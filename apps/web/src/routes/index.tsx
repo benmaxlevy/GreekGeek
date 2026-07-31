@@ -1,9 +1,16 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import { BrandLockup } from '@/components/brand/BrandLockup';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { meQueryOptions } from '@/lib/auth';
 
 export const Route = createFileRoute('/')({
+  beforeLoad: async ({ context }) => {
+    const user = await context.queryClient.ensureQueryData(meQueryOptions);
+    if (user) {
+      throw redirect({ to: '/app' });
+    }
+  },
   component: HomePage,
 });
 
@@ -16,11 +23,12 @@ function HomePage() {
           <CardTitle className="text-[28px] font-medium">Welcome to Rally</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <p className="text-sm text-ink-500">
-            Obsidian-glass theme and shell are ready. Auth routes land next.
-          </p>
-          <Button type="button" className="min-h-11 w-full">
-            Chrome button
+          <p className="text-sm text-ink-500">Sign in to continue to the app.</p>
+          <Button asChild className="min-h-11 w-full">
+            <Link to="/login">Log in</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11 w-full">
+            <Link to="/signup">Sign up</Link>
           </Button>
         </CardContent>
       </Card>

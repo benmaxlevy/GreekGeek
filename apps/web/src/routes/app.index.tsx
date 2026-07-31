@@ -1,0 +1,28 @@
+import { createFileRoute } from '@tanstack/react-router';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { meQueryOptions } from '@/lib/auth';
+
+export const Route = createFileRoute('/app/')({
+  component: AppHomePage,
+});
+
+function AppHomePage() {
+  const { data: user } = useSuspenseQuery(meQueryOptions);
+
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-[28px] font-medium">Hello, {user.name}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2 text-sm text-ink-300">
+        <p>Authenticated shell is live. Role: {user.role}.</p>
+        <p className="text-ink-500">This placeholder exercises AppShell + route guards.</p>
+      </CardContent>
+    </Card>
+  );
+}

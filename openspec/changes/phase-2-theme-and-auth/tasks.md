@@ -35,10 +35,10 @@
 
 ## 6. Auth UI and client session
 
-- [ ] 6.1 Build glass-styled `/login` and `/signup` routes (centered glass card, Playfair heading, 44px inputs, chrome submit)
-- [ ] 6.2 Implement fetch wrapper: attach Bearer access token; on 401 attempt single refresh then one replay; coalesce concurrent refreshes
-- [ ] 6.3 Wire TanStack Query `['me']` auth state and TanStack Router `beforeLoad` guard on authenticated route group → redirect `/login`
-- [ ] 6.4 Mount authenticated placeholder page inside AppShell to exercise shell + guard together
+- [x] 6.1 Build glass-styled `/login` and `/signup` routes (centered glass card, Playfair heading, 44px inputs, chrome submit)
+- [x] 6.2 Implement fetch wrapper: attach Bearer access token; on 401 attempt single refresh then one replay; coalesce concurrent refreshes
+- [x] 6.3 Wire TanStack Query `['me']` auth state and TanStack Router `beforeLoad` guard on authenticated route group → redirect `/login`
+- [x] 6.4 Mount authenticated placeholder page inside AppShell to exercise shell + guard together
 
 ## 7. E2e tests (primary coverage)
 
