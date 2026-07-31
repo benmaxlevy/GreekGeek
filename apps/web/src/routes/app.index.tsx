@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { meQueryOptions } from '@/lib/auth';
 
 export const Route = createFileRoute('/app/')({
@@ -17,7 +17,7 @@ function AppHomePage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-[28px] font-medium">Hello, {user.name}</CardTitle>
+        <h1 className="text-[28px] font-medium tracking-tight">Hello, {user.name}</h1>
       </CardHeader>
       <CardContent className="space-y-2 text-sm text-ink-300">
         <p>Authenticated shell is live. Role: {user.role}.</p>

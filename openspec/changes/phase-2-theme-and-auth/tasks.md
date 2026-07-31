@@ -42,18 +42,18 @@
 
 ## 7. E2e tests (primary coverage)
 
-- [ ] 7.1 Add Playwright config targeting web + API against Docker Postgres (create/cleanup test user strategy)
-- [ ] 7.2 E2e: signup → reach protected page; logout → login round-trip
-- [ ] 7.3 E2e: hard refresh keeps session via refresh cookie; signed-out visit to protected route redirects to `/login` (and/or protected API returns 401)
-- [ ] 7.4 Optional lean theme smoke: assert login/shell pages expose expected theme class or key token-backed classes — skip if 7.2–7.3 already cover page presence; no CSS snapshots
+- [x] 7.1 Add Playwright config targeting web + API against Docker Postgres (create/cleanup test user strategy)
+- [x] 7.2 E2e: signup → reach protected page; logout → login round-trip
+- [x] 7.3 E2e: hard refresh keeps session via refresh cookie; signed-out visit to protected route redirects to `/login` (and/or protected API returns 401)
+- [x] 7.4 Optional lean theme smoke: assert login/shell pages expose expected theme class or key token-backed classes — skip if 7.2–7.3 already cover page presence; no CSS snapshots
 
 ## 8. Unit / integration tests (only where e2e cannot cover)
 
-- [ ] 8.1 API unit/integration: argon2 hash + verify for known password (Nest Jest or Vitest)
-- [ ] 8.2 API integration: refresh rotation invalidates prior token; revoked/expired refresh rejected
-- [ ] 8.3 API unit: JwtStrategy rejects invalid/missing bearer payloads
+- [x] 8.1 API unit/integration: argon2 hash + verify for known password (Nest Jest or Vitest)
+- [x] 8.2 API integration: refresh rotation invalidates prior token; revoked/expired refresh rejected
+- [x] 8.3 API unit: JwtStrategy rejects invalid/missing bearer payloads
 
 ## 9. Phase 2 verification
 
-- [ ] 9.1 Manually smoke: seed admin login, signup path, logout/login, hard refresh, protected 401 when signed out
-- [ ] 9.2 Run Playwright e2e suite (and conditional unit/integration suite) green against local Docker Postgres
+- [x] 9.1 Manually smoke: seed admin login, signup path, logout/login, hard refresh, protected 401 when signed out
+- [x] 9.2 Run Playwright e2e suite (and conditional unit/integration suite) green against local Docker Postgres

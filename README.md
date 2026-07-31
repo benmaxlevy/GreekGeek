@@ -67,6 +67,18 @@ packages/tsconfig   Shared TypeScript bases
 | `pnpm db:migrate` | Prisma migrate (dev) |
 | `pnpm db:studio` | Prisma Studio |
 
+## Tests
+
+```bash
+# API unit/integration (argon2, refresh rotation, JWT strategy)
+pnpm test:api
+
+# Playwright e2e (needs Docker Postgres + Chromium deps)
+pnpm --filter @rally/web exec playwright install chromium
+# first time on Linux: pnpm --filter @rally/web exec playwright install-deps chromium
+pnpm test:e2e
+```
+
 ## Phase status
 
-Phase 1 (repo setup) is in place. Theme port and auth land in Phase 2.
+Phase 2 theme + auth is implemented (obsidian-glass UI, Passport JWT sessions, Playwright e2e).

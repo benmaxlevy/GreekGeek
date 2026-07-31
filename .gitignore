@@ -26,6 +26,12 @@ logs
 coverage
 .nyc_output
 
+# Playwright
+**/test-results
+**/playwright-report
+**/blob-report
+**/playwright/.cache
+
 # Prisma
 apps/api/prisma/*.db
 apps/api/prisma/*.db-journal
