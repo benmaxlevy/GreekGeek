@@ -30,7 +30,10 @@ Docker is required for Postgres. If `docker` is missing in WSL:
 docker compose up -d
 pnpm db:generate
 pnpm db:migrate
+pnpm db:seed
 ```
+
+Seeded admin: `admin@rally.local` / `RallyAdmin123!`
 
 ### Dev servers
 
@@ -38,8 +41,11 @@ pnpm db:migrate
 pnpm dev
 ```
 
-- API: http://localhost:3001/api/health
+- API health: http://localhost:3001/api/health
+- Auth: http://localhost:3001/api/auth/{signup,login,refresh,logout,me}
 - Web: http://localhost:5173 (proxies `/api` → API)
+- Login UI: http://localhost:5173/login
+- Signup UI: http://localhost:5173/signup
 
 ## Workspace layout
 

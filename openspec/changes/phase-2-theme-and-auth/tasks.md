@@ -19,19 +19,19 @@
 
 ## 4. Auth data model and contracts
 
-- [ ] 4.1 Extend Prisma `User` with `passwordHash`, `emailVerifiedAt`, and `role` enum `USER | ADMIN`
-- [ ] 4.2 Add `RefreshToken` model (`tokenHash`, `userId`, `expiresAt`, `revokedAt`) and run migration
-- [ ] 4.3 Add shared Zod auth schemas + inferred types in `packages/contracts` (signup/login/refresh responses, public user)
-- [ ] 4.4 Add Prisma seed script that creates a known development admin user
+- [x] 4.1 Extend Prisma `User` with `passwordHash`, `emailVerifiedAt`, and `role` enum `USER | ADMIN`
+- [x] 4.2 Add `RefreshToken` model (`tokenHash`, `userId`, `expiresAt`, `revokedAt`) and run migration
+- [x] 4.3 Add shared Zod auth schemas + inferred types in `packages/contracts` (signup/login/refresh responses, public user)
+- [x] 4.4 Add Prisma seed script that creates a known development admin user
 
 ## 5. Auth API
 
-- [ ] 5.1 Add Nest auth module deps: `@nestjs/passport`, `passport-local`, `passport-jwt`, `argon2`; place request DTOs under auth `types/`
-- [ ] 5.2 Implement LocalStrategy (argon2 verify) and JwtStrategy (Bearer access → user)
-- [ ] 5.3 Register global JwtAuthGuard with `@Public()`; mark signup/login/refresh/health (and logout as designed) public
-- [ ] 5.4 Implement `POST /api/auth/signup`, `POST /api/auth/login` — validate body with Zod, hash password, return access token in body, set httpOnly SameSite=Lax path-scoped refresh cookie
-- [ ] 5.5 Implement `POST /api/auth/refresh` with hashed-token lookup, rotation (revoke old, issue new), and `POST /api/auth/logout` that revokes + clears cookie
-- [ ] 5.6 Implement `GET /api/auth/me` returning public profile for the authenticated user
+- [x] 5.1 Add Nest auth module deps: `@nestjs/passport`, `passport-local`, `passport-jwt`, `argon2`; place request DTOs under auth `types/`
+- [x] 5.2 Implement LocalStrategy (argon2 verify) and JwtStrategy (Bearer access → user)
+- [x] 5.3 Register global JwtAuthGuard with `@Public()`; mark signup/login/refresh/health (and logout as designed) public
+- [x] 5.4 Implement `POST /api/auth/signup`, `POST /api/auth/login` — validate body with Zod, hash password, return access token in body, set httpOnly SameSite=Lax path-scoped refresh cookie
+- [x] 5.5 Implement `POST /api/auth/refresh` with hashed-token lookup, rotation (revoke old, issue new), and `POST /api/auth/logout` that revokes + clears cookie
+- [x] 5.6 Implement `GET /api/auth/me` returning public profile for the authenticated user
 
 ## 6. Auth UI and client session
 
