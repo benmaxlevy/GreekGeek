@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Rally">
+  <defs>
+    <radialGradient id="disc" cx="50%" cy="44%" r="58%">
+      <stop offset="0" stop-color="#211f1c" />
+      <stop offset="0.56" stop-color="#171613" />
+      <stop offset="1" stop-color="#090909" />
+    </radialGradient>
+  </defs>
+  <circle cx="256" cy="256" r="220" fill="url(#disc)" stroke="#292929" stroke-width="3" />
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#8d8980" stroke-width="4" stroke-dasharray="13 10" />
+  <text x="256" y="320" fill="#e8e5dc" font-family="Arial, Helvetica, sans-serif" font-size="176" font-weight="700" text-anchor="middle" transform="translate(256 0) scale(.82 1) translate(-256 0)">R</text>
+</svg>

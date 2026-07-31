@@ -1,5 +1,6 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/sonner';
 
 export interface RouterContext {
   queryClient: QueryClient;
@@ -11,8 +12,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootLayout() {
   return (
-    <main className="min-h-screen p-8">
+    <>
       <Outlet />
-    </main>
+      <Toaster />
+    </>
   );
 }

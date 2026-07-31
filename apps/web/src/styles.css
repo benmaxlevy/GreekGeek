@@ -1,12 +1,364 @@
 @import 'tailwindcss';
 
-html,
-body,
-#root {
-  min-height: 100%;
+@custom-variant dark (&:is(.dark *));
+
+/* Rally brand fonts — self-hosted from oldRally. */
+@font-face {
+  font-family: 'Instrument Sans';
+  src: url('./assets/fonts/InstrumentSans-normal.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Instrument Sans';
+  src: url('./assets/fonts/InstrumentSans-italic.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('./assets/fonts/PlayfairDisplay-normal.woff2') format('woff2');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('./assets/fonts/PlayfairDisplay-italic.woff2') format('woff2');
+  font-weight: 400 900;
+  font-style: italic;
+  font-display: swap;
 }
 
-body {
+@theme inline {
+  --font-display: 'Playfair Display', 'Georgia', serif;
+  --font-sans: 'Instrument Sans', 'Helvetica Neue', sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ink: var(--ink);
+  --color-ink-light: var(--ink-light);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-100: var(--ink-100);
+  --color-ink-300: var(--ink-300);
+  --color-ink-500: var(--ink-500);
+  --color-ink-700: var(--ink-700);
+  --color-surface-glass: var(--surface-glass);
+  --color-surface-glass-strong: var(--surface-glass-strong);
+  --color-surface-input: var(--surface-input);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sidebar: var(--surface-sidebar);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-border-accent: var(--border-accent);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-surface: var(--success-surface);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-surface: var(--warning-surface);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+  --color-error-surface: var(--error-surface);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #131315;
+  --card-foreground: #ffffff;
+  --popover: #131315;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  --secondary: #1e1e21;
+  --secondary-foreground: #ffffff;
+  --muted: #131315;
+  --muted-foreground: #aeb7c7;
+  --accent: #ffffff;
+  --accent-foreground: #000000;
+  --destructive: #e5544b;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.04);
+  --ring: rgba(255, 255, 255, 0.45);
+
+  --ink: #ffffff;
+  --ink-light: #ffffff;
+  --ink-muted: #aeb7c7;
+
+  --navy-950: #000000;
+  --navy-900: #000000;
+  --navy-850: #050506;
+  --navy-800: #000000;
+  --navy-700: #131315;
+  --navy-600: #1e1e21;
+  --navy-500: #34343a;
+
+  --white: #ffffff;
+  --ink-100: #ffffff;
+  --ink-300: #e9edf5;
+  --ink-500: #aeb7c7;
+  --ink-700: #747f91;
+
+  --status-paid: #ffffff;
+  --status-paid-bg: rgba(255, 255, 255, 0.12);
+  --status-pending: #ffffff;
+  --status-pending-bg: rgba(255, 255, 255, 0.06);
+  --status-overdue: #e5544b;
+  --status-overdue-bg: rgba(229, 84, 75, 0.14);
+
+  --surface-page: var(--navy-900);
+  --surface-hero: var(--navy-800);
+  --surface-sidebar: var(--navy-850);
+  --surface-card: var(--navy-700);
+  --surface-raised: var(--navy-600);
+  --surface-input: rgba(255, 255, 255, 0.04);
+  --surface-glass: rgba(8, 10, 14, 0.48);
+  --surface-glass-strong: rgba(13, 16, 22, 0.72);
+  --glass-sheen:
+    radial-gradient(
+      54% 18% at 12% 0%,
+      rgba(255, 255, 255, 0.38) 0%,
+      rgba(255, 255, 255, 0.08) 32%,
+      transparent 68%
+    ),
+    radial-gradient(38% 14% at 92% 0%, rgba(241, 229, 216, 0.22) 0%, transparent 72%),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.045) 25%,
+      rgba(255, 255, 255, 0.008) 48%,
+      rgba(255, 255, 255, 0.035) 82%,
+      transparent 100%
+    );
+  --glass-border: rgba(255, 255, 255, 0.34);
+  --glass-border-hot: rgba(255, 255, 255, 0.58);
+  --glass-highlight: rgba(255, 255, 255, 0.16);
+  --glass-void: rgba(0, 0, 0, 0.44);
+
+  --text-heading: var(--ink-100);
+  --text-body: var(--ink-300);
+  --text-muted: var(--ink-500);
+
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  --border-accent: rgba(255, 255, 255, 0.4);
+
+  --focus-ring: rgba(255, 255, 255, 0.45);
+
+  --shadow-card:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42), inset 0 0 52px rgba(173, 191, 216, 0.045),
+    0 40px 100px rgba(0, 0, 0, 0.66), 0 10px 26px rgba(0, 0, 0, 0.42),
+    0 0 24px rgba(227, 216, 204, 0.055);
+  --shadow-raised: 0 40px 100px rgba(0, 0, 0, 0.66), 0 2px 0 rgba(255, 255, 255, 0.05) inset;
+  --shadow-modal: 0 44px 110px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --shadow-glass-lip:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.62), inset -1px -1px 0 rgba(0, 0, 0, 0.58),
+    inset 0 0 48px rgba(255, 255, 255, 0.065);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+
+  --sidebar-width: 232px;
+  --content-max: 1160px;
+  --nav-height: 72px;
+
+  --success: #ffffff;
+  --success-foreground: #000000;
+  --success-surface: rgba(255, 255, 255, 0.12);
+  --warning: #ffffff;
+  --warning-foreground: #000000;
+  --warning-surface: rgba(255, 255, 255, 0.06);
+  --error: #e5544b;
+  --error-foreground: #ffffff;
+  --error-surface: rgba(229, 84, 75, 0.14);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+    color: var(--color-foreground);
+  }
+  ::selection {
+    background: color-mix(in oklab, #ffffff 30%, transparent);
+    color: #000000;
+  }
+  :where(button, a, input, textarea, select, [role='button']):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+@utility btn-chrome {
+  background: linear-gradient(160deg, #2c2c2e 0%, #101012 46%, #000000 100%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -10px 16px rgba(0, 0, 0, 0.5),
+    0 10px 22px rgba(0, 0, 0, 0.5);
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+@utility btn-chrome {
+  &:hover:not(:disabled) {
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -10px 16px rgba(0, 0, 0, 0.5),
+      0 10px 22px rgba(0, 0, 0, 0.55),
+      0 0 20px rgba(255, 255, 255, 0.14);
+    transform: translateY(-1px);
+  }
+}
+
+@utility surface-glass-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-blend-mode: normal, normal;
+  backdrop-filter: blur(52px) saturate(180%) brightness(1.06) contrast(104%);
+  -webkit-backdrop-filter: blur(52px) saturate(180%) brightness(1.06) contrast(104%);
+  border: 1px solid transparent;
+  background-image:
+    var(--glass-sheen), linear-gradient(var(--surface-glass), var(--surface-glass)),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(255, 255, 255, 0.08) 42%,
+      rgba(0, 0, 0, 0.6) 100%
+    );
+  background-origin: border-box;
+  background-clip: padding-box, padding-box, border-box;
+  box-shadow: var(--shadow-card), var(--shadow-glass-lip);
+  transition:
+    background var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
+}
+@utility surface-glass-panel {
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    z-index: 0;
+    background: radial-gradient(
+      circle at 30% 20%,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.045) 25%,
+      transparent 50%
+    );
+    pointer-events: none;
+  }
+}
+
+.rally-brand-caps {
+  font-family: var(--font-display);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--ink-100);
+  white-space: nowrap;
+}
+
+/* Ambient page gradient — tasks use rally-theme; alias oldRally rally-unified-theme. */
+body.rally-theme {
+  min-height: 100vh;
   margin: 0;
-  font-family: system-ui, sans-serif;
+  color: var(--ink-100);
+  background:
+    radial-gradient(78% 52% at 10% -10%, rgba(112, 148, 210, 0.24), transparent 68%),
+    radial-gradient(58% 44% at 96% 20%, rgba(236, 191, 152, 0.14), transparent 72%),
+    radial-gradient(46% 34% at 52% 110%, rgba(156, 124, 255, 0.11), transparent 72%),
+    linear-gradient(140deg, #030407 0%, #070a0f 45%, #010101 100%);
+  background-attachment: fixed;
+}
+
+body.rally-theme::before,
+body.rally-theme::after {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+}
+
+body.rally-theme::before {
+  background:
+    linear-gradient(115deg, transparent 0 22%, rgba(255, 255, 255, 0.055) 28%, transparent 36%),
+    linear-gradient(294deg, transparent 0 58%, rgba(255, 255, 255, 0.045) 64%, transparent 72%);
+  mix-blend-mode: screen;
+  opacity: 0.72;
+}
+
+body.rally-theme::after {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.025) 0 1px,
+      transparent 1px 88px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.018) 0 1px,
+      transparent 1px 88px
+    );
+  mask-image: radial-gradient(ellipse at center, #000 0%, transparent 74%);
+  opacity: 0.24;
+}
+
+body.rally-theme :where(#root, main) {
+  position: relative;
+  z-index: 1;
 }
