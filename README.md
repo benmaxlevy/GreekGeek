@@ -14,6 +14,7 @@ pnpm + Turborepo monorepo: NestJS API (`apps/api`) and Vite React web app (`apps
 nvm use
 corepack enable
 pnpm install
+# If pnpm blocks native builds (prisma/esbuild): pnpm approve-builds --all && pnpm install
 cp .env.example apps/api/.env
 ```
 
