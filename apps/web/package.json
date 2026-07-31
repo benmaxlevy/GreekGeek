@@ -1,0 +1,31 @@
+{
+  "name": "@rally/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@rally/contracts": "workspace:*",
+    "@tanstack/react-query": "^5.84.1",
+    "@tanstack/react-router": "^1.130.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@rally/tsconfig": "workspace:*",
+    "@tailwindcss/vite": "^4.1.11",
+    "@tanstack/router-plugin": "^1.130.2",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.9.2",
+    "vite": "^7.0.6"
+  }
+}

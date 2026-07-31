@@ -1,0 +1,35 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Builds
+dist
+build
+.turbo
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE / OS
+.idea
+.vscode
+*.swp
+.DS_Store
+
+# Logs / coverage
+logs
+*.log
+coverage
+.nyc_output
+
+# Prisma
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
+
+# Misc
+*.pem
+.cache

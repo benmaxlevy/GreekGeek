@@ -1,0 +1,11 @@
+{
+  "extends": "@rally/tsconfig/react.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src", "vite.config.ts"],
+  "references": []
+}

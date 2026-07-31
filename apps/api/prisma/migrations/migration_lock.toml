@@ -1,0 +1,6 @@
+# Prisma Migrate Lock
+
+This file warns Prisma that migrations exist and must not be reset without care.
+See https://pris.ly/d/migrate-lockfile
+
+provider = "postgresql"
