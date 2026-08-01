@@ -47,12 +47,25 @@ async function loginApi(request: APIRequestContext, email: string, password: str
 }
 
 test.describe('auth status flows', () => {
-  test('register shows pending message; no authenticated home access', async ({ page }) => {
+  test('register with uni/org shows pending; no authenticated home access', async ({ page }) => {
     const email = uniqueEmail('e2e-pending');
     const password = 'Password123!';
     await signupPending(page, email, password, 'Pending User');
     await page.goto('/app');
     await expect(page).toHaveURL(/\/login\/?$/);
+  });
+
+  test('public university and organization lists work without auth', async ({ request }) => {
+    const unis = await request.get('/api/universities');
+    expect(unis.status()).toBe(200);
+    const uniList = (await unis.json()) as Array<{ id: string; name: string }>;
+    const demoUni = uniList.find((u) => u.name === 'Demo State University');
+    expect(demoUni).toBeTruthy();
+
+    const orgs = await request.get(`/api/organizations?universityId=${demoUni!.id}`);
+    expect(orgs.status()).toBe(200);
+    const orgList = (await orgs.json()) as Array<{ id: string; name: string }>;
+    expect(orgList.some((o) => o.name === 'Alpha Demo Fraternity')).toBeTruthy();
   });
 
   test('pending login lands on awaiting-approval; cannot reach app', async ({ page }) => {
@@ -238,10 +251,14 @@ test.describe('admin approval and org flows', () => {
     expect(grantList.some((g) => g.permissionKey === 'events.create')).toBeTruthy();
   });
 
-  test('non-admin university CRUD forbidden', async ({ page, request }) => {
+  test('non-admin university CRUD forbidden; member without manage perm grant 403', async ({
+    page,
+    request,
+  }) => {
     const email = uniqueEmail('e2e-nonadmin');
     const password = 'Password123!';
-    await signupPending(page, email, password, 'Non Admin');
+    const name = 'Non Admin';
+    await signupPending(page, email, password, name);
 
     await adminLogin(page);
     await page.goto('/admin/users');
@@ -262,5 +279,166 @@ test.describe('admin approval and org flows', () => {
       data: { name: 'Should Fail Uni' },
     });
     expect(res.status()).toBe(403);
+
+    const adminToken = await loginApi(request, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const users = await request.get('/api/admin/users?status=ACTIVE', {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    const userList = (await users.json()) as Array<{ id: string; email: string }>;
+    const user = userList.find((u) => u.email === email);
+    expect(user).toBeTruthy();
+
+    const memberships = await request.get('/api/memberships', {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    const membershipList = (await memberships.json()) as Array<{
+      id: string;
+      userId: string;
+    }>;
+    const membership = membershipList.find((m) => m.userId === user!.id);
+    expect(membership).toBeTruthy();
+
+    const grantDenied = await request.post(`/api/memberships/${membership!.id}/permissions`, {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { permissionKey: 'events.create' },
+    });
+    expect(grantDenied.status()).toBe(403);
+  });
+
+  test('delegated members.manage_permissions grants in own org', async ({ page, request }) => {
+    const managerEmail = uniqueEmail('e2e-mgr');
+    const targetEmail = uniqueEmail('e2e-tgt');
+    const password = 'Password123!';
+    const managerName = 'Delegated Manager';
+    const targetName = 'Grant Target';
+
+    await signupPending(page, managerEmail, password, managerName);
+    await signupPending(page, targetEmail, password, targetName);
+
+    await adminLogin(page);
+    await page.goto('/admin/users');
+    await page.getByRole('button', { name: 'PENDING' }).click();
+
+    for (const email of [managerEmail, targetEmail]) {
+      const row = page.locator('li').filter({ hasText: email });
+      await row.getByRole('button', { name: 'Fill' }).click();
+      await page.getByRole('button', { name: 'Activate with org' }).click();
+      await expect(page.getByText(email)).toHaveCount(0);
+    }
+
+    const adminToken = await loginApi(request, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const users = await request.get('/api/admin/users?status=ACTIVE', {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    const userList = (await users.json()) as Array<{ id: string; email: string }>;
+    const managerUser = userList.find((u) => u.email === managerEmail);
+    const targetUser = userList.find((u) => u.email === targetEmail);
+    expect(managerUser).toBeTruthy();
+    expect(targetUser).toBeTruthy();
+
+    const memberships = await request.get('/api/memberships', {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    const membershipList = (await memberships.json()) as Array<{
+      id: string;
+      userId: string;
+    }>;
+    const managerMembership = membershipList.find((m) => m.userId === managerUser!.id);
+    const targetMembership = membershipList.find((m) => m.userId === targetUser!.id);
+    expect(managerMembership).toBeTruthy();
+    expect(targetMembership).toBeTruthy();
+
+    const adminGrant = await request.post(
+      `/api/memberships/${managerMembership!.id}/permissions`,
+      {
+        headers: { Authorization: `Bearer ${adminToken}` },
+        data: { permissionKey: 'members.manage_permissions' },
+      },
+    );
+    expect(adminGrant.ok()).toBeTruthy();
+
+    const managerToken = await loginApi(request, managerEmail, password);
+    const delegatedGrant = await request.post(
+      `/api/memberships/${targetMembership!.id}/permissions`,
+      {
+        headers: { Authorization: `Bearer ${managerToken}` },
+        data: { permissionKey: 'events.create' },
+      },
+    );
+    expect(delegatedGrant.ok()).toBeTruthy();
+
+    const grants = await request.get(`/api/memberships/${targetMembership!.id}/permissions`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    const grantList = (await grants.json()) as Array<{ permissionKey: string }>;
+    expect(grantList.some((g) => g.permissionKey === 'events.create')).toBeTruthy();
+  });
+
+  test('university and organization delete with dependents returns 409', async ({
+    page,
+    request,
+  }) => {
+    const uniName = `E2E 409 Uni ${Date.now()}`;
+    const orgName = `E2E 409 Org ${Date.now()}`;
+    const email = uniqueEmail('e2e-409');
+    const password = 'Password123!';
+
+    await adminLogin(page);
+    await page.goto('/admin/universities');
+    await page.getByLabel('Name').fill(uniName);
+    await page.getByRole('button', { name: 'Create' }).click();
+    await expect(page.getByText(uniName)).toBeVisible();
+
+    await page.goto('/admin/organizations');
+    await page.locator('#org-name').fill(orgName);
+    await page.locator('#org-type').selectOption('FRATERNITY');
+    await page.locator('#org-uni').selectOption({ label: uniName });
+    await page.getByRole('button', { name: 'Create' }).click();
+    await expect(page.getByText(orgName)).toBeVisible();
+
+    const adminToken = await loginApi(request, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const unis = await request.get('/api/universities', {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    const uniList = (await unis.json()) as Array<{ id: string; name: string }>;
+    const uni = uniList.find((u) => u.name === uniName);
+    expect(uni).toBeTruthy();
+
+    const uniDelete = await request.delete(`/api/universities/${uni!.id}`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    expect(uniDelete.status()).toBe(409);
+
+    const orgs = await request.get(`/api/organizations?universityId=${uni!.id}`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    const orgList = (await orgs.json()) as Array<{ id: string; name: string }>;
+    const org = orgList.find((o) => o.name === orgName);
+    expect(org).toBeTruthy();
+
+    await page.goto('/signup');
+    await page.getByLabel('Name').fill('Conflict User');
+    await page.getByLabel('Email').fill(email);
+    await page.getByLabel('Password').fill(password);
+    await page.locator('#universityId').selectOption({ label: uniName });
+    await expect(page.locator('#organizationId option', { hasText: orgName })).toHaveCount(1, {
+      timeout: 15_000,
+    });
+    await page.locator('#organizationId').selectOption({ label: `${orgName} (FRATERNITY)` });
+    await page.getByRole('button', { name: 'Sign up' }).click();
+    await expect(page.getByText('Awaiting approval', { exact: true })).toBeVisible();
+
+    await adminLogin(page);
+    await page.goto('/admin/users');
+    await page.getByRole('button', { name: 'PENDING' }).click();
+    const row = page.locator('li').filter({ hasText: email });
+    await row.getByRole('button', { name: 'Fill' }).click();
+    await page.getByRole('button', { name: 'Activate with org' }).click();
+    await expect(page.getByText(email)).toHaveCount(0);
+
+    const orgDelete = await request.delete(`/api/organizations/${org!.id}`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    expect(orgDelete.status()).toBe(409);
   });
 });
