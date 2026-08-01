@@ -21,9 +21,10 @@ export function ts() {
 }
 
 export async function launchDemo() {
+  const slowMo = Number(process.env.DEMO_SLOW_MO ?? 900);
   const browser = await chromium.launch({
     headless: true,
-    slowMo: 400,
+    slowMo,
   });
   const context = await browser.newContext({
     viewport: { width: 1280, height: 720 },
@@ -54,7 +55,7 @@ export async function finalizeVideo(page, context, browser, finalName) {
   return finalPath;
 }
 
-export async function pause(page, ms = 1000) {
+export async function pause(page, ms = 2000) {
   await page.waitForTimeout(ms);
 }
 
@@ -78,7 +79,22 @@ export async function signupCascade(page, { name, email, password }) {
   await page.getByLabel('Organization').selectOption({ label: ORG_LABEL });
   await pause(page, 600);
   await page.getByRole('button', { name: 'Sign up' }).click();
-  await page.getByText('Awaiting approval', { exact: true }).waitFor({ timeout: 15000 });
+  await page.waitForURL(/\/login/, { timeout: 45000 });
+  await page
+    .getByText(/awaits admin approval|pending admin review|must approve/i)
+    .waitFor({ timeout: 15000 });
+}
+
+/** Org-less signup → /login with ready-to-sign-in banner. */
+export async function signupWithoutOrg(page, { name, email, password }) {
+  await page.goto(`${BASE_URL}/signup`, { waitUntil: 'networkidle' });
+  await page.getByLabel('Name').fill(name);
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password').fill(password);
+  await pause(page, 400);
+  await page.getByRole('button', { name: 'Sign up' }).click();
+  await page.waitForURL(/\/login/, { timeout: 45000 });
+  await page.getByText(/ready to sign in|sign in now/i).waitFor({ timeout: 15000 });
 }
 
 export async function apiJson(pathname, { method = 'GET', token, body } = {}) {

@@ -22,6 +22,14 @@ export class UsersLifecycleService {
     const users = await this.prisma.user.findMany({
       where: query.status ? { status: query.status } : undefined,
       orderBy: { createdAt: 'desc' },
+      include: {
+        membership: {
+          include: {
+            organization: true,
+            permissions: { include: { permission: true } },
+          },
+        },
+      },
     });
     return users.map((u) => this.authService.toPublicUser(u));
   }

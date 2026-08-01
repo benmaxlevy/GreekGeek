@@ -19,8 +19,6 @@ const { browser, context, page } = await launchDemo();
 try {
   await signupCascade(page, { name, email, password: DEMO_PASSWORD });
   await pause(page, 1500);
-  await page.getByRole('link', { name: 'Go to log in' }).click();
-  await page.waitForURL(/\/login/);
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(DEMO_PASSWORD);
   await page.getByRole('button', { name: 'Continue' }).click();

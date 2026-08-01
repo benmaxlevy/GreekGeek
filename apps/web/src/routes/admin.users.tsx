@@ -315,6 +315,14 @@ function UserRow({
             Requested: {requestedLabel ?? '—'}
           </p>
         ) : null}
+        {user.status === 'ACTIVE' ? (
+          <p className="truncate text-sm text-ink-300">
+            Membership:{' '}
+            {user.membership
+              ? (user.membership.organizationName ?? user.membership.organizationId)
+              : 'None'}
+          </p>
+        ) : null}
       </div>
       <div className="flex flex-wrap gap-2">
         {user.status === 'PENDING' ? (

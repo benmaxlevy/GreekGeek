@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { BrandLockup } from '@/components/brand/BrandLockup';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ const selectClassName =
   'min-h-11 w-full rounded-md border border-border-strong bg-surface-input px-3 text-sm text-ink-100 disabled:cursor-not-allowed disabled:opacity-50';
 
 function SignupPage() {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +28,6 @@ function SignupPage() {
   const [organizationId, setOrganizationId] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [pending, setPending] = useState(false);
 
   const universitiesQuery = useQuery({
     queryKey: ['public', 'universities'],
@@ -45,45 +45,21 @@ function SignupPage() {
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
-    if (!organizationId) {
-      setError('Select a university and organization');
-      return;
-    }
     setLoading(true);
     try {
-      await signupRequest({ name, email, password, organizationId });
-      setPending(true);
+      const payload = organizationId
+        ? { name, email, password, organizationId }
+        : { name, email, password };
+      await signupRequest(payload);
+      await navigate({
+        to: '/login',
+        state: { signupMessage: organizationId ? 'pending' : 'ready' },
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed');
     } finally {
       setLoading(false);
     }
-  }
-
-  if (pending) {
-    return (
-      <div className="mx-auto flex min-h-screen max-w-[var(--content-max)] items-center justify-center px-6 py-16">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-6 p-8 pb-4">
-            <BrandLockup />
-            <CardTitle className="text-[28px] font-medium tracking-tight">
-              Awaiting approval
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 p-8 pt-2">
-            <p className="text-sm text-ink-300">
-              Account created. A platform admin must approve before you can use Rally.
-            </p>
-            <p className="text-sm text-ink-500">
-              You can log in anytime to check status. You will not reach the app until approved.
-            </p>
-            <Button asChild className="min-h-11 w-full">
-              <Link to="/login">Go to log in</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
   }
 
   const catalogError =
@@ -140,10 +116,9 @@ function SignupPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="universityId">University</Label>
+              <Label htmlFor="universityId">University (optional)</Label>
               <select
                 id="universityId"
-                required
                 value={universityId}
                 disabled={universitiesQuery.isLoading || !universitiesQuery.data?.length}
                 onChange={(e) => {
@@ -153,7 +128,7 @@ function SignupPage() {
                 className={selectClassName}
               >
                 <option value="">
-                  {universitiesQuery.isLoading ? 'Loading universities…' : 'Select university…'}
+                  {universitiesQuery.isLoading ? 'Loading universities…' : 'No university…'}
                 </option>
                 {(universitiesQuery.data ?? []).map((uni) => (
                   <option key={uni.id} value={uni.id}>
@@ -163,10 +138,9 @@ function SignupPage() {
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="organizationId">Organization</Label>
+              <Label htmlFor="organizationId">Organization (optional)</Label>
               <select
                 id="organizationId"
-                required
                 value={organizationId}
                 disabled={!universityId || organizationsQuery.isLoading}
                 onChange={(e) => setOrganizationId(e.target.value)}
@@ -177,7 +151,7 @@ function SignupPage() {
                     ? 'Select university first…'
                     : organizationsQuery.isLoading
                       ? 'Loading organizations…'
-                      : 'Select organization…'}
+                      : 'No organization…'}
                 </option>
                 {(organizationsQuery.data ?? []).map((org) => (
                   <option key={org.id} value={org.id}>
@@ -194,7 +168,7 @@ function SignupPage() {
               type="submit"
               className="min-h-11 w-full"
               isLoading={loading}
-              disabled={!organizationId || Boolean(catalogError)}
+              disabled={Boolean(catalogError)}
             >
               Sign up
             </Button>

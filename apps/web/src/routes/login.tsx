@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react';
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useEffect, useState, type FormEvent } from 'react';
+import { Link, createFileRoute, useNavigate, useRouterState } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { BrandLockup } from '@/components/brand/BrandLockup';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,16 @@ import { loginRequest } from '@/lib/api';
 import { meQueryKey } from '@/lib/auth';
 import { destinationForUser } from '@/lib/auth-routing';
 
+type LoginLocationState = {
+  signupMessage?: 'ready' | 'pending';
+};
+
+const SIGNUP_MESSAGES: Record<NonNullable<LoginLocationState['signupMessage']>, string> = {
+  ready: 'Account created. You can sign in now.',
+  pending:
+    'Account created. Your account awaits admin approval before you can use Rally.',
+};
+
 export const Route = createFileRoute('/login')({
   component: LoginPage,
 });
@@ -17,10 +27,22 @@ export const Route = createFileRoute('/login')({
 function LoginPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const signupMessage = useRouterState({
+    select: (state) => (state.location.state as LoginLocationState | undefined)?.signupMessage,
+  });
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!signupMessage) {
+      return;
+    }
+    setSuccessMessage(SIGNUP_MESSAGES[signupMessage]);
+    void navigate({ to: '/login', replace: true, state: {} });
+  }, [signupMessage, navigate]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -45,6 +67,14 @@ function LoginPage() {
           <CardTitle className="text-[28px] font-medium tracking-tight">Log in</CardTitle>
         </CardHeader>
         <CardContent className="p-8 pt-2">
+          {successMessage ? (
+            <p
+              role="status"
+              className="mb-4 rounded-md border border-border-strong bg-success-surface px-3 py-2 text-sm text-ink-100"
+            >
+              {successMessage}
+            </p>
+          ) : null}
           <form className="flex flex-col gap-4" onSubmit={onSubmit}>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

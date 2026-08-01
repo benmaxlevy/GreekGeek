@@ -19,10 +19,19 @@ async function signupPending(page: Page, email: string, password: string, name: 
   ).toHaveCount(1, { timeout: 15_000 });
   await page.locator('#organizationId').selectOption({ label: 'Alpha Demo Fraternity (FRATERNITY)' });
   await page.getByRole('button', { name: 'Sign up' }).click();
-  // CardTitle is a div, not a heading role.
-  await expect(page.getByText('Awaiting approval', { exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/\/login\/?$/);
   await expect(page.getByText(/awaits admin approval|pending admin review|must approve/i)).toBeVisible();
   await expect(page).not.toHaveURL(/\/app\/?$/);
+}
+
+async function signupWithoutOrg(page: Page, email: string, password: string, name: string) {
+  await page.goto('/signup');
+  await page.getByLabel('Name').fill(name);
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password').fill(password);
+  await page.getByRole('button', { name: 'Sign up' }).click();
+  await expect(page).toHaveURL(/\/login\/?$/);
+  await expect(page.getByText(/ready to sign in|sign in now/i)).toBeVisible();
 }
 
 async function loginAs(page: Page, email: string, password: string) {
@@ -74,13 +83,34 @@ test.describe('auth status flows', () => {
     expect(orgList.some((o) => o.name === 'Alpha Demo Fraternity')).toBeTruthy();
   });
 
+  test('org-less signup login reaches app as active without membership', async ({
+    page,
+    request,
+  }) => {
+    const email = uniqueEmail('e2e-orgless');
+    const password = 'Password123!';
+    const name = 'Orgless User';
+    await signupWithoutOrg(page, email, password, name);
+    await loginAs(page, email, password);
+    await expect(page).toHaveURL(/\/app\/?$/);
+    await expect(page.getByRole('heading', { name: `Hello, ${name}` })).toBeVisible();
+
+    const token = await loginApi(request, email, password);
+    const me = await request.get('/api/auth/me', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(me.status()).toBe(200);
+    const body = (await me.json()) as { status: string; membership: unknown };
+    expect(body.status).toBe('ACTIVE');
+    expect(body.membership).toBeNull();
+  });
+
   test('pending login lands on awaiting-approval; cannot reach app', async ({ page }) => {
     const email = uniqueEmail('e2e-await');
     const password = 'Password123!';
     const name = 'Await User';
     await signupPending(page, email, password, name);
 
-    await page.getByRole('link', { name: 'Go to log in' }).click();
     await loginAs(page, email, password);
     await expect(page).toHaveURL(/\/awaiting-approval\/?$/);
     await expect(page.getByText('Awaiting approval', { exact: true })).toBeVisible();
@@ -432,7 +462,8 @@ test.describe('admin approval and org flows', () => {
     });
     await page.locator('#organizationId').selectOption({ label: `${orgName} (FRATERNITY)` });
     await page.getByRole('button', { name: 'Sign up' }).click();
-    await expect(page.getByText('Awaiting approval', { exact: true })).toBeVisible();
+    await expect(page).toHaveURL(/\/login\/?$/);
+    await expect(page.getByText(/awaits admin approval|pending admin review|must approve/i)).toBeVisible();
 
     await adminLogin(page);
     await page.goto('/admin/users');
