@@ -24,22 +24,22 @@
 
 ## 4. Web — `/users` route group
 
-- [ ] 4.1 Add `users.tsx` layout: `createFileRoute('/users')`; `beforeLoad` requires `ACTIVE` + `members.manage_permissions` for caller's membership org; redirect others to `/app`
-- [ ] 4.2 Add `users.index.tsx`: `createFileRoute('/users/')` pending-applicant table with approve/deny actions calling org-scoped API
+- [x] 4.1 Add `users.tsx` layout: `createFileRoute('/users')`; `beforeLoad` requires `ACTIVE` + `members.manage_permissions` for caller's membership org; redirect others to `/app`
+- [x] 4.2 Add `users.index.tsx`: `createFileRoute('/users/')` pending-applicant table with approve/deny actions calling org-scoped API
 - [x] 4.3 Resolve officer `organizationId` from membership — `GET /api/auth/me` (and PublicUser) includes `membership` + `permissions`
-- [ ] 4.4 Add client API helpers with Zod parse on responses
-- [ ] 4.5 Show `/users` nav link in `/app` AppShell only when caller holds `members.manage_permissions`
-- [ ] 4.6 Style with obsidian-glass / AppShell patterns; no reactivate/deactivate/org-override controls
+- [x] 4.4 Add client API helpers with Zod parse on responses
+- [x] 4.5 Show `/users` nav link in `/app` AppShell only when caller holds `members.manage_permissions`
+- [x] 4.6 Style with obsidian-glass / AppShell patterns; no reactivate/deactivate/org-override controls
 
 ## 5. E2e tests
 
-- [ ] 5.1 Seed or fixture: officer with `members.manage_permissions`, pending applicant for same org
-- [ ] 5.2 Officer navigates to `/users`, approves applicant → applicant logs in and reaches `/app`
-- [ ] 5.3 Officer denies applicant → applicant lands on blocked screen
-- [ ] 5.4 Member without permission cannot access `/users` (redirect/forbidden)
-- [ ] 5.5 Regression: `/admin/users` remains ADMIN-only; admin global approve/deny still works
+- [x] 5.1 Seed or fixture: officer with `members.manage_permissions`, pending applicant for same org
+- [x] 5.2 Officer navigates to `/users`, approves applicant → applicant logs in and reaches `/app`
+- [x] 5.3 Officer denies applicant → applicant lands on blocked screen
+- [x] 5.4 Member without permission cannot access `/users` (redirect/forbidden)
+- [x] 5.5 Regression: `/admin/users` remains ADMIN-only; admin global approve/deny still works
 
 ## 6. Verification
 
-- [ ] 6.1 Run API integration + e2e suites green
+- [x] 6.1 Run API integration + e2e suites green
 - [ ] 6.2 Manual smoke: officer `/users` approve/deny; admin `/admin/users` unchanged
