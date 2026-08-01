@@ -231,7 +231,7 @@ function mockContext(user?: PublicUser, extras?: {
     }
   });
 
-  it('fill requires organizationId; kill and reactivate work', async () => {
+  it('fill requires organizationId; kill, deactivate, and reactivate work', async () => {
     await prisma.user.update({
       where: { id: pendingUserId },
       data: { status: 'PENDING' },
@@ -246,6 +246,13 @@ function mockContext(user?: PublicUser, extras?: {
     });
     expect(killed.status).toBe('INACTIVE');
 
+    await expect(
+      adminUsers.patchStatus(pendingUserId, {
+        status: 'ACTIVE',
+        organizationId: orgAId,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
     const reactivated = await adminUsers.patchStatus(pendingUserId, {
       status: 'ACTIVE',
     });
@@ -254,6 +261,13 @@ function mockContext(user?: PublicUser, extras?: {
       where: { userId: pendingUserId },
     });
     expect(membershipAfterReactivate).toBeNull();
+
+    const deactivated = await adminUsers.patchStatus(pendingUserId, {
+      status: 'INACTIVE',
+    });
+    expect(deactivated.status).toBe('INACTIVE');
+
+    await adminUsers.patchStatus(pendingUserId, { status: 'ACTIVE' });
 
     await prisma.user.update({
       where: { id: pendingUserId },
@@ -297,6 +311,23 @@ function mockContext(user?: PublicUser, extras?: {
         organizationId: orgAId,
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('rejects membership assign for non-ACTIVE users', async () => {
+    await prisma.user.update({
+      where: { id: pendingUserId },
+      data: { status: 'PENDING' },
+    });
+    await expect(
+      memberships.assign({
+        userId: pendingUserId,
+        organizationId: orgAId,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    await prisma.user.update({
+      where: { id: pendingUserId },
+      data: { status: 'ACTIVE' },
+    });
   });
 
   it('12.5 university/org delete with dependents returns 409', async () => {
@@ -383,7 +414,7 @@ function mockContext(user?: PublicUser, extras?: {
     expect(granted.permissionKey).toBe('events.create');
   });
 
-  it('rejects permission grants for non-ACTIVE members', async () => {
+  it('rejects permission grants and revokes for non-ACTIVE members', async () => {
     await prisma.user.update({
       where: { id: pendingUserId },
       data: { status: 'PENDING' },
@@ -393,6 +424,9 @@ function mockContext(user?: PublicUser, extras?: {
     });
     await expect(
       permissions.grant(membership.id, { permissionKey: 'events.manage' }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(
+      permissions.revoke(membership.id, 'events.create'),
     ).rejects.toBeInstanceOf(BadRequestException);
     await prisma.user.update({
       where: { id: pendingUserId },

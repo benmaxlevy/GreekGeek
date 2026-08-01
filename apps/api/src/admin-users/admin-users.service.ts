@@ -49,8 +49,21 @@ export class AdminUsersService {
       return this.authService.toPublicUser(updated);
     }
 
+    if (user.status === 'ACTIVE' && input.status === 'INACTIVE') {
+      const updated = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { status: 'INACTIVE' },
+      });
+      return this.authService.toPublicUser(updated);
+    }
+
     if (user.status === 'INACTIVE' && input.status === 'ACTIVE') {
       // Reactivate is status-only — not fill; do not assign membership here.
+      if (input.organizationId) {
+        throw new BadRequestException(
+          'organizationId is not allowed when reactivating; assign membership separately',
+        );
+      }
       const updated = await this.prisma.user.update({
         where: { id: user.id },
         data: { status: 'ACTIVE' },

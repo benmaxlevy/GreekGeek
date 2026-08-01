@@ -40,6 +40,11 @@ export class MembershipsService {
     if (user.role === 'ADMIN') {
       throw new BadRequestException('ADMIN users cannot receive membership');
     }
+    if (user.status !== 'ACTIVE') {
+      throw new BadRequestException(
+        'Membership can only be assigned to ACTIVE users',
+      );
+    }
 
     const org = await this.prisma.organization.findUnique({
       where: { id: input.organizationId },

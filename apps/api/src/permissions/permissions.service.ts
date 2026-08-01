@@ -74,7 +74,13 @@ export class PermissionsService {
   }
 
   async revoke(membershipId: string, permissionKey: string): Promise<void> {
-    await this.requireMembership(membershipId);
+    const membership = await this.requireMembership(membershipId);
+    if (membership.user.status !== 'ACTIVE') {
+      throw new BadRequestException(
+        'Permissions can only be revoked from ACTIVE members',
+      );
+    }
+
     const permission = await this.prisma.permission.findUnique({
       where: { key: permissionKey },
     });
