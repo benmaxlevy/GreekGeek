@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import {
+  deactivateUser,
   fillActivateUser,
   killUser,
   listAdminUsers,
@@ -85,6 +86,15 @@ function AdminUsersPage() {
     onError: (err: Error) => setError(err.message),
   });
 
+  const deactivateMutation = useMutation({
+    mutationFn: (userId: string) => deactivateUser(userId),
+    onSuccess: async () => {
+      setError(null);
+      await invalidateUsers();
+    },
+    onError: (err: Error) => setError(err.message),
+  });
+
   const reactivateMutation = useMutation({
     mutationFn: (userId: string) => reactivateUser(userId),
     onSuccess: async () => {
@@ -110,8 +120,8 @@ function AdminUsersPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Users</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Fill pending users with an organization + activate, or kill to inactive. Permissions
-          managed separately after ACTIVE.
+          Fill pending (org required) or kill; deactivate ACTIVE users; reactivate INACTIVE
+          without org. Permissions only after ACTIVE.
         </p>
       </div>
 
@@ -193,6 +203,7 @@ function AdminUsersPage() {
                   user={user}
                   busy={
                     killMutation.isPending ||
+                    deactivateMutation.isPending ||
                     reactivateMutation.isPending ||
                     fillMutation.isPending
                   }
@@ -202,6 +213,7 @@ function AdminUsersPage() {
                     setOrganizationId('');
                   }}
                   onKill={() => killMutation.mutate(user.id)}
+                  onDeactivate={() => deactivateMutation.mutate(user.id)}
                   onReactivate={() => reactivateMutation.mutate(user.id)}
                 />
               ))}
@@ -227,12 +239,14 @@ function UserRow({
   busy,
   onFill,
   onKill,
+  onDeactivate,
   onReactivate,
 }: {
   user: AdminUser;
   busy: boolean;
   onFill: () => void;
   onKill: () => void;
+  onDeactivate: () => void;
   onReactivate: () => void;
 }) {
   return (
@@ -261,6 +275,17 @@ function UserRow({
               Kill
             </Button>
           </>
+        ) : null}
+        {user.status === 'ACTIVE' && user.role !== 'ADMIN' ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="destructive"
+            disabled={busy}
+            onClick={onDeactivate}
+          >
+            Deactivate
+          </Button>
         ) : null}
         {user.status === 'INACTIVE' ? (
           <Button type="button" size="sm" disabled={busy} onClick={onReactivate}>

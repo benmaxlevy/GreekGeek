@@ -78,6 +78,12 @@ export async function killUser(id: string): Promise<AdminUser> {
   return patchUserStatus(id, { status: 'INACTIVE' });
 }
 
+/** ACTIVE → INACTIVE (admin deactivate). Same payload as kill. */
+export async function deactivateUser(id: string): Promise<AdminUser> {
+  return patchUserStatus(id, { status: 'INACTIVE' });
+}
+
+/** INACTIVE → ACTIVE status-only. Must not send organizationId. */
 export async function reactivateUser(id: string): Promise<AdminUser> {
   return patchUserStatus(id, { status: 'ACTIVE' });
 }
