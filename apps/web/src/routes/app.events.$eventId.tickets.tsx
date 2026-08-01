@@ -4,7 +4,7 @@ import { EventTicketsPanel } from '@/components/ticketing/EventTicketsPanel';
 import { meQueryOptions } from '@/lib/auth';
 import { canManageTickets, destinationForUser } from '@/lib/auth-routing';
 import { getEvent } from '@/lib/events-api';
-import { listAllocations, listTickets } from '@/lib/ticketing-api';
+import { listAllocations } from '@/lib/ticketing-api';
 
 export const Route = createFileRoute('/app/events/$eventId/tickets')({
   beforeLoad: async ({ context, params }) => {
@@ -24,16 +24,23 @@ export const Route = createFileRoute('/app/events/$eventId/tickets')({
     let invitedAllocationId: string | undefined;
 
     try {
-      await listAllocations(eventId);
-      mode = 'host';
-    } catch {
-      try {
-        const tickets = await listTickets(eventId);
-        invitedAllocationId = tickets.find((t) => t.allocationId)?.allocationId;
+      const event = await getEvent(eventId);
+      const isHost = user.membership?.organizationId === event.organizationId;
+      const allocations = await listAllocations(eventId);
+      if (isHost) {
+        mode = 'host';
+      } else {
         mode = 'invited';
-      } catch {
-        throw redirect({ to: '/app' });
+        invitedAllocationId = allocations[0]?.id;
+        if (!invitedAllocationId) {
+          throw redirect({ to: '/app' });
+        }
       }
+    } catch (err) {
+      if (err && typeof err === 'object' && 'to' in err) {
+        throw err;
+      }
+      throw redirect({ to: '/app' });
     }
 
     return { user, mode, invitedAllocationId };

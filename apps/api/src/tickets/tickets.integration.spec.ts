@@ -480,4 +480,31 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     });
     await prisma.event.delete({ where: { id: claimEvent.id } });
   });
+
+  it('invited lists own allocation; guest lists claimable; tickets.manage can get event', async () => {
+    await prisma.ticket.deleteMany({
+      where: { allocation: { eventId } },
+    });
+    await prisma.ticketAllocation.deleteMany({ where: { eventId } });
+    await enableTicketingOnSale(3);
+
+    const invitedAllocs = await tickets.listAllocations(
+      eventId,
+      asUser(invitedManagerId),
+    );
+    expect(invitedAllocs).toHaveLength(1);
+    expect(invitedAllocs[0]?.id).toBe(invitedAllocId);
+    expect(invitedAllocs[0]?.organizationId).toBe(invitedOrgId);
+
+    const viewed = await events.get(eventId, asUser(invitedManagerId));
+    expect(viewed.id).toBe(eventId);
+
+    const claimable = await tickets.listClaimableEvents(asUser(guestUserId));
+    expect(claimable.some((e) => e.id === eventId)).toBe(true);
+
+    await prisma.ticket.deleteMany({
+      where: { allocation: { eventId } },
+    });
+    await prisma.ticketAllocation.deleteMany({ where: { eventId } });
+  });
 });

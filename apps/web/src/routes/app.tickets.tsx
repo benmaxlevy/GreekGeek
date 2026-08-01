@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { meQueryOptions } from '@/lib/auth';
 import { destinationForUser } from '@/lib/auth-routing';
-import { listEvents } from '@/lib/events-api';
-import { listMyTickets, markTicketPaid, publicClaim } from '@/lib/ticketing-api';
+import { listClaimableEvents, listMyTickets, markTicketPaid, publicClaim } from '@/lib/ticketing-api';
 
 export const Route = createFileRoute('/app/tickets')({
   beforeLoad: async ({ context }) => {
@@ -34,17 +33,7 @@ function MyTicketsPage() {
 
   const claimableQuery = useQuery({
     queryKey: ['events', 'claimable'],
-    queryFn: async () => {
-      try {
-        const events = await listEvents({ ticketingEnabled: true });
-        return events.filter(
-          (e) => e.ticketingEnabled && e.ticketSaleStatus === 'on_sale',
-        );
-      } catch {
-        return [];
-      }
-    },
-    retry: false,
+    queryFn: () => listClaimableEvents(),
   });
 
   const markPaidMutation = useMutation({

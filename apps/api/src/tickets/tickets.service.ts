@@ -111,10 +111,25 @@ export class TicketsService {
     caller: PublicUser,
   ): Promise<TicketAllocationDto[]> {
     const event = await this.requireEvent(eventId);
-    await this.assertHostTicketManage(event, caller);
+    const membership = await this.loadMembership(caller);
+    const isHost = await this.hasHostTicketManage(event, caller, membership);
+
+    let organizationFilter: string | undefined;
+    if (!isHost) {
+      const invited = await this.getInvitedOrgAllocation(eventId, membership);
+      if (!invited) {
+        throw new ForbiddenException('Missing organization permission');
+      }
+      organizationFilter = membership!.organizationId;
+    }
 
     const rows = await this.prisma.ticketAllocation.findMany({
-      where: { eventId },
+      where: {
+        eventId,
+        ...(organizationFilter
+          ? { organizationId: organizationFilter }
+          : {}),
+      },
       include: { organization: true },
       orderBy: { createdAt: 'asc' },
     });
@@ -127,6 +142,23 @@ export class TicketsService {
         issuedCount: issuedCounts.get(row.id) ?? 0,
       }),
     );
+  }
+
+  /** ACTIVE users: on_sale events with an active public allocation. */
+  async listClaimableEvents(caller: PublicUser) {
+    if (caller.status !== 'ACTIVE') {
+      throw new ForbiddenException('Account is not active');
+    }
+    return this.prisma.event.findMany({
+      where: {
+        ticketingEnabled: true,
+        ticketSaleStatus: 'on_sale',
+        allocations: {
+          some: { organizationId: null, status: 'active' },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async createAllocation(

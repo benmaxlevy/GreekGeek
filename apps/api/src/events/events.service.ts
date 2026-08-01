@@ -35,7 +35,7 @@ export class EventsService {
     if (!row) {
       throw new NotFoundException('Event not found');
     }
-    await this.assertCanViewOrg(row.organizationId, caller);
+    await this.assertCanViewEvent(row, caller);
     return toEventDto(row);
   }
 
@@ -112,7 +112,11 @@ export class EventsService {
       throw new ForbiddenException('Missing organization permission');
     }
     const keys = new Set(membership.permissions.map((p) => p.permission.key));
-    if (!keys.has('events.create') && !keys.has('events.manage')) {
+    if (
+      !keys.has('events.create') &&
+      !keys.has('events.manage') &&
+      !keys.has('tickets.manage')
+    ) {
       throw new ForbiddenException('Missing organization permission');
     }
     if (query.organizationId && query.organizationId !== membership.organizationId) {
@@ -121,8 +125,8 @@ export class EventsService {
     return membership.organizationId;
   }
 
-  private async assertCanViewOrg(
-    organizationId: string,
+  private async assertCanViewEvent(
+    event: { id: string; organizationId: string },
     caller: PublicUser,
   ): Promise<void> {
     if (caller.role === 'ADMIN') {
@@ -132,13 +136,32 @@ export class EventsService {
       where: { userId: caller.id },
       include: { permissions: { include: { permission: true } } },
     });
-    if (!membership || membership.organizationId !== organizationId) {
+    if (!membership) {
       throw new ForbiddenException('Missing organization permission');
     }
     const keys = new Set(membership.permissions.map((p) => p.permission.key));
-    if (!keys.has('events.create') && !keys.has('events.manage')) {
-      throw new ForbiddenException('Missing organization permission');
+    const isHostMember = membership.organizationId === event.organizationId;
+    if (
+      isHostMember &&
+      (keys.has('events.create') ||
+        keys.has('events.manage') ||
+        keys.has('tickets.manage'))
+    ) {
+      return;
     }
+    if (keys.has('tickets.manage')) {
+      const invitedAlloc = await this.prisma.ticketAllocation.findFirst({
+        where: {
+          eventId: event.id,
+          organizationId: membership.organizationId,
+        },
+        select: { id: true },
+      });
+      if (invitedAlloc) {
+        return;
+      }
+    }
+    throw new ForbiddenException('Missing organization permission');
   }
 
   private async assertCanManageOrg(

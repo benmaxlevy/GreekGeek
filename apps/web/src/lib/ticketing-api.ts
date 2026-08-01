@@ -1,5 +1,6 @@
 import {
   CreateTicketAllocationSchema,
+  EventListSchema,
   EventTicketingSchema,
   GuestListSchema,
   IssueTicketSchema,
@@ -13,6 +14,7 @@ import {
   TicketSchema,
   UpdateTicketAllocationSchema,
   type CreateTicketAllocation,
+  type EventList,
   type EventTicketing,
   type GuestList,
   type IssueTicket,
@@ -161,6 +163,14 @@ export async function listMyTickets(): Promise<MyTicketList> {
     throw new Error(await readError(res, 'Failed to load your tickets'));
   }
   return MyTicketListSchema.parse(await res.json());
+}
+
+export async function listClaimableEvents(): Promise<EventList> {
+  const res = await apiFetch('/api/tickets/claimable');
+  if (!res.ok) {
+    throw new Error(await readError(res, 'Failed to load claimable events'));
+  }
+  return EventListSchema.parse(await res.json());
 }
 
 export async function markTicketPaid(ticketId: string): Promise<Ticket> {

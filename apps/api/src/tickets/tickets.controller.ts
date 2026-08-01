@@ -1,6 +1,8 @@
 import { Controller, Get, Param, Post } from '@nestjs/common';
+import { EventListSchema, type EventList } from '@rally/contracts';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { PublicUser } from '../auth/types/auth.dto';
+import { toEventDto } from '../events/types/events.dto';
 import { TicketsService } from './tickets.service';
 import {
   MyTicketListSchema,
@@ -18,6 +20,12 @@ export class TicketsController {
     return MyTicketListSchema.parse(
       await this.ticketsService.listMine(caller),
     );
+  }
+
+  @Get('claimable')
+  async listClaimable(@CurrentUser() caller: PublicUser): Promise<EventList> {
+    const rows = await this.ticketsService.listClaimableEvents(caller);
+    return EventListSchema.parse(rows.map(toEventDto));
   }
 
   @Post(':id/mark-paid')
