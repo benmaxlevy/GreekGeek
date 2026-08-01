@@ -6,6 +6,13 @@ export type Role = z.infer<typeof RoleSchema>;
 export const UserStatusSchema = z.enum(['ACTIVE', 'PENDING', 'INACTIVE']);
 export type UserStatus = z.infer<typeof UserStatusSchema>;
 
+/** Caller's org membership summary for session/me responses. */
+export const PublicUserMembershipSchema = z.object({
+  organizationId: z.string(),
+  organizationName: z.string().optional(),
+});
+export type PublicUserMembership = z.infer<typeof PublicUserMembershipSchema>;
+
 export const PublicUserSchema = z.object({
   id: z.string(),
   email: z.string().email(),
@@ -13,6 +20,10 @@ export const PublicUserSchema = z.object({
   role: RoleSchema,
   status: UserStatusSchema,
   requestedOrganizationId: z.string().nullable(),
+  /** Null for ADMIN or users without a membership. */
+  membership: PublicUserMembershipSchema.nullable(),
+  /** Permission keys for the caller's membership; empty when none or ADMIN. */
+  permissions: z.array(z.string()),
 });
 export type PublicUser = z.infer<typeof PublicUserSchema>;
 

@@ -17,6 +17,20 @@ import {
   type SignupResponse,
 } from './types/auth.dto';
 
+type UserWithMembership = {
+  id: string;
+  email: string;
+  name: string;
+  role: PublicUser['role'];
+  status: PublicUser['status'];
+  requestedOrganizationId: string | null;
+  membership?: {
+    organizationId: string;
+    organization?: { name: string } | null;
+    permissions?: Array<{ permission: { key: string } }>;
+  } | null;
+};
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -25,14 +39,29 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  toPublicUser(user: {
-    id: string;
-    email: string;
-    name: string;
-    role: PublicUser['role'];
-    status: PublicUser['status'];
-    requestedOrganizationId: string | null;
-  }): PublicUser {
+  toPublicUser(user: UserWithMembership): PublicUser {
+    if (user.role === 'ADMIN') {
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        status: user.status,
+        requestedOrganizationId: user.requestedOrganizationId,
+        membership: null,
+        permissions: [],
+      };
+    }
+
+    const membership = user.membership
+      ? {
+          organizationId: user.membership.organizationId,
+          ...(user.membership.organization?.name
+            ? { organizationName: user.membership.organization.name }
+            : {}),
+        }
+      : null;
+
     return {
       id: user.id,
       email: user.email,
@@ -40,17 +69,38 @@ export class AuthService {
       role: user.role,
       status: user.status,
       requestedOrganizationId: user.requestedOrganizationId,
+      membership,
+      permissions:
+        user.membership?.permissions?.map((mp) => mp.permission.key) ?? [],
     };
   }
 
   async getPublicUserById(id: string): Promise<PublicUser | null> {
-    const user = await this.prisma.user.findUnique({ where: { id } });
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        membership: {
+          include: {
+            organization: true,
+            permissions: { include: { permission: true } },
+          },
+        },
+      },
+    });
     return user ? this.toPublicUser(user) : null;
   }
 
   async validateUser(email: string, password: string): Promise<PublicUser | null> {
     const user = await this.prisma.user.findUnique({
       where: { email: email.toLowerCase() },
+      include: {
+        membership: {
+          include: {
+            organization: true,
+            permissions: { include: { permission: true } },
+          },
+        },
+      },
     });
     if (!user) {
       return null;
@@ -122,7 +172,12 @@ export class AuthService {
       data: { revokedAt: new Date() },
     });
 
-    return this.issueSession(this.toPublicUser(existing.user));
+    const publicUser = await this.getPublicUserById(existing.user.id);
+    if (!publicUser) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    return this.issueSession(publicUser);
   }
 
   async logout(rawRefreshToken: string | undefined): Promise<void> {

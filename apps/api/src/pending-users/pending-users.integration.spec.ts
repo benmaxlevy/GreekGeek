@@ -103,6 +103,8 @@ function mockContext(
       role: 'USER',
       status: 'ACTIVE',
       requestedOrganizationId: null,
+      membership: { organizationId: orgAId },
+      permissions: ['members.manage_permissions'],
     });
 
     const plainMember = (): PublicUser => ({
@@ -112,6 +114,8 @@ function mockContext(
       role: 'USER',
       status: 'ACTIVE',
       requestedOrganizationId: null,
+      membership: { organizationId: orgAId },
+      permissions: [],
     });
 
     const adminUser = (): PublicUser => ({
@@ -121,6 +125,8 @@ function mockContext(
       role: 'ADMIN',
       status: 'ACTIVE',
       requestedOrganizationId: null,
+      membership: null,
+      permissions: [],
     });
 
     beforeAll(async () => {

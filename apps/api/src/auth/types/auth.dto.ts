@@ -3,6 +3,7 @@ import {
   AuthTokensResponseSchema,
   LoginRequestSchema,
   LogoutResponseSchema,
+  PublicUserMembershipSchema,
   PublicUserSchema,
   SignupRequestSchema,
   SignupResponseSchema,
@@ -11,6 +12,7 @@ import {
   type LoginRequest,
   type LogoutResponse,
   type PublicUser,
+  type PublicUserMembership,
   type SignupRequest,
   type SignupResponse,
 } from '@rally/contracts';
@@ -20,6 +22,7 @@ export {
   AuthTokensResponseSchema,
   LoginRequestSchema,
   LogoutResponseSchema,
+  PublicUserMembershipSchema,
   PublicUserSchema,
   SignupRequestSchema,
   SignupResponseSchema,
@@ -31,6 +34,7 @@ export type {
   LoginRequest,
   LogoutResponse,
   PublicUser,
+  PublicUserMembership,
   SignupRequest,
   SignupResponse,
 };

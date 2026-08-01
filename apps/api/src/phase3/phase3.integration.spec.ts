@@ -392,6 +392,8 @@ function mockContext(user?: PublicUser, extras?: {
       role: 'ADMIN',
       status: 'ACTIVE',
       requestedOrganizationId: null,
+      membership: null,
+      permissions: [],
     };
     await expect(
       orgPermissionGuard.canActivate(
@@ -408,6 +410,8 @@ function mockContext(user?: PublicUser, extras?: {
       role: 'USER',
       status: 'ACTIVE',
       requestedOrganizationId: null,
+      membership: { organizationId: orgAId },
+      permissions: [],
     };
     await expect(
       orgPermissionGuard.canActivate(
@@ -426,6 +430,8 @@ function mockContext(user?: PublicUser, extras?: {
       role: 'USER',
       status: 'ACTIVE',
       requestedOrganizationId: null,
+      membership: { organizationId: orgAId },
+      permissions: ['members.manage_permissions'],
     };
 
     await expect(

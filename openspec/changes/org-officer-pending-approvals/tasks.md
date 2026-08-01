@@ -26,7 +26,7 @@
 
 - [ ] 4.1 Add `users.tsx` layout: `createFileRoute('/users')`; `beforeLoad` requires `ACTIVE` + `members.manage_permissions` for caller's membership org; redirect others to `/app`
 - [ ] 4.2 Add `users.index.tsx`: `createFileRoute('/users/')` pending-applicant table with approve/deny actions calling org-scoped API
-- [ ] 4.3 Resolve officer `organizationId` from membership (extend me/profile or dedicated query if needed)
+- [x] 4.3 Resolve officer `organizationId` from membership — `GET /api/auth/me` (and PublicUser) includes `membership` + `permissions`
 - [ ] 4.4 Add client API helpers with Zod parse on responses
 - [ ] 4.5 Show `/users` nav link in `/app` AppShell only when caller holds `members.manage_permissions`
 - [ ] 4.6 Style with obsidian-glass / AppShell patterns; no reactivate/deactivate/org-override controls

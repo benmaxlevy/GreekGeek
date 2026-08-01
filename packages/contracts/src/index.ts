@@ -2,6 +2,7 @@ export { HealthResponseSchema, HealthStatusSchema, type HealthResponse } from '.
 export {
   RoleSchema,
   UserStatusSchema,
+  PublicUserMembershipSchema,
   PublicUserSchema,
   SignupRequestSchema,
   SignupResponseSchema,
@@ -11,6 +12,7 @@ export {
   LogoutResponseSchema,
   type Role,
   type UserStatus,
+  type PublicUserMembership,
   type PublicUser,
   type SignupRequest,
   type SignupResponse,
