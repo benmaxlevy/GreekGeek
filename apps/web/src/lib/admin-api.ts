@@ -15,6 +15,7 @@ import {
   UniversitySchema,
   UpdateOrganizationSchema,
   UpdateUniversitySchema,
+  PatchUserStatusSchema,
   type AdminUser,
   type AdminUserList,
   type AssignMembership,
@@ -58,9 +59,10 @@ export async function listAdminUsers(query: ListUsersQuery = {}): Promise<AdminU
 }
 
 export async function patchUserStatus(id: string, body: PatchUserStatus): Promise<AdminUser> {
+  const payload = PatchUserStatusSchema.parse(body);
   const res = await apiFetch(`/api/admin/users/${id}/status`, {
     method: 'PATCH',
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
   });
   if (!res.ok) {
     throw new Error(await readError(res, 'Failed to update user status'));
@@ -115,7 +117,8 @@ export async function updateUniversity(id: string, body: UpdateUniversity): Prom
 export async function deleteUniversity(id: string): Promise<void> {
   const res = await apiFetch(`/api/universities/${id}`, { method: 'DELETE' });
   if (!res.ok) {
-    throw new Error(await readError(res, 'Failed to delete university'));
+    const message = await readError(res, 'Failed to delete university');
+    throw new Error(res.status === 409 ? `Conflict (409): ${message}` : message);
   }
 }
 
@@ -161,7 +164,8 @@ export async function updateOrganization(
 export async function deleteOrganization(id: string): Promise<void> {
   const res = await apiFetch(`/api/organizations/${id}`, { method: 'DELETE' });
   if (!res.ok) {
-    throw new Error(await readError(res, 'Failed to delete organization'));
+    const message = await readError(res, 'Failed to delete organization');
+    throw new Error(res.status === 409 ? `Conflict (409): ${message}` : message);
   }
 }
 
