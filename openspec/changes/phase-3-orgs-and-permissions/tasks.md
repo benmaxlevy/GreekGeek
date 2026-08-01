@@ -91,6 +91,6 @@
 
 ## 13. Phase 3 verification
 
-- [ ] 13.1 Manual smoke: signup with org selection; admin review pending (requested org visible); fill+activate or kill; create uni/org; grant permission post-active
+- [x] 13.1 Manual smoke: signup with org selection; admin review pending (requested org visible); fill+activate or kill; create uni/org; grant permission post-active — covered by Playwright demo videos (register/fill/kill/reactivate/CRUD/permissions flows; recorded 2026-08-01)
 - [x] 13.2 Run e2e + API test suites green against Docker Postgres
 - [x] 13.3 Update Phase 2 auth e2e that assumed immediate post-signup session
