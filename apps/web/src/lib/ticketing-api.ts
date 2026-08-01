@@ -152,7 +152,7 @@ export async function publicClaim(eventId: string): Promise<PublicClaimResponse>
     method: 'POST',
   });
   if (!res.ok) {
-    throw new Error(await readError(res, 'Failed to claim ticket'));
+    throw new Error(await readError(res, 'Failed to buy ticket'));
   }
   return PublicClaimResponseSchema.parse(await res.json());
 }
@@ -168,7 +168,7 @@ export async function listMyTickets(): Promise<MyTicketList> {
 export async function listClaimableEvents(): Promise<EventList> {
   const res = await apiFetch('/api/tickets/claimable');
   if (!res.ok) {
-    throw new Error(await readError(res, 'Failed to load claimable events'));
+    throw new Error(await readError(res, 'Failed to load events available to buy'));
   }
   return EventListSchema.parse(await res.json());
 }

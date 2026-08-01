@@ -70,7 +70,7 @@ function MyTicketsPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">My tickets</h1>
         <p className="mt-1 text-sm text-ink-500">
-          View your tickets and claim from public on-sale events.
+          View your tickets and buy from public on-sale events.
         </p>
       </div>
 
@@ -80,7 +80,7 @@ function MyTicketsPage() {
         <Card>
           <CardContent className="p-0">
             <p className="border-b border-border-subtle px-6 py-3 text-sm font-medium text-ink-300">
-              Claim a ticket
+              Buy a ticket
             </p>
             <ul className="divide-y divide-border-subtle">
               {claimable.map((event) => (
@@ -98,7 +98,7 @@ function MyTicketsPage() {
                     disabled={claimMutation.isPending}
                     onClick={() => claimMutation.mutate(event.id)}
                   >
-                    Claim ticket
+                    Buy ticket
                   </Button>
                 </li>
               ))}
@@ -106,7 +106,7 @@ function MyTicketsPage() {
           </CardContent>
         </Card>
       ) : claimableQuery.isSuccess ? (
-        <p className="text-sm text-ink-500">No public on-sale events available to claim.</p>
+        <p className="text-sm text-ink-500">No public on-sale events available to buy.</p>
       ) : null}
 
       <Card>

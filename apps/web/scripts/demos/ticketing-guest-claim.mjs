@@ -49,7 +49,7 @@ try {
   await pause(page, 1000);
 
   const claimRow = page.locator('li').filter({ hasText: eventName });
-  await claimRow.getByRole('button', { name: 'Claim ticket' }).click();
+  await claimRow.getByRole('button', { name: 'Buy ticket' }).click();
   await page.getByText(eventName).waitFor({ timeout: 15000 });
   await pause(page, 1200);
 
