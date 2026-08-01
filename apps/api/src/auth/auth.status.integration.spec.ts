@@ -153,4 +153,40 @@ function mockContext(user?: PublicUser): ExecutionContext {
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
+
+  it('signup without organizationId creates ACTIVE user with no membership', async () => {
+    const email = `orgless-${suffix}@example.com`;
+    const result = await auth.signup({
+      email,
+      password: 'SignupPass123!',
+      name: 'Orgless User',
+    });
+    expect(result.user.status).toBe('ACTIVE');
+    expect(result.user.requestedOrganizationId).toBeNull();
+    expect(result.user.membership).toBeNull();
+    expect(result).not.toHaveProperty('accessToken');
+
+    const stored = await prisma.user.findUniqueOrThrow({ where: { email } });
+    expect(stored.status).toBe('ACTIVE');
+    expect(stored.requestedOrganizationId).toBeNull();
+    const membership = await prisma.membership.findUnique({
+      where: { userId: stored.id },
+    });
+    expect(membership).toBeNull();
+
+    await prisma.user.delete({ where: { email } });
+  });
+
+  it('signup with empty organizationId creates ACTIVE user', async () => {
+    const email = `empty-org-${suffix}@example.com`;
+    const result = await auth.signup({
+      email,
+      password: 'SignupPass123!',
+      name: 'Empty Org User',
+      organizationId: '',
+    });
+    expect(result.user.status).toBe('ACTIVE');
+    expect(result.user.requestedOrganizationId).toBeNull();
+    await prisma.user.delete({ where: { email } });
+  });
 });

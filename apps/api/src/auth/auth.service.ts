@@ -112,7 +112,7 @@ export class AuthService {
     return this.toPublicUser(user);
   }
 
-  /** Creates PENDING user with requested org; does not issue session tokens. */
+  /** Creates user without session tokens; ACTIVE when no org, PENDING when org requested. */
   async signup(input: SignupRequest): Promise<SignupResponse> {
     const email = input.email.toLowerCase();
     const existing = await this.prisma.user.findUnique({ where: { email } });
@@ -120,22 +120,39 @@ export class AuthService {
       throw new ConflictException('Email already registered');
     }
 
-    const org = await this.prisma.organization.findUnique({
-      where: { id: input.organizationId },
-    });
-    if (!org) {
-      throw new BadRequestException('Organization not found');
+    const organizationId = input.organizationId || undefined;
+    const passwordHash = await this.passwordService.hash(input.password);
+
+    if (organizationId) {
+      const org = await this.prisma.organization.findUnique({
+        where: { id: organizationId },
+      });
+      if (!org) {
+        throw new BadRequestException('Organization not found');
+      }
+
+      const user = await this.prisma.user.create({
+        data: {
+          email,
+          name: input.name,
+          passwordHash,
+          role: 'USER',
+          status: 'PENDING',
+          requestedOrganizationId: org.id,
+        },
+      });
+
+      return { user: this.toPublicUser(user) };
     }
 
-    const passwordHash = await this.passwordService.hash(input.password);
     const user = await this.prisma.user.create({
       data: {
         email,
         name: input.name,
         passwordHash,
         role: 'USER',
-        status: 'PENDING',
-        requestedOrganizationId: org.id,
+        status: 'ACTIVE',
+        requestedOrganizationId: null,
       },
     });
 

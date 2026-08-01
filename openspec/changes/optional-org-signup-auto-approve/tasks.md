@@ -1,13 +1,13 @@
 ## 1. Contracts
 
-- [ ] 1.1 Make `SignupRequestSchema.organizationId` optional in `packages/contracts/src/auth.ts` (treat omitted/empty as no-org)
-- [ ] 1.2 Rebuild or verify downstream `SignupRequest` type consumers compile
+- [x] 1.1 Make `SignupRequestSchema.organizationId` optional in `packages/contracts/src/auth.ts` (treat omitted/empty as no-org)
+- [x] 1.2 Rebuild or verify downstream `SignupRequest` type consumers compile
 
 ## 2. API
 
-- [ ] 2.1 Branch `auth.service.ts` signup: no org → `ACTIVE`, `requestedOrganizationId` null; with org → validate org, `PENDING`, set `requestedOrganizationId`
-- [ ] 2.2 Ensure signup response still returns `PublicUser` with correct `status` and no session tokens
-- [ ] 2.3 Add focused API/integration tests for org-less and with-org signup paths
+- [x] 2.1 Branch `auth.service.ts` signup: no org → `ACTIVE`, `requestedOrganizationId` null; with org → validate org, `PENDING`, set `requestedOrganizationId`
+- [x] 2.2 Ensure signup response still returns `PublicUser` with correct `status` and no session tokens
+- [x] 2.3 Add focused API/integration tests for org-less and with-org signup paths
 
 ## 3. Frontend — Signup
 
