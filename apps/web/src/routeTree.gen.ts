@@ -22,11 +22,15 @@ import { Route as AdminEventsRouteImport } from './routes/admin.events'
 import { Route as AdminMembershipsRouteImport } from './routes/admin.memberships'
 import { Route as AdminOrganizationsRouteImport } from './routes/admin.organizations'
 import { Route as AdminPermissionsRouteImport } from './routes/admin.permissions'
+import { Route as AdminTicketedEventsRouteImport } from './routes/admin.ticketed-events'
 import { Route as AdminUniversitiesRouteImport } from './routes/admin.universities'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppEventsRouteImport } from './routes/app.events'
+import { Route as AppTicketsRouteImport } from './routes/app.tickets'
 import { Route as UsersIndexRouteImport } from './routes/users.index'
+import { Route as AdminEventsEventIdTicketsRouteImport } from './routes/admin.events.$eventId.tickets'
+import { Route as AppEventsEventIdTicketsRouteImport } from './routes/app.events.$eventId.tickets'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -93,6 +97,11 @@ const AdminPermissionsRoute = AdminPermissionsRouteImport.update({
   path: '/permissions',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminTicketedEventsRoute = AdminTicketedEventsRouteImport.update({
+  id: '/ticketed-events',
+  path: '/ticketed-events',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminUniversitiesRoute = AdminUniversitiesRouteImport.update({
   id: '/universities',
   path: '/universities',
@@ -113,10 +122,26 @@ const AppEventsRoute = AppEventsRouteImport.update({
   path: '/events',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTicketsRoute = AppTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => AppRoute,
+} as any)
 const UsersIndexRoute = UsersIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => UsersRoute,
+} as any)
+const AdminEventsEventIdTicketsRoute =
+  AdminEventsEventIdTicketsRouteImport.update({
+    id: '/$eventId/tickets',
+    path: '/$eventId/tickets',
+    getParentRoute: () => AdminEventsRoute,
+  } as any)
+const AppEventsEventIdTicketsRoute = AppEventsEventIdTicketsRouteImport.update({
+  id: '/$eventId/tickets',
+  path: '/$eventId/tickets',
+  getParentRoute: () => AppEventsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -128,16 +153,20 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/users': typeof UsersRouteWithChildren
-  '/admin/events': typeof AdminEventsRoute
+  '/admin/events': typeof AdminEventsRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/organizations': typeof AdminOrganizationsRoute
   '/admin/permissions': typeof AdminPermissionsRoute
+  '/admin/ticketed-events': typeof AdminTicketedEventsRoute
   '/admin/universities': typeof AdminUniversitiesRoute
   '/admin/users': typeof AdminUsersRoute
-  '/app/events': typeof AppEventsRoute
+  '/app/events': typeof AppEventsRouteWithChildren
+  '/app/tickets': typeof AppTicketsRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/users/': typeof UsersIndexRoute
+  '/admin/events/$eventId/tickets': typeof AdminEventsEventIdTicketsRoute
+  '/app/events/$eventId/tickets': typeof AppEventsEventIdTicketsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -145,16 +174,20 @@ export interface FileRoutesByTo {
   '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
-  '/admin/events': typeof AdminEventsRoute
+  '/admin/events': typeof AdminEventsRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/organizations': typeof AdminOrganizationsRoute
   '/admin/permissions': typeof AdminPermissionsRoute
+  '/admin/ticketed-events': typeof AdminTicketedEventsRoute
   '/admin/universities': typeof AdminUniversitiesRoute
   '/admin/users': typeof AdminUsersRoute
-  '/app/events': typeof AppEventsRoute
+  '/app/events': typeof AppEventsRouteWithChildren
+  '/app/tickets': typeof AppTicketsRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/users': typeof UsersIndexRoute
+  '/admin/events/$eventId/tickets': typeof AdminEventsEventIdTicketsRoute
+  '/app/events/$eventId/tickets': typeof AppEventsEventIdTicketsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -166,16 +199,20 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/users': typeof UsersRouteWithChildren
-  '/admin/events': typeof AdminEventsRoute
+  '/admin/events': typeof AdminEventsRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/organizations': typeof AdminOrganizationsRoute
   '/admin/permissions': typeof AdminPermissionsRoute
+  '/admin/ticketed-events': typeof AdminTicketedEventsRoute
   '/admin/universities': typeof AdminUniversitiesRoute
   '/admin/users': typeof AdminUsersRoute
-  '/app/events': typeof AppEventsRoute
+  '/app/events': typeof AppEventsRouteWithChildren
+  '/app/tickets': typeof AppTicketsRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/users/': typeof UsersIndexRoute
+  '/admin/events/$eventId/tickets': typeof AdminEventsEventIdTicketsRoute
+  '/app/events/$eventId/tickets': typeof AppEventsEventIdTicketsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -192,12 +229,16 @@ export interface FileRouteTypes {
     | '/admin/memberships'
     | '/admin/organizations'
     | '/admin/permissions'
+    | '/admin/ticketed-events'
     | '/admin/universities'
     | '/admin/users'
     | '/app/events'
+    | '/app/tickets'
     | '/admin/'
     | '/app/'
     | '/users/'
+    | '/admin/events/$eventId/tickets'
+    | '/app/events/$eventId/tickets'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -209,12 +250,16 @@ export interface FileRouteTypes {
     | '/admin/memberships'
     | '/admin/organizations'
     | '/admin/permissions'
+    | '/admin/ticketed-events'
     | '/admin/universities'
     | '/admin/users'
     | '/app/events'
+    | '/app/tickets'
     | '/admin'
     | '/app'
     | '/users'
+    | '/admin/events/$eventId/tickets'
+    | '/app/events/$eventId/tickets'
   id:
     | '__root__'
     | '/'
@@ -229,12 +274,16 @@ export interface FileRouteTypes {
     | '/admin/memberships'
     | '/admin/organizations'
     | '/admin/permissions'
+    | '/admin/ticketed-events'
     | '/admin/universities'
     | '/admin/users'
     | '/app/events'
+    | '/app/tickets'
     | '/admin/'
     | '/app/'
     | '/users/'
+    | '/admin/events/$eventId/tickets'
+    | '/app/events/$eventId/tickets'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -341,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPermissionsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/ticketed-events': {
+      id: '/admin/ticketed-events'
+      path: '/ticketed-events'
+      fullPath: '/admin/ticketed-events'
+      preLoaderRoute: typeof AdminTicketedEventsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/universities': {
       id: '/admin/universities'
       path: '/universities'
@@ -369,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEventsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/tickets': {
+      id: '/app/tickets'
+      path: '/tickets'
+      fullPath: '/app/tickets'
+      preLoaderRoute: typeof AppTicketsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/users/': {
       id: '/users/'
       path: '/'
@@ -376,24 +439,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersIndexRouteImport
       parentRoute: typeof UsersRoute
     }
+    '/admin/events/$eventId/tickets': {
+      id: '/admin/events/$eventId/tickets'
+      path: '/$eventId/tickets'
+      fullPath: '/admin/events/$eventId/tickets'
+      preLoaderRoute: typeof AdminEventsEventIdTicketsRouteImport
+      parentRoute: typeof AdminEventsRoute
+    }
+    '/app/events/$eventId/tickets': {
+      id: '/app/events/$eventId/tickets'
+      path: '/$eventId/tickets'
+      fullPath: '/app/events/$eventId/tickets'
+      preLoaderRoute: typeof AppEventsEventIdTicketsRouteImport
+      parentRoute: typeof AppEventsRoute
+    }
   }
 }
 
+interface AdminEventsRouteChildren {
+  AdminEventsEventIdTicketsRoute: typeof AdminEventsEventIdTicketsRoute
+}
+
+const AdminEventsRouteChildren: AdminEventsRouteChildren = {
+  AdminEventsEventIdTicketsRoute: AdminEventsEventIdTicketsRoute,
+}
+
+const AdminEventsRouteWithChildren = AdminEventsRoute._addFileChildren(
+  AdminEventsRouteChildren,
+)
+
 interface AdminRouteChildren {
-  AdminEventsRoute: typeof AdminEventsRoute
+  AdminEventsRoute: typeof AdminEventsRouteWithChildren
   AdminMembershipsRoute: typeof AdminMembershipsRoute
   AdminOrganizationsRoute: typeof AdminOrganizationsRoute
   AdminPermissionsRoute: typeof AdminPermissionsRoute
+  AdminTicketedEventsRoute: typeof AdminTicketedEventsRoute
   AdminUniversitiesRoute: typeof AdminUniversitiesRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminEventsRoute: AdminEventsRoute,
+  AdminEventsRoute: AdminEventsRouteWithChildren,
   AdminMembershipsRoute: AdminMembershipsRoute,
   AdminOrganizationsRoute: AdminOrganizationsRoute,
   AdminPermissionsRoute: AdminPermissionsRoute,
+  AdminTicketedEventsRoute: AdminTicketedEventsRoute,
   AdminUniversitiesRoute: AdminUniversitiesRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -401,13 +492,27 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface AppEventsRouteChildren {
+  AppEventsEventIdTicketsRoute: typeof AppEventsEventIdTicketsRoute
+}
+
+const AppEventsRouteChildren: AppEventsRouteChildren = {
+  AppEventsEventIdTicketsRoute: AppEventsEventIdTicketsRoute,
+}
+
+const AppEventsRouteWithChildren = AppEventsRoute._addFileChildren(
+  AppEventsRouteChildren,
+)
+
 interface AppRouteChildren {
-  AppEventsRoute: typeof AppEventsRoute
+  AppEventsRoute: typeof AppEventsRouteWithChildren
+  AppTicketsRoute: typeof AppTicketsRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppEventsRoute: AppEventsRoute,
+  AppEventsRoute: AppEventsRouteWithChildren,
+  AppTicketsRoute: AppTicketsRoute,
   AppIndexRoute: AppIndexRoute,
 }
 

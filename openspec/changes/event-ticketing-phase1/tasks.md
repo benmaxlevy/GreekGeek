@@ -46,10 +46,10 @@
 
 ## 7. Frontend — guest + admin UI (vertical slice 4)
 
-- [ ] 7.1 `/app/tickets` — my tickets, claim CTA for on_sale public events, mark-paid own unpaid
-- [ ] 7.2 `/admin/events/$eventId/tickets` — full config, allocations, issue/void/mark-paid, force closed
-- [ ] 7.3 Admin ticketed-events list with org filter; nav link
-- [ ] 7.4 Commit: `add guest my-tickets and admin ticketing ui`
+- [x] 7.1 `/app/tickets` — my tickets, claim CTA for on_sale public events, mark-paid own unpaid
+- [x] 7.2 `/admin/events/$eventId/tickets` — full config, allocations, issue/void/mark-paid, force closed
+- [x] 7.3 Admin ticketed-events list with org filter; nav link
+- [x] 7.4 Commit: `add guest my-tickets and admin ticketing ui`
 
 ## 8. Verification + demos
 
