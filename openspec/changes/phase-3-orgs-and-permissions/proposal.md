@@ -4,15 +4,16 @@ Phase 2 delivers authentication and the obsidian-glass shell, but Rally still la
 
 ## What Changes
 
-- Add `User.status` enum (`ACTIVE` | `PENDING` | `INACTIVE`); public signup/register creates `PENDING` users awaiting platform ADMIN approval
+- Add `User.status` enum (`ACTIVE` | `PENDING` | `INACTIVE`); public signup/register creates `PENDING` users awaiting platform ADMIN approval; signup MUST collect **university** then **organization** (cascading) and persist `User.requestedOrganizationId` (nullable FK, required on signup for `USER` role)
 - **BREAKING (auth behavior):** Signup no longer immediately grants a usable session for normal users; `PENDING` and `INACTIVE` users may authenticate (login/refresh issue tokens) but are admitted only to status surfaces (awaiting approval / blocked), not the normal app — protected routes and admin/org APIs remain blocked until `ACTIVE`
 - Add Prisma models: `University`, `Organization` (type `FRATERNITY` | `SORORITY`, unique per university name), `Membership` (1:1 user↔org, unique `userId`), `Permission` catalog, `MemberPermission` join
-- Platform ADMIN is the full control plane: CRUD universities and organizations, assign/remove memberships, grant/revoke any permission (post-`ACTIVE` only), approve users (`PENDING` → `ACTIVE` with fill-or-kill org assignment), reject pending users (`PENDING` → `INACTIVE`), reactivate (`INACTIVE` → `ACTIVE`); ADMIN holds no Membership and bypasses all org-scoped ACL checks
+- Platform ADMIN is the full control plane: CRUD universities and organizations, assign/remove memberships, grant/revoke any permission (post-`ACTIVE` only), approve users (`PENDING` → `ACTIVE` with fill-or-kill against requested org/university — **fill** assigns membership to requested org or admin override, **kill** sets `INACTIVE`), reject pending users (`PENDING` → `INACTIVE`), reactivate (`INACTIVE` → `ACTIVE`); ADMIN holds no Membership and bypasses all org-scoped ACL checks
 - Members with `members.manage_permissions` may grant/revoke permissions within their own org only (API-enforced; no separate member-facing permission UI this phase unless covered by admin flows)
 - Default on membership join: zero permissions; permission catalog seeded (including `members.manage_permissions`, `events.create`, `events.manage` as forward-looking keys — events feature not built)
 - Nest admin/org APIs with shared Zod contracts in `packages/contracts`; org-scoped permission guard/decorator with ADMIN bypass
 - Admin dashboard UI (obsidian-glass / AppShell): universities CRUD, organizations CRUD, membership assign/remove, permission grant/revoke, user approval queue and status management, permission catalog list (seed-only — no catalog CRUD UI)
-- Public register/signup UX updated to communicate awaiting admin approval (signup does not collect org/university — admin assigns membership at approval)
+- Public register/signup UX: cascading university → organization pickers, then pending-approval messaging (no session tokens)
+- Public read APIs (anonymous/`@Public`): list universities; list organizations filtered by `universityId` — for signup form only; create/update/delete remain ADMIN-only
 - Status surfaces for non-`ACTIVE` authenticated users: awaiting-approval (`PENDING`) and blocked (`INACTIVE`) screens
 - Seed: permission catalog, dev admin user (ACTIVE), optional sample university/org
 - E2e/API tests: membership uniqueness, ADMIN bypass, permission grant gates, unauthorized denial, user approval flow
@@ -21,20 +22,20 @@ Phase 2 delivers authentication and the obsidian-glass shell, but Rally still la
 
 ### New Capabilities
 
-- `universities`: University entity and platform-ADMIN-only CRUD API
-- `organizations`: Organization entity (typed, university-bound) and platform-ADMIN-only CRUD API
+- `universities`: University entity; public list for signup; platform-ADMIN-only create/update/delete
+- `organizations`: Organization entity (typed, university-bound); public list by university for signup; platform-ADMIN-only create/update/delete
 - `memberships`: One-to-one user↔organization membership assign/remove (platform ADMIN only)
 - `org-permissions`: Permission catalog, direct MemberPermission grants, org-scoped authorization with ADMIN bypass
 - `admin-dashboard`: Glass-styled admin UI for universities, organizations, memberships, permissions, and user approval/management
 
 ### Modified Capabilities
 
-- `session-auth`: User status lifecycle, PENDING signup, status-gated route admission (tokens allowed; app/admin/org APIs blocked for non-`ACTIVE`), awaiting/blocked status surfaces, updated register/signup UX
+- `session-auth`: User status lifecycle, PENDING signup with `requestedOrganizationId`, status-gated route admission (tokens allowed; app/admin/org APIs blocked for non-`ACTIVE`), awaiting/blocked status surfaces, register/signup UX with university/org selection
 
 ## Impact
 
 - **Depends on Phase 2** (`session-auth`, `obsidian-glass-theme`) — JWT auth, AppShell, glass UI patterns
-- **apps/api**: Prisma schema/migration, universities/organizations/memberships/permissions modules, user status on auth, admin user-management endpoints, org permission guard, seed updates
-- **apps/web**: Admin dashboard routes and pages, updated `/signup` (register) pending messaging, awaiting-approval and blocked status routes for authenticated non-`ACTIVE` users
-- **packages/contracts**: Zod schemas for universities, organizations, memberships, permissions, user status/admin operations
+- **apps/api**: Prisma schema/migration (`User.requestedOrganizationId`), universities/organizations/memberships/permissions modules, public read list endpoints for signup, user status on auth, admin user-management endpoints, org permission guard, seed updates
+- **apps/web**: Admin dashboard routes and pages, updated `/signup` with cascading university/org pickers and pending messaging, awaiting-approval and blocked status routes for authenticated non-`ACTIVE` users; admin pending queue shows requested org (override on fill)
+- **packages/contracts**: Zod schemas for universities, organizations, memberships, permissions, user status/admin operations, signup with `requestedOrganizationId`
 - **Non-goals**: Casbin or role-based permission indirection, national org brands, multi-org membership, URL slugs, permission catalog CRUD UI, member-facing permission management UI, events product feature (catalog keys only), email notifications for approval

@@ -2,12 +2,22 @@
 
 ### Requirement: User accounts store hashed credentials and a single global role
 
-The system MUST persist users with a unique email, a password hash, optional email-verified timestamp, a role enum of `USER` or `ADMIN`, and a status enum of `ACTIVE`, `PENDING`, or `INACTIVE`. Passwords MUST be stored only as argon2 hashes — never in plaintext.
+The system MUST persist users with a unique email, a password hash, optional email-verified timestamp, a role enum of `USER` or `ADMIN`, a status enum of `ACTIVE`, `PENDING`, or `INACTIVE`, and an optional `requestedOrganizationId` foreign key to `Organization`. Passwords MUST be stored only as argon2 hashes — never in plaintext. Signup for `USER` role MUST require `requestedOrganizationId`; the selected organization implies the user's requested university.
 
-#### Scenario: Signup creates a hashed pending user
+#### Scenario: Signup creates a hashed pending user with requested organization
 
-- **WHEN** a client submits a valid signup with email, password, and name
-- **THEN** the system creates a user with an argon2 password hash, default role `USER`, status `PENDING`, and does not store the plaintext password
+- **WHEN** a client submits a valid signup with email, password, name, and `requestedOrganizationId` referencing an existing organization
+- **THEN** the system creates a user with an argon2 password hash, default role `USER`, status `PENDING`, `requestedOrganizationId` set to the submitted organization, and does not store the plaintext password
+
+#### Scenario: Signup rejects missing organization for user role
+
+- **WHEN** a client submits a signup for role `USER` without `requestedOrganizationId`
+- **THEN** the system rejects the request with a client error and does not create a user
+
+#### Scenario: Signup rejects invalid requested organization
+
+- **WHEN** a client submits a signup with a `requestedOrganizationId` that does not exist
+- **THEN** the system rejects the request with a client error and does not create a user
 
 #### Scenario: Duplicate email is rejected
 
@@ -50,7 +60,12 @@ The API MUST expose signup, login, refresh, logout, and me endpoints under `/api
 
 ### Requirement: Auth UI, session restore, and route guards
 
-The web app MUST provide glass-styled `/login` and `/signup` (register) pages. Signup MUST NOT collect university or organization. The client MUST attach the access token to API calls, attempt a single refresh on 401, then replay the failed request once. Auth state MUST be available to the UI (current user query). Authenticated route groups for the normal app MUST redirect unauthenticated users to `/login` and non-`ACTIVE` users to the appropriate status surface before loading protected pages. After a hard refresh with a valid refresh cookie, an `ACTIVE` user MUST remain signed in without re-entering credentials.
+The web app MUST provide glass-styled `/login` and `/signup` (register) pages. Signup MUST collect university then organization using cascading selectors (organizations filtered by selected university). The client MUST load university and organization options from public read list endpoints without authentication. The client MUST attach the access token to API calls, attempt a single refresh on 401, then replay the failed request once. Auth state MUST be available to the UI (current user query). Authenticated route groups for the normal app MUST redirect unauthenticated users to `/login` and non-`ACTIVE` users to the appropriate status surface before loading protected pages. After a hard refresh with a valid refresh cookie, an `ACTIVE` user MUST remain signed in without re-entering credentials.
+
+#### Scenario: Register collects university and organization
+
+- **WHEN** a user opens the register UI
+- **THEN** they can select a university, then an organization filtered to that university, before submitting signup
 
 #### Scenario: Register shows pending approval messaging
 
@@ -129,14 +144,19 @@ Users with status `PENDING` or `INACTIVE` MUST be able to authenticate (login an
 
 ### Requirement: Platform admin manages user status
 
-Platform ADMIN MUST be able to list users filtered by status and update user status between `PENDING`, `ACTIVE`, and `INACTIVE` via admin API and admin UI. Approving a `PENDING` user (`PENDING` → `ACTIVE`) MUST be a distinct action that may assign organization membership as part of the fill flow; permission grants MUST NOT occur during approval. Rejecting a pending user MUST set status `INACTIVE` (kill). ADMIN MUST be able to reactivate `INACTIVE` → `ACTIVE`. Request and response shapes MUST be validated with shared Zod schemas.
+Platform ADMIN MUST be able to list users filtered by status and update user status between `PENDING`, `ACTIVE`, and `INACTIVE` via admin API and admin UI. User list/detail for admin MUST include `requestedOrganizationId` and implied university for `PENDING` users. Approving a `PENDING` user (`PENDING` → `ACTIVE`) MUST be a distinct **fill** action that validates the requested org/university: if acceptable, assign membership to the requested organization (admin MAY override organization in the approve request); if not acceptable, **kill** by setting status `INACTIVE`. Permission grants MUST NOT occur during approval. Rejecting a pending user MUST set status `INACTIVE` (kill). ADMIN MUST be able to reactivate `INACTIVE` → `ACTIVE`. Request and response shapes MUST be validated with shared Zod schemas.
 
-#### Scenario: Admin approves pending user with membership fill
+#### Scenario: Admin approves pending user with requested org fill
 
-- **WHEN** a platform ADMIN approves a `PENDING` user by assigning them to an organization and setting status `ACTIVE`
-- **THEN** the user's status is `ACTIVE`, a membership row links the user to that organization with zero permissions, and the user can reach normal app routes on subsequent login
+- **WHEN** a platform ADMIN approves a `PENDING` user whose requested organization is acceptable and sets status `ACTIVE`
+- **THEN** the user's status is `ACTIVE`, a membership row links the user to the requested organization (or admin override) with zero permissions, and the user can reach normal app routes on subsequent login
 
-#### Scenario: Admin kills pending user
+#### Scenario: Admin approves pending user with org override
+
+- **WHEN** a platform ADMIN approves a `PENDING` user by overriding the organization in the approve request and setting status `ACTIVE`
+- **THEN** the user's status is `ACTIVE` and membership is created for the override organization with zero permissions
+
+#### Scenario: Admin kills pending user with invalid requested org
 
 - **WHEN** a platform ADMIN rejects a `PENDING` user by setting status `INACTIVE`
 - **THEN** the user's status is persisted as `INACTIVE` and the user is routed to the blocked screen when authenticated

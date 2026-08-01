@@ -36,6 +36,7 @@ Workspace conventions: Zod at HTTP boundaries; named types/schemas in feature `t
 - `Permission`: `id`, `key` (unique), `description`, timestamps — seeded catalog
 - `MemberPermission`: `membershipId`, `permissionId`; composite unique — direct grants, default zero on join
 - `User.status`: enum `ACTIVE` | `PENDING` | `INACTIVE` (default `PENDING` for signup; seed admin `ACTIVE`)
+- `User.requestedOrganizationId`: nullable FK to `Organization`; **required on signup** for `USER` role; stores signup org intent until admin fill-or-kill (university implied via org FK)
 
 **Why:** Matches locked product decisions; simple relational model without role indirection.
 
@@ -52,8 +53,10 @@ Workspace conventions: Zod at HTTP boundaries; named types/schemas in feature `t
 
 | Action | Who |
 |--------|-----|
-| University CRUD | ADMIN only |
-| Organization CRUD | ADMIN only |
+| University list (signup) | Public (anonymous) |
+| University create/update/delete | ADMIN only |
+| Organization list by university (signup) | Public (anonymous) |
+| Organization create/update/delete | ADMIN only |
 | Membership assign/remove | ADMIN only |
 | Permission grant/revoke (any catalog key) | ADMIN, or member with `members.manage_permissions` in target org |
 | User approve / reject / reactivate | ADMIN only |
@@ -65,7 +68,7 @@ Workspace conventions: Zod at HTTP boundaries; named types/schemas in feature `t
 
 **Choice (locked):**
 
-- Signup/register creates `User` with `status = PENDING`, `role = USER`; signup does **not** collect university or organization — admin assigns membership at approval (see Decision 10)
+- Signup/register creates `User` with `status = PENDING`, `role = USER`, and `requestedOrganizationId` set from the selected organization (university chosen first in UI; org must belong to that university — see Decision 10)
 - Seed dev admin with `status = ACTIVE`
 - `PENDING` and `INACTIVE` users **may authenticate**: login and refresh succeed and issue tokens
 - Non-`ACTIVE` users are **not admitted** to the normal app: protected API routes, admin APIs, and org-scoped APIs return 401/403; authenticated frontend route groups redirect to status surfaces instead of app home
@@ -82,9 +85,9 @@ Workspace conventions: Zod at HTTP boundaries; named types/schemas in feature `t
 **Choice (locked):**
 
 - `PENDING → ACTIVE` is a distinct **approve** action
-- Org/university handling at approval is **fill or kill**:
-  - **Kill:** if the user's org/university situation is incorrect or not acceptable → set status `INACTIVE` (no hard-delete)
-  - **Fill:** if correct → assign `Membership` to the right `Organization` (university implied via org) as part of (or immediately before) activation
+- Org/university handling at approval is **fill or kill** against the user's `requestedOrganizationId` (and implied university):
+  - **Kill:** if the requested org/university is incorrect or not acceptable → set status `INACTIVE` (no hard-delete); no membership created
+  - **Fill:** if correct → assign `Membership` to the requested `Organization` (or an admin-selected override org) as part of (or immediately before) activation
 - **Permissions are not part of approve** — grant/revoke only after user is `ACTIVE`
 - ADMIN may later reactivate `INACTIVE → ACTIVE` (same status patch endpoint as approval; membership may need (re)assignment)
 
@@ -94,8 +97,8 @@ Workspace conventions: Zod at HTTP boundaries; named types/schemas in feature `t
 
 **Choice:** Feature modules under `apps/api`:
 
-- `universities` — ADMIN-only CRUD
-- `organizations` — ADMIN-only CRUD, filtered/listable by university
+- `universities` — public list for signup; ADMIN-only create/update/delete
+- `organizations` — public list filtered by `universityId` for signup; ADMIN-only create/update/delete
 - `memberships` — ADMIN assign (create), remove (delete); enforce unique `userId`
 - `permissions` — list catalog; grant/revoke MemberPermission on membership
 - `admin/users` — list users (filter by status), patch status (`PENDING` → `ACTIVE`, `PENDING` → `INACTIVE`, `INACTIVE` → `ACTIVE`); approve flow may create membership in same transaction
@@ -121,7 +124,7 @@ Guard applies to org-scoped endpoints introduced this phase and future phases; P
 
 | Page | Actions |
 |------|---------|
-| Users (pending queue) | List/filter by status; for `PENDING`: **fill** (assign org membership + activate) or **kill** (set `INACTIVE`); reactivate `INACTIVE` → `ACTIVE`; permission grants **not** on this page |
+| Users (pending queue) | List/filter by status; show requested university/org; for `PENDING`: **fill** (confirm or override org + activate) or **kill** (set `INACTIVE`); reactivate `INACTIVE` → `ACTIVE`; permission grants **not** on this page |
 | Universities | List, create, edit, delete |
 | Organizations | List (by university), create, edit, delete; type selector |
 | Memberships | Assign user to org, remove membership (post-active management) |
@@ -135,9 +138,11 @@ Glass cards, tables, forms consistent with Phase 2 theme. TanStack Router `befor
 
 **Choice (locked):** Update `/signup` (public register):
 
-- Collects email, password, name only — **no** university or organization selection (admin fills org at approval; see Decision 10)
+- Collects email, password, name, **university**, then **organization** (cascading — org options filtered by selected university)
+- On submit, persists `requestedOrganizationId` on the new `PENDING` user
 - On success → pending-approval messaging (no session tokens, no redirect to authenticated home)
 - After signup, user may log in; `PENDING` users land on **awaiting approval** screen; `INACTIVE` users land on **blocked** screen — not normal app routes
+- Signup form loads universities and orgs via public read list endpoints (no auth)
 
 ### 8. Dependent delete protection
 
@@ -153,17 +158,17 @@ Glass cards, tables, forms consistent with Phase 2 theme. TanStack Router `befor
 
 No production data dump.
 
-### 10. Signup org intent
+### 10. Signup org selection
 
-**Choice (locked):** Public signup does **not** collect university or organization. Admin assigns the correct `Organization` (university implied via org FK) during the **fill** step of pending-user review, immediately before or as part of `PENDING → ACTIVE`.
+**Choice (locked):** Public signup MUST let the user select **university**, then **organization** (cascading). The selected organization is persisted as `User.requestedOrganizationId` on the `PENDING` user. Admin **fill-or-kill** at approval validates that intent: wrong → `INACTIVE`; correct → assign membership to requested org (admin may override org in UI before activating). Permissions remain post-`ACTIVE` only.
 
-**Why:** Keeps signup minimal; org placement is an admin verification decision, not user self-selection.
+**Why:** Captures user intent at signup while keeping org placement an admin verification step.
 
 ### 11. Testing strategy
 
 **Choice:**
 
-- **E2e (Playwright):** register → pending message; pending user login → awaiting-approval screen; admin fill+activate → reach protected page; admin kill → inactive blocked screen; admin reactivate; ADMIN CRUD smoke; permission grant post-active; unauthorized 403
+- **E2e (Playwright):** register with university/org selection → pending message; pending user login → awaiting-approval screen; admin fill+activate (requested org) → reach protected page; admin kill → inactive blocked screen; admin reactivate; ADMIN CRUD smoke; permission grant post-active; unauthorized 403; public list endpoints reachable without auth
 - **API integration:** membership unique constraint, ADMIN bypass, grant gate without `members.manage_permissions`, non-ACTIVE blocked on protected routes (login/refresh succeed), delete-with-dependents 409
 
 E2e-first; unit tests only for guard edge cases if awkward in browser.
@@ -177,7 +182,7 @@ E2e-first; unit tests only for guard edge cases if awkward in browser.
 
 ## Migration Plan
 
-1. Add Prisma models + `User.status`; migrate
+1. Add Prisma models + `User.status` + `User.requestedOrganizationId`; migrate
 2. Backfill existing users to `ACTIVE` in migration (Phase 2 users should remain usable)
 3. Deploy API with new endpoints and auth gating
 4. Deploy admin UI + updated signup
@@ -190,6 +195,6 @@ All prior open questions resolved:
 
 1. **Auth for non-ACTIVE:** Login and refresh succeed; tokens issued; only status surfaces + auth maintenance reachable — not normal app, admin, or org APIs (Decision 3).
 2. **Fill or kill approval:** Kill → `INACTIVE`; fill → assign membership + `ACTIVE`; permissions only post-`ACTIVE` (Decision 3b).
-3. **Signup org intent:** Admin fills org at approval; signup has no org pick (Decision 10).
+3. **Signup org selection:** User picks university then org at signup; `requestedOrganizationId` persisted; admin fill-or-kill validates intent; admin may override org on fill (Decision 10).
 4. **Reactivation:** ADMIN may set `INACTIVE` → `ACTIVE` (Decision 3b).
 5. **Dependent delete:** University/org delete with dependents → 409 (Decision 8).

@@ -20,17 +20,17 @@ Admin dashboard routes MUST be reachable only by authenticated users with role `
 
 ### Requirement: Admin manages user approval with fill-or-kill workflow
 
-The admin dashboard MUST provide a user management view listing users with status and filtering by status. For `PENDING` users, ADMIN MUST be able to **fill** (assign organization membership and activate) or **kill** (set `INACTIVE`). Permission grants MUST NOT be part of the approval flow. ADMIN MUST be able to reactivate `INACTIVE` users to `ACTIVE`.
+The admin dashboard MUST provide a user management view listing users with status and filtering by status. For `PENDING` users, the UI MUST display requested university and organization (from `requestedOrganizationId`). ADMIN MUST be able to **fill** (confirm or override organization membership and activate) or **kill** (set `INACTIVE`). Permission grants MUST NOT be part of the approval flow. ADMIN MUST be able to reactivate `INACTIVE` users to `ACTIVE`.
 
-#### Scenario: Admin views pending users
+#### Scenario: Admin views pending users with requested org
 
 - **WHEN** a platform ADMIN opens the user management page
-- **THEN** users are listed with status and PENDING users are identifiable
+- **THEN** users are listed with status, and PENDING users show their requested university and organization
 
 #### Scenario: Admin fills and activates pending user from UI
 
-- **WHEN** a platform ADMIN assigns an organization to a PENDING user and activates them through the dashboard
-- **THEN** the user's status becomes ACTIVE, membership is created with zero permissions, and the list reflects the change
+- **WHEN** a platform ADMIN confirms or overrides the organization for a PENDING user and activates them through the dashboard
+- **THEN** the user's status becomes ACTIVE, membership is created for the confirmed or override organization with zero permissions, and the list reflects the change
 
 #### Scenario: Admin kills pending user from UI
 
