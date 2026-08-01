@@ -197,11 +197,12 @@ test.describe('admin approval and org flows', () => {
     const user = userList.find((u) => u.email === email);
     expect(user).toBeTruthy();
 
-    const dup = await request.post('/api/memberships', {
+    // Re-assign same user: API atomically replaces; still one membership per user.
+    const reassign = await request.post('/api/memberships', {
       headers: { Authorization: `Bearer ${adminToken}` },
       data: { userId: user!.id, organizationId: org!.id },
     });
-    expect(dup.status()).toBeGreaterThanOrEqual(400);
+    expect(reassign.ok()).toBeTruthy();
 
     const memberships = await request.get('/api/memberships', {
       headers: { Authorization: `Bearer ${adminToken}` },
@@ -210,17 +211,20 @@ test.describe('admin approval and org flows', () => {
       id: string;
       userId: string;
     }>;
-    const membership = membershipList.find((m) => m.userId === user!.id);
-    expect(membership).toBeTruthy();
+    const forUser = membershipList.filter((m) => m.userId === user!.id);
+    expect(forUser).toHaveLength(1);
+    const membership = forUser[0];
 
     await page.goto('/admin/permissions');
     await expect(page.getByText('members.manage_permissions')).toBeVisible();
-    await page.locator('#perm-membership').selectOption({ label: new RegExp(name) });
+    await page.locator('#perm-membership').selectOption({ label: `${name} · Alpha Demo Fraternity` });
     await page.locator('#perm-key').selectOption('events.create');
     await page.getByRole('button', { name: 'Grant' }).click();
-    await expect(page.getByText('events.create').first()).toBeVisible();
+    await expect(
+      page.locator('li').filter({ hasText: 'events.create' }).getByRole('button', { name: 'Revoke' }),
+    ).toBeVisible();
 
-    const grants = await request.get(`/api/memberships/${membership!.id}/permissions`, {
+    const grants = await request.get(`/api/memberships/${membership.id}/permissions`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
     const grantList = (await grants.json()) as Array<{ permissionKey: string }>;

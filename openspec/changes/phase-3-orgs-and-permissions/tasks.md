@@ -85,5 +85,5 @@
 ## 13. Phase 3 verification
 
 - [ ] 13.1 Manual smoke: full admin flow (review pending, fill+activate or kill, create uni/org, grant permission post-active)
-- [ ] 13.2 Run e2e + API test suites green against Docker Postgres
-- [ ] 13.3 Update Phase 2 auth e2e that assumed immediate post-signup session
+- [x] 13.2 Run e2e + API test suites green against Docker Postgres
+- [x] 13.3 Update Phase 2 auth e2e that assumed immediate post-signup session
