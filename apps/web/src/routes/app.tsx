@@ -4,12 +4,16 @@ import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/button';
 import { logoutRequest } from '@/lib/api';
 import { meQueryKey, meQueryOptions } from '@/lib/auth';
+import { destinationForUser, isAdminUser } from '@/lib/auth-routing';
 
 export const Route = createFileRoute('/app')({
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient.ensureQueryData(meQueryOptions);
     if (!user) {
       throw redirect({ to: '/login' });
+    }
+    if (user.status !== 'ACTIVE') {
+      throw redirect({ to: destinationForUser(user) });
     }
     return { user };
   },
@@ -28,9 +32,14 @@ function AuthenticatedLayout() {
     await navigate({ to: '/login' });
   }
 
+  const navItems = [
+    { label: 'Home', to: '/app' },
+    ...(isAdminUser(user) ? [{ label: 'Admin', to: '/admin' }] : []),
+  ];
+
   return (
     <AppShell
-      navItems={[{ label: 'Home', to: '/app' }]}
+      navItems={navItems}
       footer={
         <div className="space-y-2">
           <p className="truncate px-1 text-xs text-ink-500">{user.email}</p>

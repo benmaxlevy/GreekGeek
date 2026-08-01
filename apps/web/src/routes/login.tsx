@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { loginRequest } from '@/lib/api';
 import { meQueryKey } from '@/lib/auth';
+import { destinationForUser } from '@/lib/auth-routing';
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -28,7 +29,7 @@ function LoginPage() {
     try {
       const session = await loginRequest({ email, password });
       queryClient.setQueryData(meQueryKey, session.user);
-      await navigate({ to: '/app' });
+      await navigate({ to: destinationForUser(session.user) });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

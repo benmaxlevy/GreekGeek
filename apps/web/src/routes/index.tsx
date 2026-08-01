@@ -3,12 +3,13 @@ import { BrandLockup } from '@/components/brand/BrandLockup';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { meQueryOptions } from '@/lib/auth';
+import { destinationForUser } from '@/lib/auth-routing';
 
 export const Route = createFileRoute('/')({
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient.ensureQueryData(meQueryOptions);
     if (user) {
-      throw redirect({ to: '/app' });
+      throw redirect({ to: destinationForUser(user) });
     }
   },
   component: HomePage,

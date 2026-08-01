@@ -3,10 +3,12 @@ import {
   AuthTokensResponseSchema,
   LogoutResponseSchema,
   PublicUserSchema,
+  SignupResponseSchema,
   type AuthTokensResponse,
   type LoginRequest,
   type PublicUser,
   type SignupRequest,
+  type SignupResponse,
 } from '@rally/contracts';
 import { getAccessToken, setAccessToken } from './auth-token';
 
@@ -88,7 +90,7 @@ export async function loginRequest(body: LoginRequest): Promise<AuthTokensRespon
   return data;
 }
 
-export async function signupRequest(body: SignupRequest): Promise<AuthTokensResponse> {
+export async function signupRequest(body: SignupRequest): Promise<SignupResponse> {
   const res = await apiFetch(
     '/api/auth/signup',
     {
@@ -100,9 +102,8 @@ export async function signupRequest(body: SignupRequest): Promise<AuthTokensResp
   if (!res.ok) {
     throw new Error(await readError(res, 'Signup failed'));
   }
-  const data = AuthTokensResponseSchema.parse(await res.json());
-  setAccessToken(data.accessToken);
-  return data;
+  // Signup does not issue session tokens — user stays unauthenticated.
+  return SignupResponseSchema.parse(await res.json());
 }
 
 export async function logoutRequest(): Promise<void> {
@@ -151,3 +152,5 @@ async function readError(res: Response, fallback: string): Promise<string> {
   }
   return `${fallback} (${res.status})`;
 }
+
+export { readError };

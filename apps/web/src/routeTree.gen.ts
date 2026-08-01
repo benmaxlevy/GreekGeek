@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AwaitingApprovalRouteImport } from './routes/awaiting-approval'
+import { Route as BlockedRouteImport } from './routes/blocked'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -23,6 +25,16 @@ const IndexRoute = IndexRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AwaitingApprovalRoute = AwaitingApprovalRouteImport.update({
+  id: '/awaiting-approval',
+  path: '/awaiting-approval',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlockedRoute = BlockedRouteImport.update({
+  id: '/blocked',
+  path: '/blocked',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -44,12 +56,16 @@ const AppIndexRoute = AppIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/awaiting-approval': typeof AwaitingApprovalRoute
+  '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/awaiting-approval': typeof AwaitingApprovalRoute
+  '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/app': typeof AppIndexRoute
@@ -58,21 +74,40 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/awaiting-approval': typeof AwaitingApprovalRoute
+  '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/login' | '/signup' | '/app/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/awaiting-approval'
+    | '/blocked'
+    | '/login'
+    | '/signup'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/signup' | '/app'
-  id: '__root__' | '/' | '/app' | '/login' | '/signup' | '/app/'
+  to: '/' | '/awaiting-approval' | '/blocked' | '/login' | '/signup' | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/awaiting-approval'
+    | '/blocked'
+    | '/login'
+    | '/signup'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  AwaitingApprovalRoute: typeof AwaitingApprovalRoute
+  BlockedRoute: typeof BlockedRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
 }
@@ -91,6 +126,20 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/awaiting-approval': {
+      id: '/awaiting-approval'
+      path: '/awaiting-approval'
+      fullPath: '/awaiting-approval'
+      preLoaderRoute: typeof AwaitingApprovalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blocked': {
+      id: '/blocked'
+      path: '/blocked'
+      fullPath: '/blocked'
+      preLoaderRoute: typeof BlockedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -130,6 +179,8 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  AwaitingApprovalRoute: AwaitingApprovalRoute,
+  BlockedRoute: BlockedRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
 }

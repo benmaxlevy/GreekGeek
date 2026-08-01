@@ -1,40 +1,62 @@
 import { useState, type FormEvent } from 'react';
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useQueryClient } from '@tanstack/react-query';
+import { Link, createFileRoute } from '@tanstack/react-router';
 import { BrandLockup } from '@/components/brand/BrandLockup';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { signupRequest } from '@/lib/api';
-import { meQueryKey } from '@/lib/auth';
 
 export const Route = createFileRoute('/signup')({
   component: SignupPage,
 });
 
 function SignupPage() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState(false);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const session = await signupRequest({ name, email, password });
-      queryClient.setQueryData(meQueryKey, session.user);
-      await navigate({ to: '/app' });
+      await signupRequest({ name, email, password });
+      setPending(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed');
     } finally {
       setLoading(false);
     }
+  }
+
+  if (pending) {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-[var(--content-max)] items-center justify-center px-6 py-16">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-6 p-8 pb-4">
+            <BrandLockup />
+            <CardTitle className="text-[28px] font-medium tracking-tight">
+              Awaiting approval
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 p-8 pt-2">
+            <p className="text-sm text-ink-300">
+              Account created. A platform admin must approve before you can use Rally.
+            </p>
+            <p className="text-sm text-ink-500">
+              You can log in anytime to check status. You will not reach the app until approved.
+            </p>
+            <Button asChild className="min-h-11 w-full">
+              <Link to="/login">Go to log in</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
