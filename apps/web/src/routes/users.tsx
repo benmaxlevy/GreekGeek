@@ -7,10 +7,14 @@ import { meQueryKey, meQueryOptions } from '@/lib/auth';
 import {
   canManageOrgPendingApprovals,
   destinationForUser,
-  isAdminUser,
 } from '@/lib/auth-routing';
 
-export const Route = createFileRoute('/app')({
+const USERS_NAV = [
+  { label: 'Pending approvals', to: '/users' },
+  { label: 'App home', to: '/app' },
+];
+
+export const Route = createFileRoute('/users')({
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient.ensureQueryData(meQueryOptions);
     if (!user) {
@@ -19,12 +23,15 @@ export const Route = createFileRoute('/app')({
     if (user.status !== 'ACTIVE') {
       throw redirect({ to: destinationForUser(user) });
     }
+    if (!canManageOrgPendingApprovals(user)) {
+      throw redirect({ to: '/app' });
+    }
     return { user };
   },
-  component: AuthenticatedLayout,
+  component: UsersLayout,
 });
 
-function AuthenticatedLayout() {
+function UsersLayout() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = Route.useRouteContext();
@@ -36,20 +43,17 @@ function AuthenticatedLayout() {
     await navigate({ to: '/login' });
   }
 
-  const navItems = [
-    { label: 'Home', to: '/app' },
-    ...(canManageOrgPendingApprovals(user)
-      ? [{ label: 'Pending approvals', to: '/users' }]
-      : []),
-    ...(isAdminUser(user) ? [{ label: 'Admin', to: '/admin' }] : []),
-  ];
-
   return (
     <AppShell
-      navItems={navItems}
+      navItems={USERS_NAV}
       footer={
         <div className="space-y-2">
           <p className="truncate px-1 text-xs text-ink-500">{user.email}</p>
+          {user.membership?.organizationName ? (
+            <p className="truncate px-1 text-xs text-ink-500">
+              {user.membership.organizationName}
+            </p>
+          ) : null}
           <Button
             type="button"
             variant="outline"

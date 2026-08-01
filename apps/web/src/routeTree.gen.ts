@@ -16,6 +16,7 @@ import { Route as AwaitingApprovalRouteImport } from './routes/awaiting-approval
 import { Route as BlockedRouteImport } from './routes/blocked'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as UsersRouteImport } from './routes/users'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminMembershipsRouteImport } from './routes/admin.memberships'
 import { Route as AdminOrganizationsRouteImport } from './routes/admin.organizations'
@@ -23,6 +24,7 @@ import { Route as AdminPermissionsRouteImport } from './routes/admin.permissions
 import { Route as AdminUniversitiesRouteImport } from './routes/admin.universities'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as UsersIndexRouteImport } from './routes/users.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -57,6 +59,11 @@ const LoginRoute = LoginRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -94,6 +101,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const UsersIndexRoute = UsersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => UsersRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/users': typeof UsersRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/organizations': typeof AdminOrganizationsRoute
   '/admin/permissions': typeof AdminPermissionsRoute
@@ -110,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/users/': typeof UsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -124,6 +138,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
+  '/users': typeof UsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -134,6 +149,7 @@ export interface FileRoutesById {
   '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/users': typeof UsersRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/organizations': typeof AdminOrganizationsRoute
   '/admin/permissions': typeof AdminPermissionsRoute
@@ -141,6 +157,7 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/users/': typeof UsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -152,6 +169,7 @@ export interface FileRouteTypes {
     | '/blocked'
     | '/login'
     | '/signup'
+    | '/users'
     | '/admin/memberships'
     | '/admin/organizations'
     | '/admin/permissions'
@@ -159,6 +177,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/'
     | '/app/'
+    | '/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -173,6 +192,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin'
     | '/app'
+    | '/users'
   id:
     | '__root__'
     | '/'
@@ -182,6 +202,7 @@ export interface FileRouteTypes {
     | '/blocked'
     | '/login'
     | '/signup'
+    | '/users'
     | '/admin/memberships'
     | '/admin/organizations'
     | '/admin/permissions'
@@ -189,6 +210,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/'
     | '/app/'
+    | '/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -199,6 +221,7 @@ export interface RootRouteChildren {
   BlockedRoute: typeof BlockedRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
+  UsersRoute: typeof UsersRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -301,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/users/': {
+      id: '/users/'
+      path: '/'
+      fullPath: '/users/'
+      preLoaderRoute: typeof UsersIndexRouteImport
+      parentRoute: typeof UsersRoute
+    }
   }
 }
 
@@ -334,6 +371,16 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface UsersRouteChildren {
+  UsersIndexRoute: typeof UsersIndexRoute
+}
+
+const UsersRouteChildren: UsersRouteChildren = {
+  UsersIndexRoute: UsersIndexRoute,
+}
+
+const UsersRouteWithChildren = UsersRoute._addFileChildren(UsersRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
@@ -342,6 +389,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlockedRoute: BlockedRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
+  UsersRoute: UsersRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
