@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AdminUsersModule } from './admin-users/admin-users.module';
 import { AuthModule } from './auth/auth.module';
 import { AppConfigModule } from './config/config.module';
+import { EventsModule } from './events/events.module';
 import { HealthModule } from './health/health.module';
 import { MembershipsModule } from './memberships/memberships.module';
 import { OrganizationsModule } from './organizations/organizations.module';
@@ -22,6 +23,7 @@ import { UniversitiesModule } from './universities/universities.module';
     MembershipsModule,
     PermissionsModule,
     PendingUsersModule,
+    EventsModule,
   ],
 })
 export class AppModule {}

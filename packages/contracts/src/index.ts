@@ -89,3 +89,15 @@ export {
   type OrgPendingUserParams,
   type PatchPendingApplicantStatus,
 } from './pending-users';
+export {
+  EventSchema,
+  CreateEventSchema,
+  UpdateEventSchema,
+  ListEventsQuerySchema,
+  EventListSchema,
+  type Event,
+  type CreateEvent,
+  type UpdateEvent,
+  type ListEventsQuery,
+  type EventList,
+} from './events';

@@ -1,0 +1,50 @@
+import {
+  CreateEventSchema,
+  EventListSchema,
+  EventSchema,
+  ListEventsQuerySchema,
+  UpdateEventSchema,
+  type CreateEvent,
+  type Event,
+  type EventList,
+  type ListEventsQuery,
+  type UpdateEvent,
+} from '@rally/contracts';
+
+export {
+  CreateEventSchema,
+  EventListSchema,
+  EventSchema,
+  ListEventsQuerySchema,
+  UpdateEventSchema,
+};
+
+export type {
+  CreateEvent,
+  Event,
+  EventList,
+  ListEventsQuery,
+  UpdateEvent,
+};
+
+export function toEventDto(row: {
+  id: string;
+  organizationId: string;
+  name: string;
+  type: string;
+  maxHeadcount: number;
+  location: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}): Event {
+  return {
+    id: row.id,
+    organizationId: row.organizationId,
+    name: row.name,
+    type: row.type,
+    maxHeadcount: row.maxHeadcount,
+    location: row.location,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  };
+}
