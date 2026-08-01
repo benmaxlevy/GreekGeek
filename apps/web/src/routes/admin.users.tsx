@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { AdminUser, Organization, UserStatus } from '@rally/contracts';
+import type { AdminUser, Organization, University, UserStatus } from '@rally/contracts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +28,18 @@ function statusBadgeVariant(status: UserStatus) {
   return 'destructive' as const;
 }
 
+function orgLabel(
+  organizationId: string | null | undefined,
+  orgs: Map<string, Organization>,
+  unis: Map<string, University>,
+): string | null {
+  if (!organizationId) return null;
+  const org = orgs.get(organizationId);
+  if (!org) return organizationId;
+  const uni = unis.get(org.universityId);
+  return `${uni?.name ?? 'University'} · ${org.name} (${org.type})`;
+}
+
 function AdminUsersPage() {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<UserStatus | 'ALL'>('PENDING');
@@ -51,6 +63,22 @@ function AdminUsersPage() {
     queryFn: () => listOrganizations(),
   });
 
+  const orgById = useMemo(() => {
+    const map = new Map<string, Organization>();
+    for (const org of organizationsQuery.data ?? []) {
+      map.set(org.id, org);
+    }
+    return map;
+  }, [organizationsQuery.data]);
+
+  const uniById = useMemo(() => {
+    const map = new Map<string, University>();
+    for (const uni of universitiesQuery.data ?? []) {
+      map.set(uni.id, uni);
+    }
+    return map;
+  }, [universitiesQuery.data]);
+
   const orgsByUniversity = useMemo(() => {
     const map = new Map<string, Organization[]>();
     for (const org of organizationsQuery.data ?? []) {
@@ -60,6 +88,13 @@ function AdminUsersPage() {
     }
     return map;
   }, [organizationsQuery.data]);
+
+  const fillUser = useMemo(
+    () => (usersQuery.data ?? []).find((u) => u.id === fillUserId) ?? null,
+    [usersQuery.data, fillUserId],
+  );
+
+  const requestedLabel = orgLabel(fillUser?.requestedOrganizationId, orgById, uniById);
 
   function invalidateUsers() {
     return queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
@@ -120,8 +155,8 @@ function AdminUsersPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Users</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Fill pending (org required) or kill; deactivate ACTIVE users; reactivate INACTIVE
-          without org. Permissions only after ACTIVE.
+          Pending queue shows requested org. Fill confirms or overrides, then activates. Kill /
+          deactivate / reactivate unchanged. Permissions only after ACTIVE.
         </p>
       </div>
 
@@ -141,15 +176,25 @@ function AdminUsersPage() {
 
       {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
 
-      {fillUserId ? (
+      {fillUserId && fillUser ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Fill &amp; activate</CardTitle>
           </CardHeader>
           <CardContent>
             <form className="flex flex-col gap-4" onSubmit={onFillSubmit}>
+              <div className="space-y-1 text-sm">
+                <p className="text-ink-100">{fillUser.name}</p>
+                <p className="text-ink-500">{fillUser.email}</p>
+                <p className="text-ink-300">
+                  Requested:{' '}
+                  {requestedLabel ?? (
+                    <span className="text-ink-500">none on record</span>
+                  )}
+                </p>
+              </div>
               <div className="space-y-2">
-                <Label htmlFor="organizationId">Organization</Label>
+                <Label htmlFor="organizationId">Organization (confirm or override)</Label>
                 <select
                   id="organizationId"
                   required
@@ -163,6 +208,7 @@ function AdminUsersPage() {
                       {(orgsByUniversity.get(uni.id) ?? []).map((org) => (
                         <option key={org.id} value={org.id}>
                           {org.name} ({org.type})
+                          {org.id === fillUser.requestedOrganizationId ? ' — requested' : ''}
                         </option>
                       ))}
                     </optgroup>
@@ -201,6 +247,7 @@ function AdminUsersPage() {
                 <UserRow
                   key={user.id}
                   user={user}
+                  requestedLabel={orgLabel(user.requestedOrganizationId, orgById, uniById)}
                   busy={
                     killMutation.isPending ||
                     deactivateMutation.isPending ||
@@ -210,7 +257,7 @@ function AdminUsersPage() {
                   onFill={() => {
                     setError(null);
                     setFillUserId(user.id);
-                    setOrganizationId('');
+                    setOrganizationId(user.requestedOrganizationId ?? '');
                   }}
                   onKill={() => killMutation.mutate(user.id)}
                   onDeactivate={() => deactivateMutation.mutate(user.id)}
@@ -225,9 +272,6 @@ function AdminUsersPage() {
       {(organizationsQuery.data?.length ?? 0) === 0 ? (
         <p className="text-sm text-ink-500">
           No organizations yet — create one under Organizations before filling pending users.
-          {universitiesQuery.data?.length
-            ? ` Universities: ${universitiesQuery.data.map((u) => u.name).join(', ')}.`
-            : null}
         </p>
       ) : null}
     </div>
@@ -236,6 +280,7 @@ function AdminUsersPage() {
 
 function UserRow({
   user,
+  requestedLabel,
   busy,
   onFill,
   onKill,
@@ -243,6 +288,7 @@ function UserRow({
   onReactivate,
 }: {
   user: AdminUser;
+  requestedLabel: string | null;
   busy: boolean;
   onFill: () => void;
   onKill: () => void;
@@ -258,6 +304,11 @@ function UserRow({
           <Badge variant="outline">{user.role}</Badge>
         </div>
         <p className="truncate text-sm text-ink-500">{user.email}</p>
+        {user.status === 'PENDING' ? (
+          <p className="truncate text-sm text-ink-300">
+            Requested: {requestedLabel ?? '—'}
+          </p>
+        ) : null}
       </div>
       <div className="flex flex-wrap gap-2">
         {user.status === 'PENDING' ? (
