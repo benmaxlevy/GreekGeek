@@ -99,10 +99,10 @@ test.describe('auth status flows', () => {
 });
 
 test.describe('admin approval and org flows', () => {
-  test('admin fill activates pending user to app', async ({ page, request }) => {
-    const email = uniqueEmail('e2e-fill');
+  test('admin approve activates pending user to app', async ({ page, request }) => {
+    const email = uniqueEmail('e2e-approve');
     const password = 'Password123!';
-    const name = 'Fill User';
+    const name = 'Approve User';
     await signupPending(page, email, password, name);
 
     await adminLogin(page);
@@ -113,7 +113,7 @@ test.describe('admin approval and org flows', () => {
 
     const row = page.locator('li').filter({ hasText: email });
     await expect(row.getByText(/Requested:.*Alpha Demo Fraternity/)).toBeVisible();
-    await row.getByRole('button', { name: 'Fill' }).click();
+    await row.getByRole('button', { name: 'Approve' }).click();
     // Prefills requested org — confirm without override.
     await expect(page.locator('#organizationId')).toHaveValue(/.+/);
     await expect(page.locator('form').getByText(/Requested:.*Alpha Demo Fraternity/)).toBeVisible();
@@ -133,17 +133,17 @@ test.describe('admin approval and org flows', () => {
     expect((await me.json()).status).toBe('ACTIVE');
   });
 
-  test('admin kill then inactive blocked; reactivate restores access', async ({ page }) => {
-    const email = uniqueEmail('e2e-kill');
+  test('admin deny then inactive blocked; reactivate restores access', async ({ page }) => {
+    const email = uniqueEmail('e2e-deny');
     const password = 'Password123!';
-    const name = 'Kill User';
+    const name = 'Deny User';
     await signupPending(page, email, password, name);
 
     await adminLogin(page);
     await page.goto('/admin/users');
     await page.getByRole('button', { name: 'PENDING' }).click();
     const row = page.locator('li').filter({ hasText: email });
-    await row.getByRole('button', { name: 'Kill' }).click();
+    await row.getByRole('button', { name: 'Deny' }).click();
     await expect(page.getByText(email)).toHaveCount(0);
 
     await page.getByRole('button', { name: 'Log out' }).click();
@@ -196,7 +196,7 @@ test.describe('admin approval and org flows', () => {
     await page.goto('/admin/users');
     await page.getByRole('button', { name: 'PENDING' }).click();
     const row = page.locator('li').filter({ hasText: email });
-    await row.getByRole('button', { name: 'Fill' }).click();
+    await row.getByRole('button', { name: 'Approve' }).click();
     await page.getByRole('button', { name: 'Activate with org' }).click();
 
     await page.goto('/admin/memberships');
@@ -264,7 +264,7 @@ test.describe('admin approval and org flows', () => {
     await page.goto('/admin/users');
     await page.getByRole('button', { name: 'PENDING' }).click();
     const row = page.locator('li').filter({ hasText: email });
-    await row.getByRole('button', { name: 'Fill' }).click();
+    await row.getByRole('button', { name: 'Approve' }).click();
     await page.getByRole('button', { name: 'Activate with org' }).click();
     await page.getByRole('button', { name: 'Log out' }).click();
 
@@ -321,7 +321,7 @@ test.describe('admin approval and org flows', () => {
 
     for (const email of [managerEmail, targetEmail]) {
       const row = page.locator('li').filter({ hasText: email });
-      await row.getByRole('button', { name: 'Fill' }).click();
+      await row.getByRole('button', { name: 'Approve' }).click();
       await page.getByRole('button', { name: 'Activate with org' }).click();
       await expect(page.getByText(email)).toHaveCount(0);
     }
@@ -432,7 +432,7 @@ test.describe('admin approval and org flows', () => {
     await page.goto('/admin/users');
     await page.getByRole('button', { name: 'PENDING' }).click();
     const row = page.locator('li').filter({ hasText: email });
-    await row.getByRole('button', { name: 'Fill' }).click();
+    await row.getByRole('button', { name: 'Approve' }).click();
     await page.getByRole('button', { name: 'Activate with org' }).click();
     await expect(page.getByText(email)).toHaveCount(0);
 
