@@ -71,14 +71,14 @@
 
 - [ ] 11.1 Register with university/org selection → pending message; no authenticated home access
 - [ ] 11.1b Public university/org list endpoints reachable without auth for signup form
-- [ ] 11.2 Pending user login → awaiting-approval screen; cannot reach protected app page
-- [ ] 11.3 Admin fill (requested org or override) + activate → user reaches protected page
-- [ ] 11.4 Admin kill pending user → `INACTIVE` login → blocked screen
-- [ ] 11.5 Admin reactivate `INACTIVE` → `ACTIVE`
-- [ ] 11.6 Admin CRUD smoke: university + organization create
-- [ ] 11.7 Membership assign; duplicate user rejected
-- [ ] 11.8 ADMIN grants permission post-active; delegated member with `members.manage_permissions` grants in own org
-- [ ] 11.9 Unauthorized: non-admin university CRUD 403; member without manage permission grant 403
+- [x] 11.2 Pending user login → awaiting-approval screen; cannot reach protected app page
+- [x] 11.3 Admin fill (requested org or override) + activate → user reaches protected page
+- [x] 11.4 Admin kill pending user → `INACTIVE` login → blocked screen
+- [x] 11.5 Admin reactivate `INACTIVE` → `ACTIVE`
+- [x] 11.6 Admin CRUD smoke: university + organization create
+- [x] 11.7 Membership assign; duplicate user rejected
+- [x] 11.8 ADMIN grants permission post-active; delegated member with `members.manage_permissions` grants in own org
+- [x] 11.9 Unauthorized: non-admin university CRUD 403; member without manage permission grant 403
 
 ## 12. API integration tests
 
@@ -92,5 +92,5 @@
 ## 13. Phase 3 verification
 
 - [ ] 13.1 Manual smoke: signup with org selection; admin review pending (requested org visible); fill+activate or kill; create uni/org; grant permission post-active
-- [ ] 13.2 Run e2e + API test suites green against Docker Postgres
+- [x] 13.2 Run e2e + API test suites green against Docker Postgres
 - [x] 13.3 Update Phase 2 auth e2e that assumed immediate post-signup session
