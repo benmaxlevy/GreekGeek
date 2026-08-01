@@ -14,7 +14,9 @@ async function signupPending(page: Page, email: string, password: string, name: 
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign up' }).click();
-  await expect(page.getByRole('heading', { name: 'Awaiting approval' })).toBeVisible();
+  // CardTitle is a div, not a heading role.
+  await expect(page.getByText('Awaiting approval', { exact: true })).toBeVisible();
+  await expect(page.getByText(/awaits admin approval|pending admin review|must approve/i)).toBeVisible();
   await expect(page).not.toHaveURL(/\/app\/?$/);
 }
 
@@ -57,7 +59,7 @@ test.describe('auth status flows', () => {
     await page.getByRole('link', { name: 'Go to log in' }).click();
     await loginAs(page, email, password);
     await expect(page).toHaveURL(/\/awaiting-approval\/?$/);
-    await expect(page.getByRole('heading', { name: 'Awaiting approval' })).toBeVisible();
+    await expect(page.getByText('Awaiting approval', { exact: true })).toBeVisible();
     await expect(page.getByText(name)).toBeVisible();
 
     await page.goto('/app');
@@ -126,7 +128,7 @@ test.describe('admin approval and org flows', () => {
     await page.getByRole('button', { name: 'Log out' }).click();
     await loginAs(page, email, password);
     await expect(page).toHaveURL(/\/blocked\/?$/);
-    await expect(page.getByRole('heading', { name: 'Account inactive' })).toBeVisible();
+    await expect(page.getByText('Account inactive', { exact: true })).toBeVisible();
 
     await page.getByRole('button', { name: 'Log out' }).click();
     await adminLogin(page);
