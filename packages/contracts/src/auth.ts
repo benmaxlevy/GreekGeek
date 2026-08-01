@@ -12,6 +12,7 @@ export const PublicUserSchema = z.object({
   name: z.string(),
   role: RoleSchema,
   status: UserStatusSchema,
+  requestedOrganizationId: z.string().nullable(),
 });
 export type PublicUser = z.infer<typeof PublicUserSchema>;
 
@@ -19,6 +20,7 @@ export const SignupRequestSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(128),
   name: z.string().min(1).max(120),
+  organizationId: z.string().min(1),
 });
 export type SignupRequest = z.infer<typeof SignupRequestSchema>;
 

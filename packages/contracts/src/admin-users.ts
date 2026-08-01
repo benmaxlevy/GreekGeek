@@ -12,7 +12,11 @@ export type AdminUser = z.infer<typeof AdminUserSchema>;
 export const AdminUserListSchema = z.array(AdminUserSchema);
 export type AdminUserList = z.infer<typeof AdminUserListSchema>;
 
-/** Patch user status. Fill (PENDING→ACTIVE) requires organizationId. */
+/**
+ * Patch user status.
+ * Fill (PENDING→ACTIVE): organizationId optional; defaults to user.requestedOrganizationId.
+ * Body organizationId overrides. Neither → 400.
+ */
 export const PatchUserStatusSchema = z.object({
   status: z.enum(['ACTIVE', 'INACTIVE']),
   organizationId: z.string().min(1).optional(),
