@@ -601,3 +601,87 @@ test.describe('officer pending approvals at /users', () => {
     await expect(page).toHaveURL(/\/app\/?$/);
   });
 });
+
+test.describe('events crud', () => {
+  test('admin creates event; member with create+manage manages own org events', async ({
+    page,
+    request,
+  }) => {
+    const email = uniqueEmail('e2e-events');
+    const password = 'Password123!';
+    const name = 'Events Member';
+    const eventName = `E2E Formal ${Date.now()}`;
+
+    await signupPending(page, email, password, name);
+    await adminLogin(page);
+    await adminApprovePendingByEmail(page, email);
+
+    const adminToken = await loginApi(request, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const orgs = await request.get('/api/organizations', {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    const orgList = (await orgs.json()) as Array<{ id: string; name: string }>;
+    const org = orgList.find((o) => o.name === 'Alpha Demo Fraternity');
+    expect(org).toBeTruthy();
+
+    await page.goto('/admin/events');
+    await expect(page.getByRole('heading', { name: 'Events' })).toBeVisible();
+    await page.locator('#admin-event-org').selectOption({ label: 'Alpha Demo Fraternity (FRATERNITY)' });
+    await page.locator('#admin-event-name').fill(`Admin ${eventName}`);
+    await page.locator('#admin-event-type').fill('Fraternity Formal');
+    await page.locator('#admin-event-headcount').fill('100');
+    await page.locator('#admin-event-location').fill('Nashville');
+    await page.getByRole('button', { name: 'Create' }).click();
+    await expect(page.getByText(`Admin ${eventName}`)).toBeVisible();
+
+    const users = await request.get('/api/admin/users?status=ACTIVE', {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    const userList = (await users.json()) as Array<{ id: string; email: string }>;
+    const user = userList.find((u) => u.email === email);
+    expect(user).toBeTruthy();
+    const memberships = await request.get('/api/memberships', {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    const membershipList = (await memberships.json()) as Array<{
+      id: string;
+      userId: string;
+    }>;
+    const membership = membershipList.find((m) => m.userId === user!.id);
+    expect(membership).toBeTruthy();
+    for (const key of ['events.create', 'events.manage'] as const) {
+      const grant = await request.post(`/api/memberships/${membership!.id}/permissions`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+        data: { permissionKey: key },
+      });
+      expect(grant.ok()).toBeTruthy();
+    }
+
+    await logout(page);
+    await loginAs(page, email, password);
+    await page.goto('/app/events');
+    await expect(page.getByRole('heading', { name: 'Events' })).toBeVisible();
+    await page.locator('#event-name').fill(eventName);
+    await page.locator('#event-type').fill('Date Party');
+    await page.locator('#event-headcount').fill('40');
+    await page.getByRole('button', { name: 'Create' }).click();
+    await expect(page.getByText(eventName)).toBeVisible();
+    const row = page.locator('li').filter({ hasText: eventName });
+    await row.getByRole('button', { name: 'Edit' }).click();
+    await page.locator('#edit-event-name').fill(`${eventName} Updated`);
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByText(`${eventName} Updated`)).toBeVisible();
+  });
+
+  test('member without event perms redirected from /app/events', async ({ page }) => {
+    const email = uniqueEmail('e2e-noevt');
+    const password = 'Password123!';
+    await signupPending(page, email, password, 'No Events');
+    await adminLogin(page);
+    await adminApprovePendingByEmail(page, email);
+    await logout(page);
+    await loginAs(page, email, password);
+    await page.goto('/app/events');
+    await expect(page).toHaveURL(/\/app\/?$/);
+  });
+});
