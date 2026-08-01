@@ -71,15 +71,15 @@ export async function patchUserStatus(id: string, body: PatchUserStatus): Promis
   return AdminUserSchema.parse(await res.json());
 }
 
-export async function fillActivateUser(id: string, organizationId: string): Promise<AdminUser> {
+export async function approveUser(id: string, organizationId: string): Promise<AdminUser> {
   return patchUserStatus(id, { status: 'ACTIVE', organizationId });
 }
 
-export async function killUser(id: string): Promise<AdminUser> {
+export async function denyUser(id: string): Promise<AdminUser> {
   return patchUserStatus(id, { status: 'INACTIVE' });
 }
 
-/** ACTIVE → INACTIVE (admin deactivate). Same payload as kill. */
+/** ACTIVE → INACTIVE (admin deactivate). Same payload as deny. */
 export async function deactivateUser(id: string): Promise<AdminUser> {
   return patchUserStatus(id, { status: 'INACTIVE' });
 }

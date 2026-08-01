@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import {
+  approveUser,
   deactivateUser,
-  fillActivateUser,
-  killUser,
+  denyUser,
   listAdminUsers,
   listOrganizations,
   listUniversities,
@@ -43,7 +43,7 @@ function orgLabel(
 function AdminUsersPage() {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<UserStatus | 'ALL'>('PENDING');
-  const [fillUserId, setFillUserId] = useState<string | null>(null);
+  const [approveUserId, setApproveUserId] = useState<string | null>(null);
   const [organizationId, setOrganizationId] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -89,22 +89,26 @@ function AdminUsersPage() {
     return map;
   }, [organizationsQuery.data]);
 
-  const fillUser = useMemo(
-    () => (usersQuery.data ?? []).find((u) => u.id === fillUserId) ?? null,
-    [usersQuery.data, fillUserId],
+  const selectedApproveUser = useMemo(
+    () => (usersQuery.data ?? []).find((u) => u.id === approveUserId) ?? null,
+    [usersQuery.data, approveUserId],
   );
 
-  const requestedLabel = orgLabel(fillUser?.requestedOrganizationId, orgById, uniById);
+  const requestedLabel = orgLabel(
+    selectedApproveUser?.requestedOrganizationId,
+    orgById,
+    uniById,
+  );
 
   function invalidateUsers() {
     return queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
   }
 
-  const fillMutation = useMutation({
+  const approveMutation = useMutation({
     mutationFn: ({ userId, orgId }: { userId: string; orgId: string }) =>
-      fillActivateUser(userId, orgId),
+      approveUser(userId, orgId),
     onSuccess: async () => {
-      setFillUserId(null);
+      setApproveUserId(null);
       setOrganizationId('');
       setError(null);
       await invalidateUsers();
@@ -112,8 +116,8 @@ function AdminUsersPage() {
     onError: (err: Error) => setError(err.message),
   });
 
-  const killMutation = useMutation({
-    mutationFn: (userId: string) => killUser(userId),
+  const denyMutation = useMutation({
+    mutationFn: (userId: string) => denyUser(userId),
     onSuccess: async () => {
       setError(null);
       await invalidateUsers();
@@ -139,13 +143,13 @@ function AdminUsersPage() {
     onError: (err: Error) => setError(err.message),
   });
 
-  function onFillSubmit(event: FormEvent) {
+  function onApproveSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!fillUserId || !organizationId) {
-      setError('Organization required to fill and activate');
+    if (!approveUserId || !organizationId) {
+      setError('Organization required to approve and activate');
       return;
     }
-    fillMutation.mutate({ userId: fillUserId, orgId: organizationId });
+    approveMutation.mutate({ userId: approveUserId, orgId: organizationId });
   }
 
   const users = usersQuery.data ?? [];
@@ -155,7 +159,7 @@ function AdminUsersPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Users</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Pending queue shows requested org. Fill confirms or overrides, then activates. Kill /
+          Pending queue shows requested org. Approve confirms or overrides, then activates. Deny /
           deactivate / reactivate unchanged. Permissions only after ACTIVE.
         </p>
       </div>
@@ -176,16 +180,16 @@ function AdminUsersPage() {
 
       {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
 
-      {fillUserId && fillUser ? (
+      {approveUserId && selectedApproveUser ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Fill &amp; activate</CardTitle>
+            <CardTitle className="text-lg">Approve &amp; activate</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="flex flex-col gap-4" onSubmit={onFillSubmit}>
+            <form className="flex flex-col gap-4" onSubmit={onApproveSubmit}>
               <div className="space-y-1 text-sm">
-                <p className="text-ink-100">{fillUser.name}</p>
-                <p className="text-ink-500">{fillUser.email}</p>
+                <p className="text-ink-100">{selectedApproveUser.name}</p>
+                <p className="text-ink-500">{selectedApproveUser.email}</p>
                 <p className="text-ink-300">
                   Requested:{' '}
                   {requestedLabel ?? (
@@ -208,7 +212,9 @@ function AdminUsersPage() {
                       {(orgsByUniversity.get(uni.id) ?? []).map((org) => (
                         <option key={org.id} value={org.id}>
                           {org.name} ({org.type})
-                          {org.id === fillUser.requestedOrganizationId ? ' — requested' : ''}
+                          {org.id === selectedApproveUser.requestedOrganizationId
+                            ? ' — requested'
+                            : ''}
                         </option>
                       ))}
                     </optgroup>
@@ -216,14 +222,14 @@ function AdminUsersPage() {
                 </select>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button type="submit" isLoading={fillMutation.isPending}>
+                <Button type="submit" isLoading={approveMutation.isPending}>
                   Activate with org
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => {
-                    setFillUserId(null);
+                    setApproveUserId(null);
                     setOrganizationId('');
                   }}
                 >
@@ -249,17 +255,17 @@ function AdminUsersPage() {
                   user={user}
                   requestedLabel={orgLabel(user.requestedOrganizationId, orgById, uniById)}
                   busy={
-                    killMutation.isPending ||
+                    denyMutation.isPending ||
                     deactivateMutation.isPending ||
                     reactivateMutation.isPending ||
-                    fillMutation.isPending
+                    approveMutation.isPending
                   }
-                  onFill={() => {
+                  onApprove={() => {
                     setError(null);
-                    setFillUserId(user.id);
+                    setApproveUserId(user.id);
                     setOrganizationId(user.requestedOrganizationId ?? '');
                   }}
-                  onKill={() => killMutation.mutate(user.id)}
+                  onDeny={() => denyMutation.mutate(user.id)}
                   onDeactivate={() => deactivateMutation.mutate(user.id)}
                   onReactivate={() => reactivateMutation.mutate(user.id)}
                 />
@@ -271,7 +277,7 @@ function AdminUsersPage() {
 
       {(organizationsQuery.data?.length ?? 0) === 0 ? (
         <p className="text-sm text-ink-500">
-          No organizations yet — create one under Organizations before filling pending users.
+          No organizations yet — create one under Organizations before approving pending users.
         </p>
       ) : null}
     </div>
@@ -282,16 +288,16 @@ function UserRow({
   user,
   requestedLabel,
   busy,
-  onFill,
-  onKill,
+  onApprove,
+  onDeny,
   onDeactivate,
   onReactivate,
 }: {
   user: AdminUser;
   requestedLabel: string | null;
   busy: boolean;
-  onFill: () => void;
-  onKill: () => void;
+  onApprove: () => void;
+  onDeny: () => void;
   onDeactivate: () => void;
   onReactivate: () => void;
 }) {
@@ -313,17 +319,17 @@ function UserRow({
       <div className="flex flex-wrap gap-2">
         {user.status === 'PENDING' ? (
           <>
-            <Button type="button" size="sm" disabled={busy} onClick={onFill}>
-              Fill
+            <Button type="button" size="sm" disabled={busy} onClick={onApprove}>
+              Approve
             </Button>
             <Button
               type="button"
               size="sm"
               variant="destructive"
               disabled={busy}
-              onClick={onKill}
+              onClick={onDeny}
             >
-              Kill
+              Deny
             </Button>
           </>
         ) : null}
