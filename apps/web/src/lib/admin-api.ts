@@ -18,6 +18,7 @@ import {
   PatchUserStatusSchema,
   type AdminUser,
   type AdminUserList,
+  AssignMembershipSchema,
   type AssignMembership,
   type CreateOrganization,
   type CreateUniversity,
@@ -184,9 +185,10 @@ export async function listMemberships(): Promise<MembershipList> {
 }
 
 export async function assignMembership(body: AssignMembership): Promise<Membership> {
+  const payload = AssignMembershipSchema.parse(body);
   const res = await apiFetch('/api/memberships', {
     method: 'POST',
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
   });
   if (!res.ok) {
     throw new Error(await readError(res, 'Failed to assign membership'));

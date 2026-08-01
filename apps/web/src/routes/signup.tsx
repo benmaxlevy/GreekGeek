@@ -1,30 +1,57 @@
 import { useState, type FormEvent } from 'react';
 import { Link, createFileRoute } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 import { BrandLockup } from '@/components/brand/BrandLockup';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { signupRequest } from '@/lib/api';
+import {
+  listPublicOrganizations,
+  listPublicUniversities,
+  signupRequest,
+} from '@/lib/api';
 
 export const Route = createFileRoute('/signup')({
   component: SignupPage,
 });
 
+const selectClassName =
+  'min-h-11 w-full rounded-md border border-border-strong bg-surface-input px-3 text-sm text-ink-100 disabled:cursor-not-allowed disabled:opacity-50';
+
 function SignupPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [universityId, setUniversityId] = useState('');
+  const [organizationId, setOrganizationId] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState(false);
 
+  const universitiesQuery = useQuery({
+    queryKey: ['public', 'universities'],
+    queryFn: listPublicUniversities,
+    retry: 3,
+  });
+
+  const organizationsQuery = useQuery({
+    queryKey: ['public', 'organizations', universityId],
+    queryFn: () => listPublicOrganizations(universityId),
+    enabled: Boolean(universityId),
+    retry: 3,
+  });
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
+    if (!organizationId) {
+      setError('Select a university and organization');
+      return;
+    }
     setLoading(true);
     try {
-      await signupRequest({ name, email, password });
+      await signupRequest({ name, email, password, organizationId });
       setPending(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed');
@@ -58,6 +85,13 @@ function SignupPage() {
       </div>
     );
   }
+
+  const catalogError =
+    universitiesQuery.error instanceof Error
+      ? universitiesQuery.error.message
+      : organizationsQuery.error instanceof Error
+        ? organizationsQuery.error.message
+        : null;
 
   return (
     <div className="mx-auto flex min-h-screen max-w-[var(--content-max)] items-center justify-center px-6 py-16">
@@ -105,8 +139,63 @@ function SignupPage() {
                 className="min-h-11"
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="universityId">University</Label>
+              <select
+                id="universityId"
+                required
+                value={universityId}
+                disabled={universitiesQuery.isLoading || !universitiesQuery.data?.length}
+                onChange={(e) => {
+                  setUniversityId(e.target.value);
+                  setOrganizationId('');
+                }}
+                className={selectClassName}
+              >
+                <option value="">
+                  {universitiesQuery.isLoading ? 'Loading universities…' : 'Select university…'}
+                </option>
+                {(universitiesQuery.data ?? []).map((uni) => (
+                  <option key={uni.id} value={uni.id}>
+                    {uni.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="organizationId">Organization</Label>
+              <select
+                id="organizationId"
+                required
+                value={organizationId}
+                disabled={!universityId || organizationsQuery.isLoading}
+                onChange={(e) => setOrganizationId(e.target.value)}
+                className={selectClassName}
+              >
+                <option value="">
+                  {!universityId
+                    ? 'Select university first…'
+                    : organizationsQuery.isLoading
+                      ? 'Loading organizations…'
+                      : 'Select organization…'}
+                </option>
+                {(organizationsQuery.data ?? []).map((org) => (
+                  <option key={org.id} value={org.id}>
+                    {org.name} ({org.type})
+                  </option>
+                ))}
+              </select>
+            </div>
+            {catalogError ? (
+              <p className="text-sm text-[color:var(--error)]">{catalogError}</p>
+            ) : null}
             {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
-            <Button type="submit" className="min-h-11 w-full" isLoading={loading}>
+            <Button
+              type="submit"
+              className="min-h-11 w-full"
+              isLoading={loading}
+              disabled={!organizationId || Boolean(catalogError)}
+            >
               Sign up
             </Button>
           </form>

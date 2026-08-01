@@ -2,13 +2,17 @@ import {
   AccessTokenResponseSchema,
   AuthTokensResponseSchema,
   LogoutResponseSchema,
+  OrganizationListSchema,
   PublicUserSchema,
   SignupResponseSchema,
+  UniversityListSchema,
   type AuthTokensResponse,
   type LoginRequest,
+  type OrganizationList,
   type PublicUser,
   type SignupRequest,
   type SignupResponse,
+  type UniversityList,
 } from '@rally/contracts';
 import { getAccessToken, setAccessToken } from './auth-token';
 
@@ -102,8 +106,30 @@ export async function signupRequest(body: SignupRequest): Promise<SignupResponse
   if (!res.ok) {
     throw new Error(await readError(res, 'Signup failed'));
   }
-  // Signup does not issue session tokens — user stays unauthenticated.
+  // Signup does not issue session tokens — clear any stale in-memory token.
+  setAccessToken(null);
   return SignupResponseSchema.parse(await res.json());
+}
+
+/** Public catalog — no auth required. */
+export async function listPublicUniversities(): Promise<UniversityList> {
+  const res = await apiFetch('/api/universities', {}, false);
+  if (!res.ok) {
+    throw new Error(await readError(res, 'Failed to list universities'));
+  }
+  return UniversityListSchema.parse(await res.json());
+}
+
+/** Public catalog filtered by university — no auth required. */
+export async function listPublicOrganizations(
+  universityId: string,
+): Promise<OrganizationList> {
+  const search = new URLSearchParams({ universityId });
+  const res = await apiFetch(`/api/organizations?${search.toString()}`, {}, false);
+  if (!res.ok) {
+    throw new Error(await readError(res, 'Failed to list organizations'));
+  }
+  return OrganizationListSchema.parse(await res.json());
 }
 
 export async function logoutRequest(): Promise<void> {
