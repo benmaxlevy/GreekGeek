@@ -231,10 +231,10 @@ function mockContext(user?: PublicUser, extras?: {
     }
   });
 
-  it('fill requires organizationId; kill, deactivate, and reactivate work', async () => {
+  it('fill requires organizationId when none requested; kill, deactivate, and reactivate work', async () => {
     await prisma.user.update({
       where: { id: pendingUserId },
-      data: { status: 'PENDING' },
+      data: { status: 'PENDING', requestedOrganizationId: null },
     });
 
     await expect(
@@ -271,7 +271,7 @@ function mockContext(user?: PublicUser, extras?: {
 
     await prisma.user.update({
       where: { id: pendingUserId },
-      data: { status: 'PENDING' },
+      data: { status: 'PENDING', requestedOrganizationId: null },
     });
 
     const filled = await adminUsers.patchStatus(pendingUserId, {
@@ -287,6 +287,51 @@ function mockContext(user?: PublicUser, extras?: {
       where: { membershipId: membership.id },
     });
     expect(grants).toBe(0);
+  });
+
+  it('fill defaults to requestedOrganizationId; body organizationId overrides', async () => {
+    await prisma.membership.deleteMany({ where: { userId: pendingUserId } });
+    await prisma.user.update({
+      where: { id: pendingUserId },
+      data: {
+        status: 'PENDING',
+        requestedOrganizationId: orgAId,
+      },
+    });
+
+    const filledDefault = await adminUsers.patchStatus(pendingUserId, {
+      status: 'ACTIVE',
+    });
+    expect(filledDefault.status).toBe('ACTIVE');
+    expect(
+      (
+        await prisma.membership.findUniqueOrThrow({
+          where: { userId: pendingUserId },
+        })
+      ).organizationId,
+    ).toBe(orgAId);
+
+    await prisma.membership.deleteMany({ where: { userId: pendingUserId } });
+    await prisma.user.update({
+      where: { id: pendingUserId },
+      data: {
+        status: 'PENDING',
+        requestedOrganizationId: orgAId,
+      },
+    });
+
+    const filledOverride = await adminUsers.patchStatus(pendingUserId, {
+      status: 'ACTIVE',
+      organizationId: orgBId,
+    });
+    expect(filledOverride.status).toBe('ACTIVE');
+    expect(
+      (
+        await prisma.membership.findUniqueOrThrow({
+          where: { userId: pendingUserId },
+        })
+      ).organizationId,
+    ).toBe(orgBId);
   });
 
   it('12.1 membership assign atomically replaces existing membership', async () => {
@@ -346,6 +391,7 @@ function mockContext(user?: PublicUser, extras?: {
       name: 'Admin',
       role: 'ADMIN',
       status: 'ACTIVE',
+      requestedOrganizationId: null,
     };
     await expect(
       orgPermissionGuard.canActivate(
@@ -361,6 +407,7 @@ function mockContext(user?: PublicUser, extras?: {
       name: 'Active Member',
       role: 'USER',
       status: 'ACTIVE',
+      requestedOrganizationId: null,
     };
     await expect(
       orgPermissionGuard.canActivate(
@@ -378,6 +425,7 @@ function mockContext(user?: PublicUser, extras?: {
       name: 'Manager Member',
       role: 'USER',
       status: 'ACTIVE',
+      requestedOrganizationId: null,
     };
 
     await expect(
@@ -434,15 +482,30 @@ function mockContext(user?: PublicUser, extras?: {
     });
   });
 
-  it('signup creates PENDING user without session tokens', async () => {
+  it('signup stores organizationId as requestedOrganizationId without session tokens', async () => {
     const email = `signup-${suffix}@example.com`;
     const result = await auth.signup({
       email,
       password: 'SignupPass123!',
       name: 'Signup User',
+      organizationId: orgAId,
     });
     expect(result.user.status).toBe('PENDING');
+    expect(result.user.requestedOrganizationId).toBe(orgAId);
     expect(result).not.toHaveProperty('accessToken');
+    const stored = await prisma.user.findUniqueOrThrow({ where: { email } });
+    expect(stored.requestedOrganizationId).toBe(orgAId);
     await prisma.user.delete({ where: { email } });
+  });
+
+  it('signup rejects unknown organizationId', async () => {
+    await expect(
+      auth.signup({
+        email: `bad-org-${suffix}@example.com`,
+        password: 'SignupPass123!',
+        name: 'Bad Org User',
+        organizationId: 'nonexistent-org-id',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

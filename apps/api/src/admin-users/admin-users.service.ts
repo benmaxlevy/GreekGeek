@@ -33,12 +33,14 @@ export class AdminUsersService {
     }
 
     if (user.status === 'PENDING' && input.status === 'ACTIVE') {
-      if (!input.organizationId) {
+      const organizationId =
+        input.organizationId ?? user.requestedOrganizationId ?? undefined;
+      if (!organizationId) {
         throw new BadRequestException(
-          'organizationId is required to approve a pending user (fill)',
+          'organizationId is required to approve a pending user (fill); none on request and user has no requestedOrganizationId',
         );
       }
-      return this.fillAndActivate(user.id, input.organizationId);
+      return this.fillAndActivate(user.id, organizationId);
     }
 
     if (user.status === 'PENDING' && input.status === 'INACTIVE') {

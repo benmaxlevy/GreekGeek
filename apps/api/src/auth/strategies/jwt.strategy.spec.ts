@@ -38,6 +38,7 @@ describe('JwtStrategy', () => {
       name: 'User',
       role: 'USER' as const,
       status: 'ACTIVE' as const,
+      requestedOrganizationId: null,
     };
     (authService.getPublicUserById as jest.Mock).mockResolvedValue(user);
     await expect(strategy.validate({ sub: 'user_1', email: 'user@example.com' })).resolves.toEqual(

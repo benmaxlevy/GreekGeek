@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -30,6 +31,7 @@ export class AuthService {
     name: string;
     role: PublicUser['role'];
     status: PublicUser['status'];
+    requestedOrganizationId: string | null;
   }): PublicUser {
     return {
       id: user.id,
@@ -37,6 +39,7 @@ export class AuthService {
       name: user.name,
       role: user.role,
       status: user.status,
+      requestedOrganizationId: user.requestedOrganizationId,
     };
   }
 
@@ -59,12 +62,19 @@ export class AuthService {
     return this.toPublicUser(user);
   }
 
-  /** Creates PENDING user; does not issue session tokens. */
+  /** Creates PENDING user with requested org; does not issue session tokens. */
   async signup(input: SignupRequest): Promise<SignupResponse> {
     const email = input.email.toLowerCase();
     const existing = await this.prisma.user.findUnique({ where: { email } });
     if (existing) {
       throw new ConflictException('Email already registered');
+    }
+
+    const org = await this.prisma.organization.findUnique({
+      where: { id: input.organizationId },
+    });
+    if (!org) {
+      throw new BadRequestException('Organization not found');
     }
 
     const passwordHash = await this.passwordService.hash(input.password);
@@ -75,6 +85,7 @@ export class AuthService {
         passwordHash,
         role: 'USER',
         status: 'PENDING',
+        requestedOrganizationId: org.id,
       },
     });
 
