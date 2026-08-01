@@ -12,6 +12,17 @@ enum Role {
   ADMIN
 }
 
+enum UserStatus {
+  ACTIVE
+  PENDING
+  INACTIVE
+}
+
+enum OrganizationType {
+  FRATERNITY
+  SORORITY
+}
+
 model User {
   id              String         @id @default(cuid())
   email           String         @unique
@@ -19,9 +30,11 @@ model User {
   passwordHash    String
   emailVerifiedAt DateTime?
   role            Role           @default(USER)
+  status          UserStatus     @default(PENDING)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   refreshTokens   RefreshToken[]
+  membership      Membership?
 }
 
 model RefreshToken {
@@ -34,4 +47,60 @@ model RefreshToken {
   createdAt DateTime  @default(now())
 
   @@index([userId])
+}
+
+model University {
+  id            String         @id @default(cuid())
+  name          String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  organizations Organization[]
+}
+
+model Organization {
+  id           String           @id @default(cuid())
+  name         String
+  type         OrganizationType
+  universityId String
+  university   University       @relation(fields: [universityId], references: [id])
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  memberships  Membership[]
+
+  @@unique([universityId, name])
+  @@index([universityId])
+}
+
+model Membership {
+  id             String             @id @default(cuid())
+  userId         String             @unique
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  permissions    MemberPermission[]
+
+  @@index([organizationId])
+}
+
+model Permission {
+  id          String             @id @default(cuid())
+  key         String             @unique
+  description String
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  members     MemberPermission[]
+}
+
+model MemberPermission {
+  id           String     @id @default(cuid())
+  membershipId String
+  membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([membershipId, permissionId])
+  @@index([permissionId])
 }
