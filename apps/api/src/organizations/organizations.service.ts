@@ -99,6 +99,14 @@ export class OrganizationsService {
         'Cannot delete organization with existing memberships',
       );
     }
+    const eventCount = await this.prisma.event.count({
+      where: { organizationId: id },
+    });
+    if (eventCount > 0) {
+      throw new ConflictException(
+        'Cannot delete organization with existing events',
+      );
+    }
     await this.prisma.organization.delete({ where: { id } });
   }
 }

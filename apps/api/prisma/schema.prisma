@@ -70,10 +70,25 @@ model Organization {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
   memberships      Membership[]
+  events           Event[]
   requestedByUsers User[]           @relation("UserRequestedOrganization")
 
   @@unique([universityId, name])
   @@index([universityId])
+}
+
+model Event {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  type           String
+  maxHeadcount   Int
+  location       String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
 }
 
 model Membership {
