@@ -44,11 +44,7 @@ export class AdminUsersService {
     }
 
     if (user.status === 'PENDING' && input.status === 'INACTIVE') {
-      const updated = await this.prisma.user.update({
-        where: { id: user.id },
-        data: { status: 'INACTIVE' },
-      });
-      return this.authService.toPublicUser(updated);
+      return this.denyPending(user.id);
     }
 
     if (user.status === 'ACTIVE' && input.status === 'INACTIVE') {
@@ -78,7 +74,8 @@ export class AdminUsersService {
     );
   }
 
-  private async approveAndActivate(
+  /** Shared approve: create/replace membership + set ACTIVE atomically. */
+  async approveAndActivate(
     userId: string,
     organizationId: string,
   ): Promise<AdminUser> {
@@ -111,6 +108,15 @@ export class AdminUsersService {
       });
     });
 
+    return this.authService.toPublicUser(updated);
+  }
+
+  /** Shared deny: PENDING → INACTIVE without membership. */
+  async denyPending(userId: string): Promise<AdminUser> {
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: { status: 'INACTIVE' },
+    });
     return this.authService.toPublicUser(updated);
   }
 }
