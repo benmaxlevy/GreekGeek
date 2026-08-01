@@ -42,4 +42,4 @@
 ## 6. Verification
 
 - [x] 6.1 Run API integration + e2e suites green
-- [ ] 6.2 Manual smoke: officer `/users` approve/deny; admin `/admin/users` unchanged
+- [x] 6.2 Manual smoke: officer `/users` approve/deny; admin `/admin/users` unchanged — Playwright demos cover officer approve/deny/forbidden at `/users` (videos: `demo-videos/officer-*.webm`)
