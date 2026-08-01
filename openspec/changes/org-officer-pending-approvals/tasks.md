@@ -1,26 +1,26 @@
 ## 1. Shared contracts
 
-- [ ] 1.1 Add Zod schemas in `packages/contracts` for pending-applicant list response, org-scoped list query (if any), and patch status body (`ACTIVE` | `INACTIVE`; optional `organizationId` documented ADMIN-only)
-- [ ] 1.2 Export inferred types; wire into API feature `types/` re-exports per workspace conventions
+- [x] 1.1 Add Zod schemas in `packages/contracts` for pending-applicant list response, org-scoped list query (if any), and patch status body (`ACTIVE` | `INACTIVE`; optional `organizationId` documented ADMIN-only)
+- [x] 1.2 Export inferred types; wire into API feature `types/` re-exports per workspace conventions
 
 ## 2. API — org-scoped pending approvals
 
-- [ ] 2.1 Add Nest module for org-scoped pending applicants under `organizations/:organizationId/pending-users`
-- [ ] 2.2 `GET` list: return `PENDING` users where `requestedOrganizationId = organizationId`; parse params/query with Zod
-- [ ] 2.3 `PATCH :userId` approve/deny: validate caller org scope; officer approve uses `requestedOrganizationId` only (reject override); deny sets `INACTIVE`
-- [ ] 2.4 Apply `@RequireOrgPermission('members.manage_permissions')` with ADMIN bypass on both endpoints
-- [ ] 2.5 Reject approve/deny when target user's `requestedOrganizationId` does not match path `organizationId`
-- [ ] 2.6 Extract or reuse shared approve/deny transaction logic with `AdminUsersService` (membership + status atomically)
+- [x] 2.1 Add Nest module for org-scoped pending applicants under `organizations/:organizationId/pending-users`
+- [x] 2.2 `GET` list: return `PENDING` users where `requestedOrganizationId = organizationId`; parse params/query with Zod
+- [x] 2.3 `PATCH :userId` approve/deny: validate caller org scope; officer approve uses `requestedOrganizationId` only (reject override); deny sets `INACTIVE`
+- [x] 2.4 Apply `@RequireOrgPermission('members.manage_permissions')` with ADMIN bypass on both endpoints
+- [x] 2.5 Reject approve/deny when target user's `requestedOrganizationId` does not match path `organizationId`
+- [x] 2.6 Extract or reuse shared approve/deny transaction logic with `AdminUsersService` (membership + status atomically)
 
 ## 3. API integration tests
 
-- [ ] 3.1 Officer with `members.manage_permissions` lists only matching-org `PENDING` users
-- [ ] 3.2 Officer approve creates membership to requested org and sets `ACTIVE`
-- [ ] 3.3 Officer deny sets `INACTIVE` without membership
-- [ ] 3.4 403 without `members.manage_permissions`; 403 listing another org
-- [ ] 3.5 Officer cannot approve applicant whose `requestedOrganizationId` differs from path org
-- [ ] 3.6 Officer body with `organizationId` override rejected; ADMIN override still works where supported
-- [ ] 3.7 Non-ADMIN still blocked from admin user-status API (regression)
+- [x] 3.1 Officer with `members.manage_permissions` lists only matching-org `PENDING` users
+- [x] 3.2 Officer approve creates membership to requested org and sets `ACTIVE`
+- [x] 3.3 Officer deny sets `INACTIVE` without membership
+- [x] 3.4 403 without `members.manage_permissions`; 403 listing another org
+- [x] 3.5 Officer cannot approve applicant whose `requestedOrganizationId` differs from path org
+- [x] 3.6 Officer body with `organizationId` override rejected; ADMIN override still works where supported
+- [x] 3.7 Non-ADMIN still blocked from admin user-status API (regression)
 
 ## 4. Web — `/users` route group
 
