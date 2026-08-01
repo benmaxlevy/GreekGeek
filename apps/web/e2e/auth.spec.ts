@@ -30,6 +30,12 @@ async function loginAs(page: Page, email: string, password: string) {
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page).not.toHaveURL(/\/login\/?$/);
+}
+
+async function logout(page: Page) {
+  await page.getByRole('button', { name: 'Log out' }).click();
+  await expect(page).toHaveURL(/\/login\/?$/);
 }
 
 async function adminLogin(page: Page) {
@@ -440,5 +446,158 @@ test.describe('admin approval and org flows', () => {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
     expect(orgDelete.status()).toBe(409);
+  });
+});
+
+async function adminApprovePendingByEmail(page: Page, email: string) {
+  await page.goto('/admin/users');
+  await page.getByRole('button', { name: 'PENDING' }).click();
+  const row = page.locator('li').filter({ hasText: email });
+  await expect(row).toBeVisible();
+  await row.getByRole('button', { name: 'Approve' }).click();
+  await page.getByRole('button', { name: 'Activate with org' }).click();
+  await expect(page.getByText(email)).toHaveCount(0);
+}
+
+async function grantManagePermissions(
+  request: APIRequestContext,
+  userEmail: string,
+) {
+  const adminToken = await loginApi(request, ADMIN_EMAIL, ADMIN_PASSWORD);
+  const users = await request.get('/api/admin/users?status=ACTIVE', {
+    headers: { Authorization: `Bearer ${adminToken}` },
+  });
+  const userList = (await users.json()) as Array<{ id: string; email: string }>;
+  const user = userList.find((u) => u.email === userEmail);
+  expect(user).toBeTruthy();
+
+  const memberships = await request.get('/api/memberships', {
+    headers: { Authorization: `Bearer ${adminToken}` },
+  });
+  const membershipList = (await memberships.json()) as Array<{
+    id: string;
+    userId: string;
+  }>;
+  const membership = membershipList.find((m) => m.userId === user!.id);
+  expect(membership).toBeTruthy();
+
+  const grant = await request.post(`/api/memberships/${membership!.id}/permissions`, {
+    headers: { Authorization: `Bearer ${adminToken}` },
+    data: { permissionKey: 'members.manage_permissions' },
+  });
+  expect(grant.ok()).toBeTruthy();
+}
+
+test.describe('officer pending approvals at /users', () => {
+  test('officer approves applicant via /users; applicant reaches app', async ({
+    page,
+    request,
+  }) => {
+    const officerEmail = uniqueEmail('e2e-off-appr');
+    const applicantEmail = uniqueEmail('e2e-off-appl');
+    const password = 'Password123!';
+    const officerName = 'Officer Approver';
+    const applicantName = 'Officer Applicant';
+
+    await signupPending(page, officerEmail, password, officerName);
+    await signupPending(page, applicantEmail, password, applicantName);
+
+    await adminLogin(page);
+    await adminApprovePendingByEmail(page, officerEmail);
+    await grantManagePermissions(request, officerEmail);
+    await logout(page);
+
+    await loginAs(page, officerEmail, password);
+    await expect(page).toHaveURL(/\/app\/?$/);
+    await expect(page.getByRole('link', { name: 'Pending approvals' })).toBeVisible();
+    await page.getByRole('link', { name: 'Pending approvals' }).click();
+    await expect(page).toHaveURL(/\/users\/?$/);
+    await expect(page.getByRole('heading', { name: 'Pending approvals' })).toBeVisible();
+    await expect(page.getByText(applicantEmail)).toBeVisible();
+
+    const row = page.locator('li').filter({ hasText: applicantEmail });
+    await row.getByRole('button', { name: 'Approve' }).click();
+    await expect(page.getByText(applicantEmail)).toHaveCount(0);
+
+    await logout(page);
+    await loginAs(page, applicantEmail, password);
+    await expect(page).toHaveURL(/\/app\/?$/);
+    await expect(page.getByRole('heading', { name: `Hello, ${applicantName}` })).toBeVisible();
+  });
+
+  test('officer denies applicant via /users; applicant blocked', async ({ page, request }) => {
+    const officerEmail = uniqueEmail('e2e-off-deny');
+    const applicantEmail = uniqueEmail('e2e-off-denyd');
+    const password = 'Password123!';
+
+    await signupPending(page, officerEmail, password, 'Officer Denier');
+    await signupPending(page, applicantEmail, password, 'Denied Applicant');
+
+    await adminLogin(page);
+    await adminApprovePendingByEmail(page, officerEmail);
+    await grantManagePermissions(request, officerEmail);
+    await logout(page);
+
+    await loginAs(page, officerEmail, password);
+    await expect(page).toHaveURL(/\/app\/?$/);
+    await page.goto('/users');
+    await expect(page.getByRole('heading', { name: 'Pending approvals' })).toBeVisible();
+    await expect(page.getByText(applicantEmail)).toBeVisible();
+    const row = page.locator('li').filter({ hasText: applicantEmail });
+    await row.getByRole('button', { name: 'Deny' }).click();
+    await expect(page.getByText(applicantEmail)).toHaveCount(0);
+
+    await logout(page);
+    await loginAs(page, applicantEmail, password);
+    await expect(page).toHaveURL(/\/blocked\/?$/);
+  });
+
+  test('member without permission redirected from /users; no nav link', async ({
+    page,
+    request,
+  }) => {
+    const memberEmail = uniqueEmail('e2e-off-noperm');
+    const password = 'Password123!';
+
+    await signupPending(page, memberEmail, password, 'No Perm Member');
+    await adminLogin(page);
+    await adminApprovePendingByEmail(page, memberEmail);
+    await logout(page);
+
+    await loginAs(page, memberEmail, password);
+    await expect(page).toHaveURL(/\/app\/?$/);
+    await expect(page.getByRole('link', { name: 'Pending approvals' })).toHaveCount(0);
+
+    await page.goto('/users');
+    await expect(page).toHaveURL(/\/app\/?$/);
+
+    const token = await loginApi(request, memberEmail, password);
+    const me = await request.get('/api/auth/me', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const body = (await me.json()) as { permissions: string[] };
+    expect(body.permissions.includes('members.manage_permissions')).toBeFalsy();
+  });
+
+  test('admin /admin/users still works; non-admin cannot access admin users', async ({
+    page,
+    request,
+  }) => {
+    const officerEmail = uniqueEmail('e2e-off-adminreg');
+    const password = 'Password123!';
+
+    await signupPending(page, officerEmail, password, 'Officer Admin Reg');
+    await adminLogin(page);
+    await adminApprovePendingByEmail(page, officerEmail);
+    await grantManagePermissions(request, officerEmail);
+
+    await page.goto('/admin/users');
+    await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
+    await logout(page);
+
+    await loginAs(page, officerEmail, password);
+    await expect(page).toHaveURL(/\/app\/?$/);
+    await page.goto('/admin/users');
+    await expect(page).toHaveURL(/\/app\/?$/);
   });
 });
