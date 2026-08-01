@@ -78,3 +78,12 @@ export function canManageEvents(user: PublicUser): boolean {
 export function canAccessEvents(user: PublicUser): boolean {
   return canCreateEvents(user) || canManageEvents(user);
 }
+
+/** ACTIVE member with tickets.manage in their org. */
+export function canManageTickets(user: PublicUser): boolean {
+  return (
+    user.status === 'ACTIVE' &&
+    user.membership != null &&
+    user.permissions.includes('tickets.manage')
+  );
+}

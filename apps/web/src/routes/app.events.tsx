@@ -8,10 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { meQueryOptions } from '@/lib/auth';
+import { Link } from '@tanstack/react-router';
 import {
   canAccessOrgEvents,
   canCreateOrgEvents,
   canManageOrgEvents,
+  canManageTickets,
   destinationForUser,
 } from '@/lib/auth-routing';
 import {
@@ -44,6 +46,7 @@ function AppEventsPage() {
   const organizationId = user.membership!.organizationId;
   const canCreate = canCreateOrgEvents(user);
   const canManage = canManageOrgEvents(user);
+  const canTickets = canManageTickets(user);
 
   const [name, setName] = useState('');
   const [type, setType] = useState('');
@@ -282,32 +285,46 @@ function AppEventsPage() {
                       {event.location ? ` · ${event.location}` : ''}
                     </p>
                   </div>
-                  {canManage ? (
+                  {canManage || canTickets ? (
                     <div className="flex flex-wrap gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditing(event);
-                          setEditName(event.name);
-                          setEditType(event.type);
-                          setEditMaxHeadcount(String(event.maxHeadcount));
-                          setEditLocation(event.location ?? '');
-                          setError(null);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="destructive"
-                        disabled={deleteMutation.isPending}
-                        onClick={() => deleteMutation.mutate(event.id)}
-                      >
-                        Delete
-                      </Button>
+                      {canTickets ? (
+                        <Button type="button" size="sm" variant="outline" asChild>
+                          <Link
+                            to="/app/events/$eventId/tickets"
+                            params={{ eventId: event.id }}
+                          >
+                            Tickets
+                          </Link>
+                        </Button>
+                      ) : null}
+                      {canManage ? (
+                        <>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setEditing(event);
+                              setEditName(event.name);
+                              setEditType(event.type);
+                              setEditMaxHeadcount(String(event.maxHeadcount));
+                              setEditLocation(event.location ?? '');
+                              setError(null);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            disabled={deleteMutation.isPending}
+                            onClick={() => deleteMutation.mutate(event.id)}
+                          >
+                            Delete
+                          </Button>
+                        </>
+                      ) : null}
                     </div>
                   ) : null}
                 </li>

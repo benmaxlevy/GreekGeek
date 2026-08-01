@@ -37,12 +37,12 @@
 
 ## 6. Frontend — member officer UI (vertical slice 3)
 
-- [ ] 6.1 `/app/events/$eventId/tickets` — config form, sale status, capacity; gate on host `tickets.manage`
-- [ ] 6.2 Allocations UI: select orgs, all orgs, public toggle; issue/list/void/mark-paid
-- [ ] 6.3 Invited-org scoped view: only caller's allocation controls
-- [ ] 6.4 Guest list tab: paid tickets with org / "Public" label
-- [ ] 6.5 Redirect / 403 when missing `tickets.manage` on officer routes
-- [ ] 6.6 Commit: `add member event ticketing ui`
+- [x] 6.1 `/app/events/$eventId/tickets` — config form, sale status, capacity; gate on host `tickets.manage`
+- [x] 6.2 Allocations UI: select orgs, all orgs, public toggle; issue/list/void/mark-paid
+- [x] 6.3 Invited-org scoped view: only caller's allocation controls
+- [x] 6.4 Guest list tab: paid tickets with org / "Public" label
+- [x] 6.5 Redirect / 403 when missing `tickets.manage` on officer routes
+- [x] 6.6 Commit: `add member event ticketing ui`
 
 ## 7. Frontend — guest + admin UI (vertical slice 4)
 

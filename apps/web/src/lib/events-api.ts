@@ -6,10 +6,14 @@ import {
   type CreateEvent,
   type Event,
   type EventList,
-  type ListEventsQuery,
   type UpdateEvent,
 } from '@rally/contracts';
 import { apiFetch, readError } from './api';
+
+type ListEventsParams = {
+  organizationId?: string;
+  ticketingEnabled?: boolean;
+};
 
 function toQuery(params: Record<string, string | undefined>): string {
   const search = new URLSearchParams();
@@ -22,14 +26,26 @@ function toQuery(params: Record<string, string | undefined>): string {
   return qs ? `?${qs}` : '';
 }
 
-export async function listEvents(query: ListEventsQuery = {}): Promise<EventList> {
+export async function listEvents(query: ListEventsParams = {}): Promise<EventList> {
   const res = await apiFetch(
-    `/api/events${toQuery({ organizationId: query.organizationId })}`,
+    `/api/events${toQuery({
+      organizationId: query.organizationId,
+      ticketingEnabled:
+        query.ticketingEnabled === true ? 'true' : undefined,
+    })}`,
   );
   if (!res.ok) {
     throw new Error(await readError(res, 'Failed to list events'));
   }
   return EventListSchema.parse(await res.json());
+}
+
+export async function getEvent(id: string): Promise<Event> {
+  const res = await apiFetch(`/api/events/${id}`);
+  if (!res.ok) {
+    throw new Error(await readError(res, 'Failed to load event'));
+  }
+  return EventSchema.parse(await res.json());
 }
 
 export async function createEvent(body: CreateEvent): Promise<Event> {
