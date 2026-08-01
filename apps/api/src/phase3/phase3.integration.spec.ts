@@ -231,7 +231,7 @@ function mockContext(user?: PublicUser, extras?: {
     }
   });
 
-  it('fill requires organizationId when none requested; kill, deactivate, and reactivate work', async () => {
+  it('approve requires organizationId when none requested; deny, deactivate, and reactivate work', async () => {
     await prisma.user.update({
       where: { id: pendingUserId },
       data: { status: 'PENDING', requestedOrganizationId: null },
@@ -241,10 +241,10 @@ function mockContext(user?: PublicUser, extras?: {
       adminUsers.patchStatus(pendingUserId, { status: 'ACTIVE' }),
     ).rejects.toBeInstanceOf(BadRequestException);
 
-    const killed = await adminUsers.patchStatus(pendingUserId, {
+    const denied = await adminUsers.patchStatus(pendingUserId, {
       status: 'INACTIVE',
     });
-    expect(killed.status).toBe('INACTIVE');
+    expect(denied.status).toBe('INACTIVE');
 
     await expect(
       adminUsers.patchStatus(pendingUserId, {
@@ -274,11 +274,11 @@ function mockContext(user?: PublicUser, extras?: {
       data: { status: 'PENDING', requestedOrganizationId: null },
     });
 
-    const filled = await adminUsers.patchStatus(pendingUserId, {
+    const approved = await adminUsers.patchStatus(pendingUserId, {
       status: 'ACTIVE',
       organizationId: orgBId,
     });
-    expect(filled.status).toBe('ACTIVE');
+    expect(approved.status).toBe('ACTIVE');
     const membership = await prisma.membership.findUniqueOrThrow({
       where: { userId: pendingUserId },
     });
@@ -289,7 +289,7 @@ function mockContext(user?: PublicUser, extras?: {
     expect(grants).toBe(0);
   });
 
-  it('fill defaults to requestedOrganizationId; body organizationId overrides', async () => {
+  it('approve defaults to requestedOrganizationId; body organizationId overrides', async () => {
     await prisma.membership.deleteMany({ where: { userId: pendingUserId } });
     await prisma.user.update({
       where: { id: pendingUserId },
@@ -299,10 +299,10 @@ function mockContext(user?: PublicUser, extras?: {
       },
     });
 
-    const filledDefault = await adminUsers.patchStatus(pendingUserId, {
+    const approvedDefault = await adminUsers.patchStatus(pendingUserId, {
       status: 'ACTIVE',
     });
-    expect(filledDefault.status).toBe('ACTIVE');
+    expect(approvedDefault.status).toBe('ACTIVE');
     expect(
       (
         await prisma.membership.findUniqueOrThrow({
@@ -320,11 +320,11 @@ function mockContext(user?: PublicUser, extras?: {
       },
     });
 
-    const filledOverride = await adminUsers.patchStatus(pendingUserId, {
+    const approvedOverride = await adminUsers.patchStatus(pendingUserId, {
       status: 'ACTIVE',
       organizationId: orgBId,
     });
-    expect(filledOverride.status).toBe('ACTIVE');
+    expect(approvedOverride.status).toBe('ACTIVE');
     expect(
       (
         await prisma.membership.findUniqueOrThrow({

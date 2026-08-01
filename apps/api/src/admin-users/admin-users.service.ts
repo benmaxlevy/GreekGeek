@@ -37,10 +37,10 @@ export class AdminUsersService {
         input.organizationId ?? user.requestedOrganizationId ?? undefined;
       if (!organizationId) {
         throw new BadRequestException(
-          'organizationId is required to approve a pending user (fill); none on request and user has no requestedOrganizationId',
+          'organizationId is required to approve a pending user; none on request and user has no requestedOrganizationId',
         );
       }
-      return this.fillAndActivate(user.id, organizationId);
+      return this.approveAndActivate(user.id, organizationId);
     }
 
     if (user.status === 'PENDING' && input.status === 'INACTIVE') {
@@ -60,7 +60,7 @@ export class AdminUsersService {
     }
 
     if (user.status === 'INACTIVE' && input.status === 'ACTIVE') {
-      // Reactivate is status-only — not fill; do not assign membership here.
+      // Reactivate is status-only — not approve; do not assign membership here.
       if (input.organizationId) {
         throw new BadRequestException(
           'organizationId is not allowed when reactivating; assign membership separately',
@@ -78,7 +78,7 @@ export class AdminUsersService {
     );
   }
 
-  private async fillAndActivate(
+  private async approveAndActivate(
     userId: string,
     organizationId: string,
   ): Promise<AdminUser> {
