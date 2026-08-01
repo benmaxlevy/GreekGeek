@@ -116,7 +116,7 @@ test.describe('admin approval and org flows', () => {
     await row.getByRole('button', { name: 'Fill' }).click();
     // Prefills requested org — confirm without override.
     await expect(page.locator('#organizationId')).toHaveValue(/.+/);
-    await expect(page.getByText(/Requested:.*Alpha Demo Fraternity/)).toBeVisible();
+    await expect(page.locator('form').getByText(/Requested:.*Alpha Demo Fraternity/)).toBeVisible();
     await page.getByRole('button', { name: 'Activate with org' }).click();
     await expect(page.getByText(email)).toHaveCount(0);
 
