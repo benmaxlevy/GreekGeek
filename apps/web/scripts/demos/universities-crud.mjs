@@ -8,7 +8,7 @@ import {
   login,
   pause,
   ts,
-} from './phase3-helpers.mjs';
+} from './demo-helpers.mjs';
 
 const stamp = ts();
 const uniName = `Demo Uni CRUD ${stamp}`;

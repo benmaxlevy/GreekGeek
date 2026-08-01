@@ -10,7 +10,7 @@ import {
   pause,
   signupCascade,
   ts,
-} from './phase3-helpers.mjs';
+} from './demo-helpers.mjs';
 
 const stamp = ts();
 const email = `demo+deny-${stamp}@rally.local`;

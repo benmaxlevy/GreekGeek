@@ -130,3 +130,83 @@ export async function findUserRow(page, email) {
   await row.first().waitFor({ timeout: 15000 });
   return row.first();
 }
+
+export async function adminApproveUserByEmail(email) {
+  const token = await adminToken();
+  const users = await apiJson('/api/admin/users?status=PENDING', { token });
+  const user = users.find((u) => u.email === email);
+  if (!user) throw new Error(`Pending user not found: ${email}`);
+  return apiJson(`/api/admin/users/${user.id}/status`, {
+    method: 'PATCH',
+    token,
+    body: { status: 'ACTIVE' },
+  });
+}
+
+export async function grantManagePermissionsByEmail(userEmail) {
+  return grantPermissionsByEmail(userEmail, ['members.manage_permissions']);
+}
+
+export async function grantPermissionsByEmail(userEmail, permissionKeys) {
+  const token = await adminToken();
+  const users = await apiJson('/api/admin/users?status=ACTIVE', { token });
+  const user = users.find((u) => u.email === userEmail);
+  if (!user) throw new Error(`Active user not found: ${userEmail}`);
+
+  const memberships = await apiJson('/api/memberships', { token });
+  const membership = memberships.find((m) => m.userId === user.id);
+  if (!membership) throw new Error(`Membership not found for ${userEmail}`);
+
+  for (const permissionKey of permissionKeys) {
+    await apiJson(`/api/memberships/${membership.id}/permissions`, {
+      method: 'POST',
+      token,
+      body: { permissionKey },
+    });
+  }
+}
+
+export async function grantEventPermissionsByEmail(userEmail) {
+  return grantPermissionsByEmail(userEmail, ['events.create', 'events.manage']);
+}
+
+export async function setupActiveMember({ name, email, password = DEMO_PASSWORD, grantEventPerms = false }) {
+  const organizationId = await seedOrgId();
+  await apiSignup({ name, email, password, organizationId });
+  await adminApproveUserByEmail(email);
+  if (grantEventPerms) {
+    await grantEventPermissionsByEmail(email);
+  }
+  return { organizationId };
+}
+
+/** ACTIVE officer with members.manage_permissions + PENDING applicant on seed org. */
+export async function setupOfficerAndApplicant({
+  officerEmail,
+  officerName,
+  applicantEmail,
+  applicantName,
+  password = DEMO_PASSWORD,
+  grantOfficerPermission = true,
+}) {
+  const organizationId = await seedOrgId();
+  await apiSignup({ name: officerName, email: officerEmail, password, organizationId });
+  if (applicantEmail) {
+    await apiSignup({
+      name: applicantName,
+      email: applicantEmail,
+      password,
+      organizationId,
+    });
+  }
+  await adminApproveUserByEmail(officerEmail);
+  if (grantOfficerPermission) {
+    await grantManagePermissionsByEmail(officerEmail);
+  }
+  return { organizationId };
+}
+
+export async function logout(page) {
+  await page.getByRole('button', { name: 'Log out' }).click();
+  await page.waitForURL(/\/login/, { timeout: 15000 });
+}

@@ -8,7 +8,7 @@ import {
   pause,
   signupCascade,
   ts,
-} from './phase3-helpers.mjs';
+} from './demo-helpers.mjs';
 
 const stamp = ts();
 const email = `demo+pending-${stamp}@rally.local`;
