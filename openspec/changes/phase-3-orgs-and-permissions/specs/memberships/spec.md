@@ -20,16 +20,16 @@ The system MUST persist memberships with a string id, userId (unique), organizat
 
 ### Requirement: Platform admin assigns and removes memberships
 
-Only platform ADMIN MAY assign a user to an organization (create membership) and remove membership via the API. Request and response shapes MUST be validated with shared Zod schemas. New memberships MUST start with zero permission grants. Membership assignment during pending-user fill (approve flow) MUST create the membership atomically with activation, defaulting to the user's `requestedOrganizationId` unless the admin supplies an override organization.
+Only platform ADMIN MAY assign a user to an organization (create membership) and remove membership via the API. Request and response shapes MUST be validated with shared Zod schemas. New memberships MUST start with zero permission grants. Membership assignment during pending-user approve flow MUST create the membership atomically with activation, defaulting to the user's `requestedOrganizationId` unless the admin supplies an override organization.
 
 #### Scenario: Admin assigns user to organization
 
 - **WHEN** a platform ADMIN assigns a user without an existing membership to an organization
 - **THEN** a membership row is created linking the user to that organization with no permissions granted
 
-#### Scenario: Admin assigns membership during pending fill and activate
+#### Scenario: Admin assigns membership during pending approve and activate
 
-- **WHEN** a platform ADMIN approves a `PENDING` user by filling organization membership (requested org or admin override)
+- **WHEN** a platform ADMIN approves a `PENDING` user by assigning organization membership (requested org or admin override)
 - **THEN** a membership row is created with zero permissions and the user's status becomes `ACTIVE` in the same flow
 
 #### Scenario: Admin removes membership

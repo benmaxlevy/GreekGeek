@@ -23,7 +23,7 @@
 - [x] 4.1 Update signup to create `PENDING` users with `requestedOrganizationId`; no session tokens; reject signup without org for `USER` role
 - [x] 4.2 Allow login and refresh for `PENDING` and `INACTIVE` users (issue tokens); keep credential rejection for invalid email/password only
 - [x] 4.3 Add global status guard on protected routes and admin/org APIs — block non-`ACTIVE`; allow `/api/auth/me`, logout, and other auth maintenance
-- [x] 4.4 Implement ADMIN user-management API: list users (filter by status), patch status (`PENDING` → `ACTIVE`, `PENDING` → `INACTIVE`, `INACTIVE` → `ACTIVE`); approve/fill may create membership atomically
+- [x] 4.4 Implement ADMIN user-management API: list users (filter by status), patch status (`PENDING` → `ACTIVE`, `PENDING` → `INACTIVE`, `INACTIVE` → `ACTIVE`); approve may create membership atomically
 - [x] 4.5 Place request DTOs under feature `types/` folders; parse at HTTP boundaries
 
 ## 5. Universities API
@@ -41,7 +41,7 @@
 ## 7. Memberships API
 
 - [x] 7.1 Nest `memberships` module: ADMIN assign/remove; enforce unique `userId`
-- [x] 7.2 Reject membership for ADMIN users; new membership starts with zero grants; support assign during pending-user fill flow
+- [x] 7.2 Reject membership for ADMIN users; new membership starts with zero grants; support assign during pending-user approve flow
 
 ## 8. Permissions API and guard
 
@@ -60,7 +60,7 @@
 ## 10. Admin dashboard UI
 
 - [x] 10.1 Add `/admin/*` route group with ADMIN + ACTIVE `beforeLoad` guard
-- [x] 10.2 Users page (pending queue): list/filter by status; show requested university/org; **fill** (confirm or override org + activate) or **kill** (`INACTIVE`); reactivate `INACTIVE` → `ACTIVE`; no permission grants on this page
+- [x] 10.2 Users page (pending queue): list/filter by status; show requested university/org; **approve** (confirm or override org + activate) or **deny** (`INACTIVE`); reactivate `INACTIVE` → `ACTIVE`; no permission grants on this page
 - [x] 10.3 Universities page: list, create, edit, delete (surface 409 when dependents exist)
 - [x] 10.4 Organizations page: list by university, create/edit/delete with type selector (surface 409 when memberships exist)
 - [x] 10.5 Memberships page: assign user to org, remove membership (post-active management)
@@ -72,8 +72,8 @@
 - [x] 11.1 Register with university/org selection → pending message; no authenticated home access
 - [x] 11.1b Public university/org list endpoints reachable without auth for signup form
 - [x] 11.2 Pending user login → awaiting-approval screen; cannot reach protected app page
-- [x] 11.3 Admin fill (requested org or override) + activate → user reaches protected page
-- [x] 11.4 Admin kill pending user → `INACTIVE` login → blocked screen
+- [x] 11.3 Admin approve (requested org or override) + activate → user reaches protected page
+- [x] 11.4 Admin deny pending user → `INACTIVE` login → blocked screen
 - [x] 11.5 Admin reactivate `INACTIVE` → `ACTIVE`
 - [x] 11.6 Admin CRUD smoke: university + organization create
 - [x] 11.7 Membership assign; atomic reassign keeps one membership per user
@@ -91,6 +91,6 @@
 
 ## 13. Phase 3 verification
 
-- [x] 13.1 Manual smoke: signup with org selection; admin review pending (requested org visible); fill+activate or kill; create uni/org; grant permission post-active — covered by Playwright demo videos (register/fill/kill/reactivate/CRUD/permissions flows; recorded 2026-08-01)
+- [x] 13.1 Manual smoke: signup with org selection; admin review pending (requested org visible); approve+activate or deny; create uni/org; grant permission post-active — covered by Playwright demo videos (register/approve/deny/reactivate/CRUD/permissions flows; recorded 2026-08-01)
 - [x] 13.2 Run e2e + API test suites green against Docker Postgres
 - [x] 13.3 Update Phase 2 auth e2e that assumed immediate post-signup session

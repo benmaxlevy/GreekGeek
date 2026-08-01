@@ -36,7 +36,7 @@ Workspace conventions: Zod at HTTP boundaries; named types/schemas in feature `t
 - `Permission`: `id`, `key` (unique), `description`, timestamps — seeded catalog
 - `MemberPermission`: `membershipId`, `permissionId`; composite unique — direct grants, default zero on join
 - `User.status`: enum `ACTIVE` | `PENDING` | `INACTIVE` (default `PENDING` for signup; seed admin `ACTIVE`)
-- `User.requestedOrganizationId`: nullable FK to `Organization`; **required on signup** for `USER` role; stores signup org intent until admin fill-or-kill (university implied via org FK)
+- `User.requestedOrganizationId`: nullable FK to `Organization`; **required on signup** for `USER` role; stores signup org intent until admin approve-or-deny (university implied via org FK)
 
 **Why:** Matches locked product decisions; simple relational model without role indirection.
 
@@ -80,14 +80,14 @@ Workspace conventions: Zod at HTTP boundaries; named types/schemas in feature `t
 
 **Alternatives considered:** Reject login/refresh with no tokens — rejected (locked decision). Allow PENDING limited read-only app — rejected (out of scope).
 
-### 3b. Admin approval workflow (fill or kill)
+### 3b. Admin approval workflow (approve or deny)
 
 **Choice (locked):**
 
 - `PENDING → ACTIVE` is a distinct **approve** action
-- Org/university handling at approval is **fill or kill** against the user's `requestedOrganizationId` (and implied university):
-  - **Kill:** if the requested org/university is incorrect or not acceptable → set status `INACTIVE` (no hard-delete); no membership created
-  - **Fill:** if correct → assign `Membership` to the requested `Organization` (or an admin-selected override org) as part of (or immediately before) activation
+- Org/university handling at approval is **approve or deny** against the user's `requestedOrganizationId` (and implied university):
+  - **Deny:** if the requested org/university is incorrect or not acceptable → set status `INACTIVE` (no hard-delete); no membership created
+  - **Approve:** if correct → assign `Membership` to the requested `Organization` (or an admin-selected override org) as part of (or immediately before) activation
 - **Permissions are not part of approve** — grant/revoke only after user is `ACTIVE`
 - ADMIN may later reactivate `INACTIVE → ACTIVE` (same status patch endpoint as approval; membership may need (re)assignment)
 
@@ -124,7 +124,7 @@ Guard applies to org-scoped endpoints introduced this phase and future phases; P
 
 | Page | Actions |
 |------|---------|
-| Users (pending queue) | List/filter by status; show requested university/org; for `PENDING`: **fill** (confirm or override org + activate) or **kill** (set `INACTIVE`); reactivate `INACTIVE` → `ACTIVE`; permission grants **not** on this page |
+| Users (pending queue) | List/filter by status; show requested university/org; for `PENDING`: **approve** (confirm or override org + activate) or **deny** (set `INACTIVE`); reactivate `INACTIVE` → `ACTIVE`; permission grants **not** on this page |
 | Universities | List, create, edit, delete |
 | Organizations | List (by university), create, edit, delete; type selector |
 | Memberships | Assign user to org, remove membership (post-active management) |
@@ -160,7 +160,7 @@ No production data dump.
 
 ### 10. Signup org selection
 
-**Choice (locked):** Public signup MUST let the user select **university**, then **organization** (cascading). The selected organization is persisted as `User.requestedOrganizationId` on the `PENDING` user. Admin **fill-or-kill** at approval validates that intent: wrong → `INACTIVE`; correct → assign membership to requested org (admin may override org in UI before activating). Permissions remain post-`ACTIVE` only.
+**Choice (locked):** Public signup MUST let the user select **university**, then **organization** (cascading). The selected organization is persisted as `User.requestedOrganizationId` on the `PENDING` user. Admin **approve-or-deny** at approval validates that intent: wrong → `INACTIVE`; correct → assign membership to requested org (admin may override org in UI before activating). Permissions remain post-`ACTIVE` only.
 
 **Why:** Captures user intent at signup while keeping org placement an admin verification step.
 
@@ -168,7 +168,7 @@ No production data dump.
 
 **Choice:**
 
-- **E2e (Playwright):** register with university/org selection → pending message; pending user login → awaiting-approval screen; admin fill+activate (requested org) → reach protected page; admin kill → inactive blocked screen; admin reactivate; ADMIN CRUD smoke; permission grant post-active; unauthorized 403; public list endpoints reachable without auth
+- **E2e (Playwright):** register with university/org selection → pending message; pending user login → awaiting-approval screen; admin approve+activate (requested org) → reach protected page; admin deny → inactive blocked screen; admin reactivate; ADMIN CRUD smoke; permission grant post-active; unauthorized 403; public list endpoints reachable without auth
 - **API integration:** membership unique constraint, ADMIN bypass, grant gate without `members.manage_permissions`, non-ACTIVE blocked on protected routes (login/refresh succeed), delete-with-dependents 409
 
 E2e-first; unit tests only for guard edge cases if awkward in browser.
@@ -194,7 +194,7 @@ E2e-first; unit tests only for guard edge cases if awkward in browser.
 All prior open questions resolved:
 
 1. **Auth for non-ACTIVE:** Login and refresh succeed; tokens issued; only status surfaces + auth maintenance reachable — not normal app, admin, or org APIs (Decision 3).
-2. **Fill or kill approval:** Kill → `INACTIVE`; fill → assign membership + `ACTIVE`; permissions only post-`ACTIVE` (Decision 3b).
-3. **Signup org selection:** User picks university then org at signup; `requestedOrganizationId` persisted; admin fill-or-kill validates intent; admin may override org on fill (Decision 10).
+2. **Approve or deny approval:** Deny → `INACTIVE`; approve → assign membership + `ACTIVE`; permissions only post-`ACTIVE` (Decision 3b).
+3. **Signup org selection:** User picks university then org at signup; `requestedOrganizationId` persisted; admin approve-or-deny validates intent; admin may override org on approve (Decision 10).
 4. **Reactivation:** ADMIN may set `INACTIVE` → `ACTIVE` (Decision 3b).
 5. **Dependent delete:** University/org delete with dependents → 409 (Decision 8).

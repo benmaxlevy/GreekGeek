@@ -18,21 +18,21 @@ Admin dashboard routes MUST be reachable only by authenticated users with role `
 - **WHEN** a non-ADMIN or non-ACTIVE user navigates to admin routes
 - **THEN** the app redirects to login or shows a forbidden state without exposing admin controls
 
-### Requirement: Admin manages user approval with fill-or-kill workflow
+### Requirement: Admin manages user approval with approve-or-deny workflow
 
-The admin dashboard MUST provide a user management view listing users with status and filtering by status. For `PENDING` users, the UI MUST display requested university and organization (from `requestedOrganizationId`). ADMIN MUST be able to **fill** (confirm or override organization membership and activate) or **kill** (set `INACTIVE`). Permission grants MUST NOT be part of the approval flow. ADMIN MUST be able to reactivate `INACTIVE` users to `ACTIVE`.
+The admin dashboard MUST provide a user management view listing users with status and filtering by status. For `PENDING` users, the UI MUST display requested university and organization (from `requestedOrganizationId`). ADMIN MUST be able to **approve** (confirm or override organization membership and activate) or **deny** (set `INACTIVE`). Permission grants MUST NOT be part of the approval flow. ADMIN MUST be able to reactivate `INACTIVE` users to `ACTIVE`.
 
 #### Scenario: Admin views pending users with requested org
 
 - **WHEN** a platform ADMIN opens the user management page
 - **THEN** users are listed with status, and PENDING users show their requested university and organization
 
-#### Scenario: Admin fills and activates pending user from UI
+#### Scenario: Admin approves and activates pending user from UI
 
 - **WHEN** a platform ADMIN confirms or overrides the organization for a PENDING user and activates them through the dashboard
 - **THEN** the user's status becomes ACTIVE, membership is created for the confirmed or override organization with zero permissions, and the list reflects the change
 
-#### Scenario: Admin kills pending user from UI
+#### Scenario: Admin denies pending user from UI
 
 - **WHEN** a platform ADMIN rejects a PENDING user by setting status INACTIVE through the dashboard
 - **THEN** the user's status becomes INACTIVE and the list reflects the change

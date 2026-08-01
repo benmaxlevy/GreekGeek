@@ -144,9 +144,9 @@ Users with status `PENDING` or `INACTIVE` MUST be able to authenticate (login an
 
 ### Requirement: Platform admin manages user status
 
-Platform ADMIN MUST be able to list users filtered by status and update user status between `PENDING`, `ACTIVE`, and `INACTIVE` via admin API and admin UI. User list/detail for admin MUST include `requestedOrganizationId` and implied university for `PENDING` users. Approving a `PENDING` user (`PENDING` → `ACTIVE`) MUST be a distinct **fill** action that validates the requested org/university: if acceptable, assign membership to the requested organization (admin MAY override organization in the approve request); if not acceptable, **kill** by setting status `INACTIVE`. Permission grants MUST NOT occur during approval. Rejecting a pending user MUST set status `INACTIVE` (kill). ADMIN MUST be able to reactivate `INACTIVE` → `ACTIVE`. Request and response shapes MUST be validated with shared Zod schemas.
+Platform ADMIN MUST be able to list users filtered by status and update user status between `PENDING`, `ACTIVE`, and `INACTIVE` via admin API and admin UI. User list/detail for admin MUST include `requestedOrganizationId` and implied university for `PENDING` users. Approving a `PENDING` user (`PENDING` → `ACTIVE`) MUST be a distinct **approve** action that validates the requested org/university: if acceptable, assign membership to the requested organization (admin MAY override organization in the approve request); if not acceptable, **deny** by setting status `INACTIVE`. Permission grants MUST NOT occur during approval. Rejecting a pending user MUST set status `INACTIVE` (deny). ADMIN MUST be able to reactivate `INACTIVE` → `ACTIVE`. Request and response shapes MUST be validated with shared Zod schemas.
 
-#### Scenario: Admin approves pending user with requested org fill
+#### Scenario: Admin approves pending user with requested org
 
 - **WHEN** a platform ADMIN approves a `PENDING` user whose requested organization is acceptable and sets status `ACTIVE`
 - **THEN** the user's status is `ACTIVE`, a membership row links the user to the requested organization (or admin override) with zero permissions, and the user can reach normal app routes on subsequent login
@@ -156,7 +156,7 @@ Platform ADMIN MUST be able to list users filtered by status and update user sta
 - **WHEN** a platform ADMIN approves a `PENDING` user by overriding the organization in the approve request and setting status `ACTIVE`
 - **THEN** the user's status is `ACTIVE` and membership is created for the override organization with zero permissions
 
-#### Scenario: Admin kills pending user with invalid requested org
+#### Scenario: Admin denies pending user with invalid requested org
 
 - **WHEN** a platform ADMIN rejects a `PENDING` user by setting status `INACTIVE`
 - **THEN** the user's status is persisted as `INACTIVE` and the user is routed to the blocked screen when authenticated
