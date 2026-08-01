@@ -73,3 +73,17 @@ export {
   type AdminUserList,
   type PatchUserStatus,
 } from './admin-users';
+export {
+  PendingApplicantSchema,
+  PendingApplicantListSchema,
+  ListPendingApplicantsQuerySchema,
+  OrgPendingUsersParamsSchema,
+  OrgPendingUserParamsSchema,
+  PatchPendingApplicantStatusSchema,
+  type PendingApplicant,
+  type PendingApplicantList,
+  type ListPendingApplicantsQuery,
+  type OrgPendingUsersParams,
+  type OrgPendingUserParams,
+  type PatchPendingApplicantStatus,
+} from './pending-users';
