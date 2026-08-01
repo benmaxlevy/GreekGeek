@@ -23,6 +23,23 @@ enum OrganizationType {
   SORORITY
 }
 
+enum TicketSaleStatus {
+  draft
+  on_sale
+  closed
+}
+
+enum AllocationStatus {
+  active
+  closed
+}
+
+enum TicketStatus {
+  unpaid
+  paid
+  void
+}
+
 model User {
   id                      String         @id @default(cuid())
   email                   String         @unique
@@ -37,6 +54,7 @@ model User {
   updatedAt               DateTime       @updatedAt
   refreshTokens           RefreshToken[]
   membership              Membership?
+  heldTickets             Ticket[]
 
   @@index([requestedOrganizationId])
 }
@@ -69,26 +87,68 @@ model Organization {
   university       University       @relation(fields: [universityId], references: [id])
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
-  memberships      Membership[]
-  events           Event[]
-  requestedByUsers User[]           @relation("UserRequestedOrganization")
+  memberships         Membership[]
+  events              Event[]
+  ticketAllocations   TicketAllocation[]
+  requestedByUsers    User[]             @relation("UserRequestedOrganization")
 
   @@unique([universityId, name])
   @@index([universityId])
 }
 
 model Event {
-  id             String       @id @default(cuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  name           String
-  type           String
-  maxHeadcount   Int
-  location       String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id                  String            @id @default(cuid())
+  organizationId      String
+  organization        Organization      @relation(fields: [organizationId], references: [id])
+  name                String
+  type                String
+  maxHeadcount        Int
+  location            String?
+  ticketingEnabled    Boolean           @default(false)
+  ticketCapacity      Int?
+  ticketSaleStatus    TicketSaleStatus?
+  ticketSalesOpenAt   DateTime?
+  ticketSalesCloseAt  DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  allocations         TicketAllocation[]
 
   @@index([organizationId])
+}
+
+model TicketAllocation {
+  id             String           @id @default(cuid())
+  eventId        String
+  event          Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization   Organization?    @relation(fields: [organizationId], references: [id])
+  quantity       Int
+  priceCents     Int?
+  status         AllocationStatus @default(active)
+  tickets        Ticket[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@unique([eventId, organizationId])
+  @@index([eventId])
+  @@index([organizationId])
+}
+
+model Ticket {
+  id              String           @id @default(cuid())
+  allocationId    String
+  allocation      TicketAllocation @relation(fields: [allocationId], references: [id], onDelete: Restrict)
+  status          TicketStatus     @default(unpaid)
+  credentialToken String           @unique
+  holderUserId    String?
+  holder          User?            @relation(fields: [holderUserId], references: [id])
+  paidAt          DateTime?
+  voidedAt        DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([allocationId])
+  @@index([holderUserId])
 }
 
 model Membership {

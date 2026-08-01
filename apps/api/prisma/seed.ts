@@ -20,6 +20,10 @@ const PERMISSIONS = [
     key: 'events.manage',
     description: 'Manage existing events for the organization',
   },
+  {
+    key: 'tickets.manage',
+    description: 'Manage event ticketing for the organization',
+  },
 ] as const;
 
 async function main() {
