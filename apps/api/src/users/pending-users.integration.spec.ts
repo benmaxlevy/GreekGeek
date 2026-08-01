@@ -5,7 +5,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
 import { Reflector } from '@nestjs/core';
-import { AdminUsersService } from '../admin-users/admin-users.service';
+import { UsersLifecycleService } from './users-lifecycle.service';
 import { AuthService } from '../auth/auth.service';
 import { PasswordService } from '../auth/password.service';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -55,11 +55,11 @@ function mockContext(
     const organizations = new OrganizationsService(prisma as never);
     const memberships = new MembershipsService(prisma as never);
     const permissions = new PermissionsService(prisma as never);
-    const adminUsers = new AdminUsersService(prisma as never, auth);
+    const usersLifecycle = new UsersLifecycleService(prisma as never, auth);
     const pendingUsers = new PendingUsersService(
       prisma as never,
       auth,
-      adminUsers,
+      usersLifecycle,
     );
 
     const orgPermissionMeta = {

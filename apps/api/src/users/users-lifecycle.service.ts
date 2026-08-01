@@ -12,7 +12,7 @@ import type {
 } from './types/admin-users.dto';
 
 @Injectable()
-export class AdminUsersService {
+export class UsersLifecycleService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,

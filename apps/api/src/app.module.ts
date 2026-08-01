@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AdminUsersModule } from './admin-users/admin-users.module';
 import { AuthModule } from './auth/auth.module';
 import { AppConfigModule } from './config/config.module';
 import { EventsModule } from './events/events.module';
 import { HealthModule } from './health/health.module';
 import { MembershipsModule } from './memberships/memberships.module';
 import { OrganizationsModule } from './organizations/organizations.module';
-import { PendingUsersModule } from './pending-users/pending-users.module';
 import { PermissionsModule } from './permissions/permissions.module';
+import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UniversitiesModule } from './universities/universities.module';
 
@@ -17,12 +16,11 @@ import { UniversitiesModule } from './universities/universities.module';
     PrismaModule,
     HealthModule,
     AuthModule,
-    AdminUsersModule,
+    UsersModule,
     UniversitiesModule,
     OrganizationsModule,
     MembershipsModule,
     PermissionsModule,
-    PendingUsersModule,
     EventsModule,
   ],
 })

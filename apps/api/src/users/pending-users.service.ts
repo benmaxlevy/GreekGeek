@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import type { PublicUser } from '../auth/types/auth.dto';
-import { AdminUsersService } from '../admin-users/admin-users.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { UsersLifecycleService } from './users-lifecycle.service';
 import type {
   ListPendingApplicantsQuery,
   PatchPendingApplicantStatus,
@@ -19,7 +19,7 @@ export class PendingUsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
-    private readonly adminUsersService: AdminUsersService,
+    private readonly usersLifecycleService: UsersLifecycleService,
   ) {}
 
   async list(
@@ -65,7 +65,7 @@ export class PendingUsersService {
           'organizationId is not allowed when denying a pending user',
         );
       }
-      return this.adminUsersService.denyPending(user.id);
+      return this.usersLifecycleService.denyPending(user.id);
     }
 
     // Approve PENDING → ACTIVE
@@ -86,7 +86,7 @@ export class PendingUsersService {
       );
     }
 
-    return this.adminUsersService.approveAndActivate(
+    return this.usersLifecycleService.approveAndActivate(
       user.id,
       membershipOrganizationId,
     );

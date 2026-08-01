@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Patch, Query, Body } from '@nestjs/common';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
-import { AdminUsersService } from './admin-users.service';
+import { UsersLifecycleService } from './users-lifecycle.service';
 import {
   AdminUserListSchema,
   AdminUserSchema,
@@ -16,13 +16,13 @@ import {
 @Controller('admin/users')
 @Roles('ADMIN')
 export class AdminUsersController {
-  constructor(private readonly adminUsersService: AdminUsersService) {}
+  constructor(private readonly usersLifecycleService: UsersLifecycleService) {}
 
   @Get()
   async list(
     @Query(new ZodValidationPipe(ListUsersQuerySchema)) query: ListUsersQuery,
   ): Promise<AdminUserList> {
-    const users = await this.adminUsersService.list(query);
+    const users = await this.usersLifecycleService.list(query);
     return AdminUserListSchema.parse(users);
   }
 
@@ -31,7 +31,7 @@ export class AdminUsersController {
     @Param('id') id: string,
     @Body(new ZodValidationPipe(PatchUserStatusSchema)) body: PatchUserStatus,
   ): Promise<AdminUser> {
-    const user = await this.adminUsersService.patchStatus(id, body);
+    const user = await this.usersLifecycleService.patchStatus(id, body);
     return AdminUserSchema.parse(user);
   }
 }

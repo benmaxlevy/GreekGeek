@@ -5,7 +5,7 @@ import { AuthService } from '../auth/auth.service';
 import { PasswordService } from '../auth/password.service';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { UniversitiesService } from '../universities/universities.service';
-import { AdminUsersService } from './admin-users.service';
+import { UsersLifecycleService } from './users-lifecycle.service';
 
 const hasDatabase = Boolean(process.env.DATABASE_URL);
 
@@ -18,7 +18,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
   const auth = new AuthService(prisma as never, passwords, jwt);
   const universities = new UniversitiesService(prisma as never);
   const organizations = new OrganizationsService(prisma as never);
-  const adminUsers = new AdminUsersService(prisma as never, auth);
+  const usersLifecycle = new UsersLifecycleService(prisma as never, auth);
 
   const suffix = `admin-users-${Date.now()}`;
   let universityId = '';
@@ -87,22 +87,22 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     });
 
     await expect(
-      adminUsers.patchStatus(pendingUserId, { status: 'ACTIVE' }),
+      usersLifecycle.patchStatus(pendingUserId, { status: 'ACTIVE' }),
     ).rejects.toBeInstanceOf(BadRequestException);
 
-    const denied = await adminUsers.patchStatus(pendingUserId, {
+    const denied = await usersLifecycle.patchStatus(pendingUserId, {
       status: 'INACTIVE',
     });
     expect(denied.status).toBe('INACTIVE');
 
     await expect(
-      adminUsers.patchStatus(pendingUserId, {
+      usersLifecycle.patchStatus(pendingUserId, {
         status: 'ACTIVE',
         organizationId: orgAId,
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
 
-    const reactivated = await adminUsers.patchStatus(pendingUserId, {
+    const reactivated = await usersLifecycle.patchStatus(pendingUserId, {
       status: 'ACTIVE',
     });
     expect(reactivated.status).toBe('ACTIVE');
@@ -111,19 +111,19 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     });
     expect(membershipAfterReactivate).toBeNull();
 
-    const deactivated = await adminUsers.patchStatus(pendingUserId, {
+    const deactivated = await usersLifecycle.patchStatus(pendingUserId, {
       status: 'INACTIVE',
     });
     expect(deactivated.status).toBe('INACTIVE');
 
-    await adminUsers.patchStatus(pendingUserId, { status: 'ACTIVE' });
+    await usersLifecycle.patchStatus(pendingUserId, { status: 'ACTIVE' });
 
     await prisma.user.update({
       where: { id: pendingUserId },
       data: { status: 'PENDING', requestedOrganizationId: null },
     });
 
-    const approved = await adminUsers.patchStatus(pendingUserId, {
+    const approved = await usersLifecycle.patchStatus(pendingUserId, {
       status: 'ACTIVE',
       organizationId: orgBId,
     });
@@ -148,7 +148,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       },
     });
 
-    const approvedDefault = await adminUsers.patchStatus(pendingUserId, {
+    const approvedDefault = await usersLifecycle.patchStatus(pendingUserId, {
       status: 'ACTIVE',
     });
     expect(approvedDefault.status).toBe('ACTIVE');
@@ -169,7 +169,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       },
     });
 
-    const approvedOverride = await adminUsers.patchStatus(pendingUserId, {
+    const approvedOverride = await usersLifecycle.patchStatus(pendingUserId, {
       status: 'ACTIVE',
       organizationId: orgBId,
     });
