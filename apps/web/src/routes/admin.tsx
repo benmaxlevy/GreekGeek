@@ -10,6 +10,7 @@ const ADMIN_NAV = [
   { label: 'Users', to: '/admin/users' },
   { label: 'Universities', to: '/admin/universities' },
   { label: 'Organizations', to: '/admin/organizations' },
+  { label: 'Events', to: '/admin/events' },
   { label: 'Memberships', to: '/admin/memberships' },
   { label: 'Permissions', to: '/admin/permissions' },
   { label: 'App home', to: '/app' },

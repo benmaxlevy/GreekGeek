@@ -18,12 +18,14 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminEventsRouteImport } from './routes/admin.events'
 import { Route as AdminMembershipsRouteImport } from './routes/admin.memberships'
 import { Route as AdminOrganizationsRouteImport } from './routes/admin.organizations'
 import { Route as AdminPermissionsRouteImport } from './routes/admin.permissions'
 import { Route as AdminUniversitiesRouteImport } from './routes/admin.universities'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppEventsRouteImport } from './routes/app.events'
 import { Route as UsersIndexRouteImport } from './routes/users.index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -71,6 +73,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminEventsRoute = AdminEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMembershipsRoute = AdminMembershipsRouteImport.update({
   id: '/memberships',
   path: '/memberships',
@@ -101,6 +108,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEventsRoute = AppEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => AppRoute,
+} as any)
 const UsersIndexRoute = UsersIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -116,11 +128,13 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/users': typeof UsersRouteWithChildren
+  '/admin/events': typeof AdminEventsRoute
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/organizations': typeof AdminOrganizationsRoute
   '/admin/permissions': typeof AdminPermissionsRoute
   '/admin/universities': typeof AdminUniversitiesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/app/events': typeof AppEventsRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/users/': typeof UsersIndexRoute
@@ -131,11 +145,13 @@ export interface FileRoutesByTo {
   '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/admin/events': typeof AdminEventsRoute
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/organizations': typeof AdminOrganizationsRoute
   '/admin/permissions': typeof AdminPermissionsRoute
   '/admin/universities': typeof AdminUniversitiesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/app/events': typeof AppEventsRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/users': typeof UsersIndexRoute
@@ -150,11 +166,13 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/users': typeof UsersRouteWithChildren
+  '/admin/events': typeof AdminEventsRoute
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/organizations': typeof AdminOrganizationsRoute
   '/admin/permissions': typeof AdminPermissionsRoute
   '/admin/universities': typeof AdminUniversitiesRoute
   '/admin/users': typeof AdminUsersRoute
+  '/app/events': typeof AppEventsRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/users/': typeof UsersIndexRoute
@@ -170,11 +188,13 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/users'
+    | '/admin/events'
     | '/admin/memberships'
     | '/admin/organizations'
     | '/admin/permissions'
     | '/admin/universities'
     | '/admin/users'
+    | '/app/events'
     | '/admin/'
     | '/app/'
     | '/users/'
@@ -185,11 +205,13 @@ export interface FileRouteTypes {
     | '/blocked'
     | '/login'
     | '/signup'
+    | '/admin/events'
     | '/admin/memberships'
     | '/admin/organizations'
     | '/admin/permissions'
     | '/admin/universities'
     | '/admin/users'
+    | '/app/events'
     | '/admin'
     | '/app'
     | '/users'
@@ -203,11 +225,13 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/users'
+    | '/admin/events'
     | '/admin/memberships'
     | '/admin/organizations'
     | '/admin/permissions'
     | '/admin/universities'
     | '/admin/users'
+    | '/app/events'
     | '/admin/'
     | '/app/'
     | '/users/'
@@ -289,6 +313,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/events': {
+      id: '/admin/events'
+      path: '/events'
+      fullPath: '/admin/events'
+      preLoaderRoute: typeof AdminEventsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/memberships': {
       id: '/admin/memberships'
       path: '/memberships'
@@ -331,6 +362,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/events': {
+      id: '/app/events'
+      path: '/events'
+      fullPath: '/app/events'
+      preLoaderRoute: typeof AppEventsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/users/': {
       id: '/users/'
       path: '/'
@@ -342,6 +380,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminEventsRoute: typeof AdminEventsRoute
   AdminMembershipsRoute: typeof AdminMembershipsRoute
   AdminOrganizationsRoute: typeof AdminOrganizationsRoute
   AdminPermissionsRoute: typeof AdminPermissionsRoute
@@ -351,6 +390,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminEventsRoute: AdminEventsRoute,
   AdminMembershipsRoute: AdminMembershipsRoute,
   AdminOrganizationsRoute: AdminOrganizationsRoute,
   AdminPermissionsRoute: AdminPermissionsRoute,
@@ -362,10 +402,12 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRouteChildren {
+  AppEventsRoute: typeof AppEventsRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppEventsRoute: AppEventsRoute,
   AppIndexRoute: AppIndexRoute,
 }
 

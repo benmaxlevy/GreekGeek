@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { logoutRequest } from '@/lib/api';
 import { meQueryKey, meQueryOptions } from '@/lib/auth';
 import {
+  canAccessOrgEvents,
   canManageOrgPendingApprovals,
   destinationForUser,
   isAdminUser,
@@ -38,6 +39,7 @@ function AuthenticatedLayout() {
 
   const navItems = [
     { label: 'Home', to: '/app' },
+    ...(canAccessOrgEvents(user) ? [{ label: 'Events', to: '/app/events' }] : []),
     ...(canManageOrgPendingApprovals(user)
       ? [{ label: 'Pending approvals', to: '/users' }]
       : []),
