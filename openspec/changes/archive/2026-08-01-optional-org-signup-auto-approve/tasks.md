@@ -23,4 +23,4 @@
 
 - [x] 5.1 E2E: org-less signup → login → reaches protected page as ACTIVE user without membership
 - [x] 5.2 E2E: org signup → login → awaiting-approval screen (unchanged pending path)
-- [ ] 5.3 Record demo video covering both signup paths and admin view of org-less ACTIVE user
+- [x] 5.3 Record demo video covering both signup paths and admin view of org-less ACTIVE user
