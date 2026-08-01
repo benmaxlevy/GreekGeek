@@ -21,7 +21,10 @@ export class EventsService {
   async list(query: ListEventsQuery, caller: PublicUser): Promise<Event[]> {
     const organizationId = await this.resolveListOrganizationId(query, caller);
     const rows = await this.prisma.event.findMany({
-      where: organizationId ? { organizationId } : undefined,
+      where: {
+        ...(organizationId ? { organizationId } : {}),
+        ...(query.ticketingEnabled === true ? { ticketingEnabled: true } : {}),
+      },
       orderBy: { createdAt: 'desc' },
     });
     return rows.map(toEventDto);

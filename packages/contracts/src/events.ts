@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TicketSaleStatusSchema } from './ticketing';
 
 export const EventSchema = z.object({
   id: z.string(),
@@ -7,6 +8,11 @@ export const EventSchema = z.object({
   type: z.string(),
   maxHeadcount: z.number().int(),
   location: z.string().nullable(),
+  ticketingEnabled: z.boolean(),
+  ticketCapacity: z.number().int().positive().nullable(),
+  ticketSaleStatus: TicketSaleStatusSchema.nullable(),
+  ticketSalesOpenAt: z.string().datetime().nullable(),
+  ticketSalesCloseAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -40,6 +46,13 @@ export type UpdateEvent = z.infer<typeof UpdateEventSchema>;
 
 export const ListEventsQuerySchema = z.object({
   organizationId: z.string().min(1).optional(),
+  /** When true, only events with ticketingEnabled. */
+  ticketingEnabled: z
+    .union([z.boolean(), z.enum(['true', 'false'])])
+    .optional()
+    .transform((v) =>
+      v === undefined ? undefined : v === true || v === 'true',
+    ),
 });
 export type ListEventsQuery = z.infer<typeof ListEventsQuerySchema>;
 
