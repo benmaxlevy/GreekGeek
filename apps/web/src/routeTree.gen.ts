@@ -17,6 +17,7 @@ import { Route as BlockedRouteImport } from './routes/blocked'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminOrganizationsRouteImport } from './routes/admin.organizations'
 import { Route as AdminUniversitiesRouteImport } from './routes/admin.universities'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -61,6 +62,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminOrganizationsRoute = AdminOrganizationsRouteImport.update({
+  id: '/organizations',
+  path: '/organizations',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminUniversitiesRoute = AdminUniversitiesRouteImport.update({
   id: '/universities',
   path: '/universities',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/admin/organizations': typeof AdminOrganizationsRoute
   '/admin/universities': typeof AdminUniversitiesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/admin/organizations': typeof AdminOrganizationsRoute
   '/admin/universities': typeof AdminUniversitiesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin': typeof AdminIndexRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/admin/organizations': typeof AdminOrganizationsRoute
   '/admin/universities': typeof AdminUniversitiesRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/': typeof AdminIndexRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/blocked'
     | '/login'
     | '/signup'
+    | '/admin/organizations'
     | '/admin/universities'
     | '/admin/users'
     | '/admin/'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/blocked'
     | '/login'
     | '/signup'
+    | '/admin/organizations'
     | '/admin/universities'
     | '/admin/users'
     | '/admin'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/blocked'
     | '/login'
     | '/signup'
+    | '/admin/organizations'
     | '/admin/universities'
     | '/admin/users'
     | '/admin/'
@@ -223,6 +235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/organizations': {
+      id: '/admin/organizations'
+      path: '/organizations'
+      fullPath: '/admin/organizations'
+      preLoaderRoute: typeof AdminOrganizationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/universities': {
       id: '/admin/universities'
       path: '/universities'
@@ -248,12 +267,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminOrganizationsRoute: typeof AdminOrganizationsRoute
   AdminUniversitiesRoute: typeof AdminUniversitiesRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminOrganizationsRoute: AdminOrganizationsRoute,
   AdminUniversitiesRoute: AdminUniversitiesRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
