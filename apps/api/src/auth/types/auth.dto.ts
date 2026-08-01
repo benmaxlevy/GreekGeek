@@ -5,12 +5,14 @@ import {
   LogoutResponseSchema,
   PublicUserSchema,
   SignupRequestSchema,
+  SignupResponseSchema,
   type AccessTokenResponse,
   type AuthTokensResponse,
   type LoginRequest,
   type LogoutResponse,
   type PublicUser,
   type SignupRequest,
+  type SignupResponse,
 } from '@rally/contracts';
 
 export {
@@ -20,6 +22,7 @@ export {
   LogoutResponseSchema,
   PublicUserSchema,
   SignupRequestSchema,
+  SignupResponseSchema,
 };
 
 export type {
@@ -29,6 +32,7 @@ export type {
   LogoutResponse,
   PublicUser,
   SignupRequest,
+  SignupResponse,
 };
 
 export const REFRESH_COOKIE_NAME = 'refresh_token';

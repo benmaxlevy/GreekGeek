@@ -13,6 +13,7 @@ import {
   type AuthTokensResponse,
   type PublicUser,
   type SignupRequest,
+  type SignupResponse,
 } from './types/auth.dto';
 
 @Injectable()
@@ -28,12 +29,14 @@ export class AuthService {
     email: string;
     name: string;
     role: PublicUser['role'];
+    status: PublicUser['status'];
   }): PublicUser {
     return {
       id: user.id,
       email: user.email,
       name: user.name,
       role: user.role,
+      status: user.status,
     };
   }
 
@@ -56,10 +59,8 @@ export class AuthService {
     return this.toPublicUser(user);
   }
 
-  async signup(input: SignupRequest): Promise<{
-    tokens: AuthTokensResponse;
-    refreshToken: string;
-  }> {
+  /** Creates PENDING user; does not issue session tokens. */
+  async signup(input: SignupRequest): Promise<SignupResponse> {
     const email = input.email.toLowerCase();
     const existing = await this.prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -73,10 +74,11 @@ export class AuthService {
         name: input.name,
         passwordHash,
         role: 'USER',
+        status: 'PENDING',
       },
     });
 
-    return this.issueSession(this.toPublicUser(user));
+    return { user: this.toPublicUser(user) };
   }
 
   async login(user: PublicUser): Promise<{

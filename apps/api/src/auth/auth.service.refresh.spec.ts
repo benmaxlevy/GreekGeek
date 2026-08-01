@@ -25,6 +25,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
         name: 'Refresh Tester',
         passwordHash,
         role: 'USER',
+        status: 'ACTIVE',
       },
     });
     userId = user.id;
@@ -42,6 +43,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       email,
       name: 'Refresh Tester',
       role: 'USER',
+      status: 'ACTIVE',
     });
 
     const rotated = await auth.refresh(first.refreshToken);
@@ -60,6 +62,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       email,
       name: 'Refresh Tester',
       role: 'USER',
+      status: 'ACTIVE',
     });
     const tokenHash = auth.hashRefreshToken(session.refreshToken);
     await prisma.refreshToken.update({

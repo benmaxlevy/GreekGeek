@@ -10,6 +10,7 @@ import {
 import type { Request, Response } from 'express';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { AuthService } from './auth.service';
+import { AllowNonActive } from './decorators/allow-non-active.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -24,12 +25,14 @@ import {
   REFRESH_COOKIE_PATH,
   REFRESH_TOKEN_TTL_MS,
   SignupRequestSchema,
+  SignupResponseSchema,
   type AccessTokenResponse,
   type AuthTokensResponse,
   type LoginRequest,
   type LogoutResponse,
   type PublicUser,
   type SignupRequest,
+  type SignupResponse,
 } from './types/auth.dto';
 
 @Controller('auth')
@@ -40,11 +43,9 @@ export class AuthController {
   @Post('signup')
   async signup(
     @Body(new ZodValidationPipe(SignupRequestSchema)) body: SignupRequest,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<AuthTokensResponse> {
-    const session = await this.authService.signup(body);
-    this.setRefreshCookie(res, session.refreshToken);
-    return AuthTokensResponseSchema.parse(session.tokens);
+  ): Promise<SignupResponse> {
+    const result = await this.authService.signup(body);
+    return SignupResponseSchema.parse(result);
   }
 
   @Public()
@@ -90,6 +91,7 @@ export class AuthController {
     return LogoutResponseSchema.parse({ ok: true });
   }
 
+  @AllowNonActive()
   @UseGuards(JwtAuthGuard)
   @Get('me')
   me(@CurrentUser() user: PublicUser): PublicUser {
