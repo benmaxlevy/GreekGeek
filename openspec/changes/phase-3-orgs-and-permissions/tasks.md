@@ -47,20 +47,20 @@
 
 ## 9. Register, login, and status surfaces
 
-- [ ] 9.1 Update `/signup` register flow: email/password/name only; success → pending-approval screen (no authenticated redirect)
-- [ ] 9.2 Add awaiting-approval route for authenticated `PENDING` users; blocked route for authenticated `INACTIVE` users
-- [ ] 9.3 Route guards: non-`ACTIVE` authenticated users redirect to status surface, not app home or admin
-- [ ] 9.4 `ACTIVE` user login and session restore unchanged
+- [x] 9.1 Update `/signup` register flow: email/password/name only; success → pending-approval screen (no authenticated redirect)
+- [x] 9.2 Add awaiting-approval route for authenticated `PENDING` users; blocked route for authenticated `INACTIVE` users
+- [x] 9.3 Route guards: non-`ACTIVE` authenticated users redirect to status surface, not app home or admin
+- [x] 9.4 `ACTIVE` user login and session restore unchanged
 
 ## 10. Admin dashboard UI
 
-- [ ] 10.1 Add `/admin/*` route group with ADMIN + ACTIVE `beforeLoad` guard
-- [ ] 10.2 Users page (pending queue): list/filter by status; **fill** (assign org + activate) or **kill** (`INACTIVE`); reactivate `INACTIVE` → `ACTIVE`; no permission grants on this page
-- [ ] 10.3 Universities page: list, create, edit, delete (surface 409 when dependents exist)
-- [ ] 10.4 Organizations page: list by university, create/edit/delete with type selector (surface 409 when memberships exist)
-- [ ] 10.5 Memberships page: assign user to org, remove membership (post-active management)
-- [ ] 10.6 Permissions page: read-only catalog list; grant/revoke per membership for `ACTIVE` members only
-- [ ] 10.7 Style with obsidian-glass / AppShell patterns from Phase 2
+- [x] 10.1 Add `/admin/*` route group with ADMIN + ACTIVE `beforeLoad` guard
+- [x] 10.2 Users page (pending queue): list/filter by status; **fill** (assign org + activate) or **kill** (`INACTIVE`); reactivate `INACTIVE` → `ACTIVE`; no permission grants on this page
+- [x] 10.3 Universities page: list, create, edit, delete (surface 409 when dependents exist)
+- [x] 10.4 Organizations page: list by university, create/edit/delete with type selector (surface 409 when memberships exist)
+- [x] 10.5 Memberships page: assign user to org, remove membership (post-active management)
+- [x] 10.6 Permissions page: read-only catalog list; grant/revoke per membership for `ACTIVE` members only
+- [x] 10.7 Style with obsidian-glass / AppShell patterns from Phase 2
 
 ## 11. E2e tests
 
