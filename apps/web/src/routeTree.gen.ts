@@ -29,6 +29,7 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppEventsRouteImport } from './routes/app.events'
 import { Route as AppTicketsRouteImport } from './routes/app.tickets'
 import { Route as UsersIndexRouteImport } from './routes/users.index'
+import { Route as AppEventsIndexRouteImport } from './routes/app.events.index'
 import { Route as AdminEventsEventIdTicketsRouteImport } from './routes/admin.events.$eventId.tickets'
 import { Route as AppEventsEventIdTicketsRouteImport } from './routes/app.events.$eventId.tickets'
 
@@ -132,6 +133,11 @@ const UsersIndexRoute = UsersIndexRouteImport.update({
   path: '/',
   getParentRoute: () => UsersRoute,
 } as any)
+const AppEventsIndexRoute = AppEventsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppEventsRoute,
+} as any)
 const AdminEventsEventIdTicketsRoute =
   AdminEventsEventIdTicketsRouteImport.update({
     id: '/$eventId/tickets',
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/users/': typeof UsersIndexRoute
+  '/app/events/': typeof AppEventsIndexRoute
   '/admin/events/$eventId/tickets': typeof AdminEventsEventIdTicketsRoute
   '/app/events/$eventId/tickets': typeof AppEventsEventIdTicketsRoute
 }
@@ -181,11 +188,11 @@ export interface FileRoutesByTo {
   '/admin/ticketed-events': typeof AdminTicketedEventsRoute
   '/admin/universities': typeof AdminUniversitiesRoute
   '/admin/users': typeof AdminUsersRoute
-  '/app/events': typeof AppEventsRouteWithChildren
   '/app/tickets': typeof AppTicketsRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/users': typeof UsersIndexRoute
+  '/app/events': typeof AppEventsIndexRoute
   '/admin/events/$eventId/tickets': typeof AdminEventsEventIdTicketsRoute
   '/app/events/$eventId/tickets': typeof AppEventsEventIdTicketsRoute
 }
@@ -211,6 +218,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/users/': typeof UsersIndexRoute
+  '/app/events/': typeof AppEventsIndexRoute
   '/admin/events/$eventId/tickets': typeof AdminEventsEventIdTicketsRoute
   '/app/events/$eventId/tickets': typeof AppEventsEventIdTicketsRoute
 }
@@ -237,6 +245,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/users/'
+    | '/app/events/'
     | '/admin/events/$eventId/tickets'
     | '/app/events/$eventId/tickets'
   fileRoutesByTo: FileRoutesByTo
@@ -253,11 +262,11 @@ export interface FileRouteTypes {
     | '/admin/ticketed-events'
     | '/admin/universities'
     | '/admin/users'
-    | '/app/events'
     | '/app/tickets'
     | '/admin'
     | '/app'
     | '/users'
+    | '/app/events'
     | '/admin/events/$eventId/tickets'
     | '/app/events/$eventId/tickets'
   id:
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/users/'
+    | '/app/events/'
     | '/admin/events/$eventId/tickets'
     | '/app/events/$eventId/tickets'
   fileRoutesById: FileRoutesById
@@ -439,6 +449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersIndexRouteImport
       parentRoute: typeof UsersRoute
     }
+    '/app/events/': {
+      id: '/app/events/'
+      path: '/'
+      fullPath: '/app/events/'
+      preLoaderRoute: typeof AppEventsIndexRouteImport
+      parentRoute: typeof AppEventsRoute
+    }
     '/admin/events/$eventId/tickets': {
       id: '/admin/events/$eventId/tickets'
       path: '/$eventId/tickets'
@@ -493,10 +510,12 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppEventsRouteChildren {
+  AppEventsIndexRoute: typeof AppEventsIndexRoute
   AppEventsEventIdTicketsRoute: typeof AppEventsEventIdTicketsRoute
 }
 
 const AppEventsRouteChildren: AppEventsRouteChildren = {
+  AppEventsIndexRoute: AppEventsIndexRoute,
   AppEventsEventIdTicketsRoute: AppEventsEventIdTicketsRoute,
 }
 

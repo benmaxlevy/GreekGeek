@@ -53,7 +53,7 @@
 
 ## 8. Verification + demos
 
-- [ ] 8.1 Demo: enable ticketing → Org A + Org B alloc (+ optional public) → issue → mark paid → guest list
-- [ ] 8.2 Demo: void frees slot; oversell attempt fails
-- [ ] 8.3 Demo (if feasible): guest signup → claim public → mark paid
+- [x] 8.1 Demo: enable ticketing → Org A + Org B alloc (+ optional public) → issue → mark paid → guest list
+- [x] 8.2 Demo: void frees slot; oversell attempt fails
+- [x] 8.3 Demo (if feasible): guest signup → claim public → mark paid
 - [ ] 8.4 Mark all tasks complete; archive when shipped

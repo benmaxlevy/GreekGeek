@@ -186,6 +186,77 @@ export async function grantEventPermissionsByEmail(userEmail) {
   return grantPermissionsByEmail(userEmail, ['events.create', 'events.manage']);
 }
 
+export async function grantTicketPermissionsByEmail(userEmail) {
+  return grantPermissionsByEmail(userEmail, [
+    'events.create',
+    'events.manage',
+    'tickets.manage',
+  ]);
+}
+
+export async function loginToken(email, password) {
+  const data = await apiJson('/api/auth/login', {
+    method: 'POST',
+    body: { email, password },
+  });
+  return data.accessToken;
+}
+
+export async function createOrgViaAdmin({
+  name,
+  type = 'SORORITY',
+  universityId = 'seed-university-demo',
+}) {
+  const token = await adminToken();
+  return apiJson('/api/organizations', {
+    method: 'POST',
+    token,
+    body: { name, type, universityId },
+  });
+}
+
+/** On_sale event with public pool only (API fixture for guest-claim demo). */
+export async function setupOnSalePublicEvent({
+  hostEmail,
+  hostPassword = DEMO_PASSWORD,
+  eventName,
+  publicQty = 10,
+}) {
+  const token = await loginToken(hostEmail, hostPassword);
+  const organizationId = await seedOrgId();
+  const event = await apiJson('/api/events', {
+    method: 'POST',
+    token,
+    body: {
+      organizationId,
+      name: eventName,
+      type: 'Public Party',
+      maxHeadcount: 50,
+      location: 'Campus Lawn',
+    },
+  });
+  await apiJson(`/api/events/${event.id}/ticketing`, {
+    method: 'PATCH',
+    token,
+    body: {
+      ticketingEnabled: true,
+      ticketCapacity: publicQty,
+      ticketSaleStatus: 'draft',
+    },
+  });
+  await apiJson(`/api/events/${event.id}/allocations`, {
+    method: 'POST',
+    token,
+    body: { organizationId: null, quantity: publicQty },
+  });
+  await apiJson(`/api/events/${event.id}/ticketing`, {
+    method: 'PATCH',
+    token,
+    body: { ticketSaleStatus: 'on_sale' },
+  });
+  return { eventId: event.id, eventName: event.name };
+}
+
 export async function setupActiveMember({ name, email, password = DEMO_PASSWORD, grantEventPerms = false }) {
   const organizationId = await seedOrgId();
   await apiSignup({ name, email, password, organizationId });
