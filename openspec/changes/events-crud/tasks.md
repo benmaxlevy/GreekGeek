@@ -26,5 +26,5 @@
 ## 5. Verification + demos
 
 - [x] 5.1 E2e or smoke for member create + admin create-with-org
-- [x] 5.2 Mark tasks complete; Playwright demos (member + admin flows) — recording next
+- [x] 5.2 Mark tasks complete; Playwright demos (member + admin flows) — `demo-videos/admin-events-1785598358651.webm`, `member-events-1785598406744.webm`, `member-events-forbidden-1785598422378.webm`
 - [x] 5.3 Commit task ticks if needed
