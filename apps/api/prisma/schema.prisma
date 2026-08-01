@@ -24,17 +24,21 @@ enum OrganizationType {
 }
 
 model User {
-  id              String         @id @default(cuid())
-  email           String         @unique
-  name            String
-  passwordHash    String
-  emailVerifiedAt DateTime?
-  role            Role           @default(USER)
-  status          UserStatus     @default(PENDING)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  refreshTokens   RefreshToken[]
-  membership      Membership?
+  id                      String         @id @default(cuid())
+  email                   String         @unique
+  name                    String
+  passwordHash            String
+  emailVerifiedAt         DateTime?
+  role                    Role           @default(USER)
+  status                  UserStatus     @default(PENDING)
+  requestedOrganizationId String?
+  requestedOrganization   Organization?  @relation("UserRequestedOrganization", fields: [requestedOrganizationId], references: [id], onDelete: SetNull)
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+  refreshTokens           RefreshToken[]
+  membership              Membership?
+
+  @@index([requestedOrganizationId])
 }
 
 model RefreshToken {
@@ -58,14 +62,15 @@ model University {
 }
 
 model Organization {
-  id           String           @id @default(cuid())
-  name         String
-  type         OrganizationType
-  universityId String
-  university   University       @relation(fields: [universityId], references: [id])
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  memberships  Membership[]
+  id               String           @id @default(cuid())
+  name             String
+  type             OrganizationType
+  universityId     String
+  university       University       @relation(fields: [universityId], references: [id])
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  memberships      Membership[]
+  requestedByUsers User[]           @relation("UserRequestedOrganization")
 
   @@unique([universityId, name])
   @@index([universityId])
