@@ -13,6 +13,11 @@ async function signupPending(page: Page, email: string, password: string, name: 
   await page.getByLabel('Name').fill(name);
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
+  await page.locator('#universityId').selectOption({ label: 'Demo State University' });
+  await expect(
+    page.locator('#organizationId option', { hasText: 'Alpha Demo Fraternity' }),
+  ).toHaveCount(1, { timeout: 15_000 });
+  await page.locator('#organizationId').selectOption({ label: 'Alpha Demo Fraternity (FRATERNITY)' });
   await page.getByRole('button', { name: 'Sign up' }).click();
   // CardTitle is a div, not a heading role.
   await expect(page.getByText('Awaiting approval', { exact: true })).toBeVisible();
@@ -94,8 +99,11 @@ test.describe('admin approval and org flows', () => {
     await expect(page.getByText(email)).toBeVisible();
 
     const row = page.locator('li').filter({ hasText: email });
+    await expect(row.getByText(/Requested:.*Alpha Demo Fraternity/)).toBeVisible();
     await row.getByRole('button', { name: 'Fill' }).click();
-    await page.locator('#organizationId').selectOption({ label: 'Alpha Demo Fraternity (FRATERNITY)' });
+    // Prefills requested org — confirm without override.
+    await expect(page.locator('#organizationId')).toHaveValue(/.+/);
+    await expect(page.getByText(/Requested:.*Alpha Demo Fraternity/)).toBeVisible();
     await page.getByRole('button', { name: 'Activate with org' }).click();
     await expect(page.getByText(email)).toHaveCount(0);
 
@@ -176,7 +184,6 @@ test.describe('admin approval and org flows', () => {
     await page.getByRole('button', { name: 'PENDING' }).click();
     const row = page.locator('li').filter({ hasText: email });
     await row.getByRole('button', { name: 'Fill' }).click();
-    await page.locator('#organizationId').selectOption({ label: 'Alpha Demo Fraternity (FRATERNITY)' });
     await page.getByRole('button', { name: 'Activate with org' }).click();
 
     await page.goto('/admin/memberships');
@@ -241,7 +248,6 @@ test.describe('admin approval and org flows', () => {
     await page.getByRole('button', { name: 'PENDING' }).click();
     const row = page.locator('li').filter({ hasText: email });
     await row.getByRole('button', { name: 'Fill' }).click();
-    await page.locator('#organizationId').selectOption({ label: 'Alpha Demo Fraternity (FRATERNITY)' });
     await page.getByRole('button', { name: 'Activate with org' }).click();
     await page.getByRole('button', { name: 'Log out' }).click();
 
