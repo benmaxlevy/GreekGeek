@@ -7,20 +7,20 @@
 
 - [x] 2.1 Add `UserStatus` enum (`ACTIVE`, `PENDING`, `INACTIVE`) and `User.status` column (default `PENDING` for new signups)
 - [x] 2.2 Add `University`, `Organization` (type enum, `@@unique([universityId, name])`), `Membership` (unique `userId`), `Permission`, `MemberPermission` models
-- [ ] 2.2b Add `User.requestedOrganizationId` nullable FK to `Organization` (required on signup for `USER` role)
+- [x] 2.2b Add `User.requestedOrganizationId` nullable FK to `Organization` (required on signup for `USER` role)
 - [x] 2.3 Run migration; backfill existing Phase 2 users to `ACTIVE`
 - [x] 2.4 Update seed: permission catalog keys (`members.manage_permissions`, `events.create`, `events.manage`), dev admin `ACTIVE`, optional sample university/org
 
 ## 3. Shared contracts
 
 - [x] 3.1 Add Zod schemas + inferred types in `packages/contracts` for universities, organizations, memberships, permissions, user status/admin ops
-- [ ] 3.1b Extend signup/register schema with `requestedOrganizationId` (required for `USER` role)
+- [x] 3.1b Extend signup/register schema with `organizationId` → persisted as `requestedOrganizationId` (required for `USER` role)
 - [x] 3.2 Extend auth user/public profile schemas with `status` field
-- [ ] 3.2b Extend admin user list/detail schemas with requested org (and implied university) for pending queue
+- [x] 3.2b Extend admin user list/detail schemas with requested org (and implied university) for pending queue
 
 ## 4. User status and auth gating
 
-- [ ] 4.1 Update signup to create `PENDING` users with `requestedOrganizationId`; no session tokens; reject signup without org for `USER` role
+- [x] 4.1 Update signup to create `PENDING` users with `requestedOrganizationId`; no session tokens; reject signup without org for `USER` role
 - [x] 4.2 Allow login and refresh for `PENDING` and `INACTIVE` users (issue tokens); keep credential rejection for invalid email/password only
 - [x] 4.3 Add global status guard on protected routes and admin/org APIs — block non-`ACTIVE`; allow `/api/auth/me`, logout, and other auth maintenance
 - [x] 4.4 Implement ADMIN user-management API: list users (filter by status), patch status (`PENDING` → `ACTIVE`, `PENDING` → `INACTIVE`, `INACTIVE` → `ACTIVE`); approve/fill may create membership atomically
@@ -29,13 +29,13 @@
 ## 5. Universities API
 
 - [x] 5.1 Nest `universities` module: ADMIN-only create/update/delete endpoints
-- [ ] 5.1b Public `@Public` list-universities endpoint for signup (read-only; no auth)
+- [x] 5.1b Public `@Public` list-universities endpoint for signup (read-only; no auth)
 - [x] 5.2 Return 409 when delete blocked by existing organizations
 
 ## 6. Organizations API
 
 - [x] 6.1 Nest `organizations` module: ADMIN-only create/update/delete; admin list filter by `universityId`
-- [ ] 6.1b Public `@Public` list-organizations-by-university endpoint for signup (read-only; filter by `universityId`; no auth)
+- [x] 6.1b Public `@Public` list-organizations-by-university endpoint for signup (read-only; filter by `universityId`; no auth)
 - [x] 6.2 Enforce unique name per university; return 409 when delete blocked by existing memberships
 
 ## 7. Memberships API
@@ -69,14 +69,14 @@
 
 ## 11. E2e tests
 
-- [ ] 11.1 Register with university/org selection → pending message; no authenticated home access
-- [ ] 11.1b Public university/org list endpoints reachable without auth for signup form
+- [x] 11.1 Register with university/org selection → pending message; no authenticated home access
+- [x] 11.1b Public university/org list endpoints reachable without auth for signup form
 - [x] 11.2 Pending user login → awaiting-approval screen; cannot reach protected app page
 - [x] 11.3 Admin fill (requested org or override) + activate → user reaches protected page
 - [x] 11.4 Admin kill pending user → `INACTIVE` login → blocked screen
 - [x] 11.5 Admin reactivate `INACTIVE` → `ACTIVE`
 - [x] 11.6 Admin CRUD smoke: university + organization create
-- [x] 11.7 Membership assign; duplicate user rejected
+- [x] 11.7 Membership assign; atomic reassign keeps one membership per user
 - [x] 11.8 ADMIN grants permission post-active; delegated member with `members.manage_permissions` grants in own org
 - [x] 11.9 Unauthorized: non-admin university CRUD 403; member without manage permission grant 403
 
@@ -87,7 +87,7 @@
 - [x] 12.3 Grant gate without `members.manage_permissions` returns 403
 - [x] 12.4 PENDING/INACTIVE login and refresh succeed; protected routes return 401/403
 - [x] 12.5 University/org delete with dependents returns 409
-- [ ] 12.6 Signup rejects missing or invalid `requestedOrganizationId`; public list endpoints return data without auth; admin-only mutations still 403 for non-admin
+- [x] 12.6 Signup stores/rejects `organizationId` (unknown → 400); public list + mutation 403 covered by e2e 11.1b/11.9
 
 ## 13. Phase 3 verification
 
