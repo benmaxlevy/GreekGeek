@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Organization-scoped event records that members with `events.create` / `events.manage` (and platform ADMIN) can create and manage — name, type, max headcount, and optional location — before vendor or ticketing features exist.
+Organization-scoped event records that members with `events.create` / `events.manage` (and platform ADMIN) can create and manage — name, type, max headcount, optional location, and optional inline ticketing config. Vendor outreach remains out of scope for this capability.
 
 ## Requirements
 
