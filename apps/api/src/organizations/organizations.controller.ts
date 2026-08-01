@@ -10,6 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { Public } from '../auth/decorators/public.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { OrganizationsService } from './organizations.service';
@@ -27,10 +28,10 @@ import {
 } from './types/organizations.dto';
 
 @Controller('organizations')
-@Roles('ADMIN')
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
 
+  @Public()
   @Get()
   async list(
     @Query(new ZodValidationPipe(ListOrganizationsQuerySchema))
@@ -41,11 +42,13 @@ export class OrganizationsController {
     );
   }
 
+  @Roles('ADMIN')
   @Get(':id')
   async get(@Param('id') id: string): Promise<Organization> {
     return OrganizationSchema.parse(await this.organizationsService.get(id));
   }
 
+  @Roles('ADMIN')
   @Post()
   async create(
     @Body(new ZodValidationPipe(CreateOrganizationSchema))
@@ -56,6 +59,7 @@ export class OrganizationsController {
     );
   }
 
+  @Roles('ADMIN')
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -67,6 +71,7 @@ export class OrganizationsController {
     );
   }
 
+  @Roles('ADMIN')
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string): Promise<void> {

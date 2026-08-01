@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { Public } from '../auth/decorators/public.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import {
@@ -24,20 +25,22 @@ import {
 import { UniversitiesService } from './universities.service';
 
 @Controller('universities')
-@Roles('ADMIN')
 export class UniversitiesController {
   constructor(private readonly universitiesService: UniversitiesService) {}
 
+  @Public()
   @Get()
   async list(): Promise<UniversityList> {
     return UniversityListSchema.parse(await this.universitiesService.list());
   }
 
+  @Roles('ADMIN')
   @Get(':id')
   async get(@Param('id') id: string): Promise<University> {
     return UniversitySchema.parse(await this.universitiesService.get(id));
   }
 
+  @Roles('ADMIN')
   @Post()
   async create(
     @Body(new ZodValidationPipe(CreateUniversitySchema)) body: CreateUniversity,
@@ -45,6 +48,7 @@ export class UniversitiesController {
     return UniversitySchema.parse(await this.universitiesService.create(body));
   }
 
+  @Roles('ADMIN')
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -53,6 +57,7 @@ export class UniversitiesController {
     return UniversitySchema.parse(await this.universitiesService.update(id, body));
   }
 
+  @Roles('ADMIN')
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string): Promise<void> {
