@@ -31,6 +31,6 @@
 ## 4. Verification / demos
 
 - [x] 4.1 Manual verify: `docker compose up` + API + `start:worker` → prove smoke then removed; health `redis:up` without worker required
-- [ ] 4.2 Manual verify: Stripe CLI forward → event stored, processed once; replay → 200 no duplicate processing
-- [ ] 4.3 Manual verify: induce handler failure → retries → visible in admin failed list → re-enqueue succeeds
-- [ ] 4.4 Mark all tasks complete; archive when shipped
+- [x] 4.2 Manual verify: Stripe CLI forward → event stored, processed once; replay → 200 no duplicate processing
+- [x] 4.3 Manual verify: induce handler failure → retries → visible in admin failed list → re-enqueue succeeds
+- [x] 4.4 Mark all tasks complete; archive when shipped
