@@ -24,6 +24,7 @@ import {
   toIsoDateTime,
   updateEvent,
 } from '@/lib/events-api';
+import { listMyTickets } from '@/lib/ticketing-api';
 
 const appEventsRouteApi = getRouteApi('/app/events');
 
@@ -60,6 +61,10 @@ function AppEventsPage() {
     queryKey: ['events', organizationId],
     queryFn: () => listEvents({ organizationId }),
     enabled: Boolean(organizationId),
+  });
+  const ticketsQuery = useQuery({
+    queryKey: ['tickets', 'mine'],
+    queryFn: listMyTickets,
   });
 
   function invalidate() {
@@ -130,6 +135,11 @@ function AppEventsPage() {
   }
 
   const events = listQuery.data ?? [];
+  const ticketsByEventId = new Map<string, number>();
+  for (const ticket of ticketsQuery.data ?? []) {
+    if (ticket.status === 'void') continue;
+    ticketsByEventId.set(ticket.eventId, (ticketsByEventId.get(ticket.eventId) ?? 0) + 1);
+  }
 
   return (
     <div className="space-y-6">
@@ -353,6 +363,12 @@ function AppEventsPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium text-ink-100">{event.name}</p>
                         <Badge variant="outline">{event.type}</Badge>
+                        {ticketsByEventId.has(event.id) ? (
+                          <Badge variant="paid">
+                            {ticketsByEventId.get(event.id)}{' '}
+                            {ticketsByEventId.get(event.id) === 1 ? 'ticket' : 'tickets'}
+                          </Badge>
+                        ) : null}
                         {event.heldAt ? <Badge variant="destructive">On hold</Badge> : null}
                       </div>
                       <p className="text-sm text-ink-500">

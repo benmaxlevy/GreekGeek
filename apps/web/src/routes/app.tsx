@@ -1,5 +1,6 @@
 import { Outlet, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
+import { CalendarDays, CircleUser, Compass, Ticket } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/button';
 import { logoutRequest } from '@/lib/api';
@@ -7,9 +8,7 @@ import { meQueryKey, meQueryOptions } from '@/lib/auth';
 import {
   canAccessEventTicketing,
   canAccessOrgEvents,
-  canManageOrgPendingApprovals,
   destinationForUser,
-  isAdminUser,
 } from '@/lib/auth-routing';
 
 export const Route = createFileRoute('/app')({
@@ -38,42 +37,28 @@ function AuthenticatedLayout() {
     await navigate({ to: '/login' });
   }
 
-  const orgId = user.membership?.organizationId;
+  const showEvents =
+    Boolean(user.membership) &&
+    (canAccessOrgEvents(user) || canAccessEventTicketing(user));
+
   const navItems = [
-    { label: 'Home', to: '/app' },
-    { label: 'My tickets', to: '/app/tickets' },
-    ...(user.membership &&
-    (canAccessOrgEvents(user) || canAccessEventTicketing(user))
-      ? [{ label: 'Events', to: '/app/events' }]
-      : []),
-    ...(orgId
-      ? [
-          {
-            label: 'Payments',
-            to: '/app/orgs/$orgId/payments',
-            params: { orgId },
-          },
-        ]
-      : []),
-    ...(canManageOrgPendingApprovals(user)
-      ? [{ label: 'Pending approvals', to: '/users' }]
-      : []),
-    ...(isAdminUser(user) ? [{ label: 'Admin', to: '/admin' }] : []),
+    { label: 'Upcoming', to: '/app', exact: true, icon: Compass },
+    { label: 'Tickets', to: '/app/tickets', icon: Ticket },
+    ...(showEvents ? [{ label: 'Events', to: '/app/events', icon: CalendarDays }] : []),
+    { label: 'You', to: '/app/you', icon: CircleUser },
   ];
 
   return (
     <AppShell
       portal="member"
+      navigation="bottom"
       navItems={navItems}
       footer={
-        <div className="space-y-2">
-          <p className="truncate px-1 text-xs text-ink-500">{user.email}</p>
-          <Button
-            type="button"
-            variant="outline"
-            className="min-h-11 w-full"
-            onClick={() => void onLogout()}
-          >
+        <div className="flex items-center gap-2">
+          <span className="hidden max-w-[160px] truncate text-xs text-ink-500 sm:inline">
+            {user.email}
+          </span>
+          <Button type="button" variant="quiet" size="sm" onClick={() => void onLogout()}>
             Log out
           </Button>
         </div>
