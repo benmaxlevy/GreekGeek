@@ -8,60 +8,104 @@ Provides the Rally web app with the obsidian-glass visual system — tokens, fon
 
 ### Requirement: Obsidian-glass tokens and fonts are the sole theme source
 
-The web application MUST apply the obsidian-glass design tokens as CSS custom properties and MUST load self-hosted Playfair Display and Instrument Sans fonts. UI color and typography MUST reference those tokens (or theme mappings derived from them). The application MUST NOT introduce per-route inline color palette objects as the source of truth for colors.
+The web application MUST apply the rally-mockup-handoff design tokens as CSS custom properties and MUST load the configured display and UI fonts used by the mockup. UI color, typography, spacing, radii, borders, shadows, motion, and responsive values MUST reference those tokens or theme mappings derived from them. The application MUST NOT introduce per-route inline color palette objects as the source of truth for visual styling.
 
-#### Scenario: Token-backed surfaces render on themed pages
+#### Scenario: Token-backed surfaces render on every themed page
 
-- **WHEN** a user opens a themed page such as login or the authenticated shell
-- **THEN** the page background and surfaces resolve through CSS custom properties consistent with the obsidian-glass palette (true-black background, glass/card surfaces, monochrome ink scale, single error red)
+- **WHEN** a user opens any existing web route
+- **THEN** page background, text, borders, controls, and surfaces resolve through the shared token system rather than route-specific palettes
 
-#### Scenario: Brand fonts apply to headings and UI text
+#### Scenario: Brand typography applies consistently
 
-- **WHEN** a themed page renders headings and form labels
-- **THEN** display headings use Playfair Display and UI text uses Instrument Sans via the theme font tokens
+- **WHEN** a themed page renders display headings, labels, body text, or numeric values
+- **THEN** each text role uses the shared typography tokens or utilities defined by the mockup-aligned theme
 
 ### Requirement: Ambient body treatment and layout tokens
 
-The application MUST apply an ambient page gradient via a theme class on the document body and MUST expose layout tokens for sidebar width (232px), content max width (1160px), and navigation height so shell layout can consume them consistently.
+The application MUST apply shared ambient page treatment through portal context and MUST expose layout tokens for sidebar width, content sizing, navigation height, spacing, and responsive breakpoints. Member portal ambient treatment MUST be warmer and executive portal ambient treatment MUST be cooler with a persistent top rail. The primary web shell MUST be full-width and desktop-first; it MUST NOT constrain member routes to a fixed 480px phone column.
 
-#### Scenario: Body theme class enables ambient gradient
+#### Scenario: Member portal ambient treatment renders
 
-- **WHEN** the web app boots
-- **THEN** the document body carries the theme class that applies the ambient gradient treatment
+- **WHEN** a user opens a member route
+- **THEN** the page uses the warmer member ambient treatment while remaining full-width at desktop viewport sizes
+
+#### Scenario: Executive portal ambient treatment renders
+
+- **WHEN** a user opens an executive route
+- **THEN** the page uses the cooler executive ambient treatment and displays its persistent top rail
+
+#### Scenario: Responsive shell preserves available width
+
+- **WHEN** a user resizes an existing route from desktop through narrow responsive widths
+- **THEN** layout reflows navigation, grids, and content without applying a fixed 480px primary shell width
 
 ### Requirement: Shared UI primitives with glass variants
 
-The web application MUST provide shared UI primitives for button, card, input, label, form, separator, badge, avatar, dropdown menu, toast notifications, and skeleton. Chrome button styling and glass panel card styling MUST be available as reusable variants rather than one-off inline styles.
+The web application MUST provide shared visual primitives for buttons, glass cards, inputs, labels, forms, separators, badges, avatars, dropdown menus, toast notifications, skeletons, gates, page furniture, and status treatments. Glass panel styling MUST use the shared glass recipe, including translucent surface, blur, border, sheen, and shadow behavior. Primary actions MUST use white fill with black text, matching the mockup's `rl-btn-primary` treatment.
 
-#### Scenario: Chrome button and glass card are reusable
+#### Scenario: Shared glass surface renders
 
-- **WHEN** a screen needs a primary chrome CTA or a glass surface panel
-- **THEN** it uses the shared Button/Card glass variants rather than duplicating glass CSS inline
+- **WHEN** a route renders a card, panel, modal, or grouped surface
+- **THEN** it uses the shared glass treatment or a documented token-backed surface variant rather than a route-specific approximation
+
+#### Scenario: Primary action renders in mockup style
+
+- **WHEN** a route renders its primary action
+- **THEN** the action has a white background, black text, shared button dimensions, focus state, hover state, and disabled state
+
+#### Scenario: Status treatment remains accessible
+
+- **WHEN** a route renders a status, alert, pending state, or error
+- **THEN** the shared status treatment pairs visual color with text or an icon and preserves visible focus and readable contrast
 
 ### Requirement: App shell and brand lockup
 
-Authenticated product chrome MUST present a sticky sidebar of 232px on desktop, a main content area capped at 1160px with comfortable padding, a mobile drawer navigation below 768px, and interactive targets of at least 44px. Brand identity MUST be available via Wordmark and BrandLockup components.
+Authenticated product chrome MUST present a shared full-width responsive shell across all existing web routes. Executive routes MUST provide a desktop sidebar using the shared sidebar width token and a content area using shared content sizing. Member routes MUST use desktop-capable content width rather than a fixed phone column. Below the responsive navigation breakpoint, navigation MUST remain available through an accessible mobile control. Brand identity MUST be available through shared Wordmark and BrandLockup presentation.
 
-#### Scenario: Desktop shell layout
+#### Scenario: Desktop member shell layout
 
-- **WHEN** a signed-in user views the app on a viewport at or above 768px
-- **THEN** a sticky 232px sidebar is visible and main content is constrained to the content max width
+- **WHEN** a signed-in user views a member route at a desktop viewport
+- **THEN** the member shell spans the available viewport width, presents aligned page chrome, and does not render as a centered 480px phone frame
 
-#### Scenario: Mobile drawer navigation
+#### Scenario: Desktop executive shell layout
 
-- **WHEN** a signed-in user views the app on a viewport below 768px
-- **THEN** navigation is available through a hamburger-triggered drawer instead of a persistent sidebar
+- **WHEN** a signed-in user views an executive route at or above the desktop breakpoint
+- **THEN** a shared sidebar is visible, the main content uses shared layout tokens, and the executive top rail identifies the portal
+
+#### Scenario: Responsive navigation remains available
+
+- **WHEN** a signed-in user views any authenticated route below the responsive navigation breakpoint
+- **THEN** navigation is available through an accessible drawer, compact navigation, or equivalent responsive control without losing route access
 
 #### Scenario: Brand lockup renders in shell or auth chrome
 
 - **WHEN** the shell or auth screens render brand identity
-- **THEN** Wordmark/BrandLockup appear as the brand signal
+- **THEN** the shared Wordmark or BrandLockup presentation appears using the aligned typography and surface tokens
 
 ### Requirement: Theme smoke coverage without visual regression suites
 
-Theme verification MUST stay lean: either a single e2e smoke that themed auth/shell pages render with expected theme classes or tokens, or reliance on auth e2e that already visit those pages. The project MUST NOT require CSS snapshot or visual-regression suites for this capability.
+Theme verification MUST cover representative existing member, executive, auth/onboarding, ticketing, money, chapter, scanner, admin, agency, and production routes at desktop and responsive widths. Verification MUST confirm shared portal attributes, token-backed surfaces, full-width shell behavior, white primary actions, and responsive navigation. The project MUST NOT require CSS snapshot or visual-regression suites for this capability.
 
-#### Scenario: Themed pages are exercised by e2e without CSS snapshots
+#### Scenario: Representative route matrix is exercised
 
-- **WHEN** the Phase 2 test suite runs
-- **THEN** themed pages used by auth or shell flows are covered by Playwright e2e (or an optional single smoke) and no CSS snapshot/visual-regression suite is required
+- **WHEN** the frontend theme verification runs
+- **THEN** representative routes from each existing route family render with the aligned shell and no CSS snapshot or visual-regression suite is required
+
+#### Scenario: Responsive shell behavior is checked
+
+- **WHEN** theme verification runs at desktop and narrow responsive widths
+- **THEN** member routes remain full-width, executive navigation remains usable, and portal ambient treatments stay distinguishable
+
+### Requirement: Existing web routes use one visual system
+
+Every existing web route and shared web component MUST use the aligned theme, shell chrome, typography utilities, glass recipe, and shared control treatments. Restyling MUST preserve existing route URLs, feature affordances, navigation destinations, and visible data states. This requirement covers presentation only and MUST NOT introduce API, Prisma, Stripe, authentication, permission, or data-flow changes.
+
+#### Scenario: Existing route preserves feature surface
+
+- **WHEN** a user visits an existing route after visual alignment
+- **THEN** the route remains reachable with its existing feature affordances and data states while rendering aligned visual chrome
+
+#### Scenario: Backend boundaries remain unchanged
+
+- **WHEN** the frontend style alignment is implemented
+- **THEN** no API, Prisma, Stripe, authentication, permission, or backend data contract changes are required
