@@ -3,18 +3,24 @@ import {
   AuthTokensResponseSchema,
   LoginRequestSchema,
   LogoutResponseSchema,
+  ProfileSummaryNextEventSchema,
+  ProfileSummarySchema,
   PublicUserMembershipSchema,
   PublicUserSchema,
   SignupRequestSchema,
   SignupResponseSchema,
+  UpdateDisplayNameRequestSchema,
   type AccessTokenResponse,
   type AuthTokensResponse,
   type LoginRequest,
   type LogoutResponse,
+  type ProfileSummary,
+  type ProfileSummaryNextEvent,
   type PublicUser,
   type PublicUserMembership,
   type SignupRequest,
   type SignupResponse,
+  type UpdateDisplayNameRequest,
 } from '@rally/contracts';
 
 export {
@@ -22,10 +28,13 @@ export {
   AuthTokensResponseSchema,
   LoginRequestSchema,
   LogoutResponseSchema,
+  ProfileSummaryNextEventSchema,
+  ProfileSummarySchema,
   PublicUserMembershipSchema,
   PublicUserSchema,
   SignupRequestSchema,
   SignupResponseSchema,
+  UpdateDisplayNameRequestSchema,
 };
 
 export type {
@@ -33,10 +42,13 @@ export type {
   AuthTokensResponse,
   LoginRequest,
   LogoutResponse,
+  ProfileSummary,
+  ProfileSummaryNextEvent,
   PublicUser,
   PublicUserMembership,
   SignupRequest,
   SignupResponse,
+  UpdateDisplayNameRequest,
 };
 
 export const REFRESH_COOKIE_NAME = 'refresh_token';

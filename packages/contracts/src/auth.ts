@@ -64,3 +64,26 @@ export const LogoutResponseSchema = z.object({
   ok: z.literal(true),
 });
 export type LogoutResponse = z.infer<typeof LogoutResponseSchema>;
+
+export const UpdateDisplayNameRequestSchema = z
+  .object({
+    name: z.string().trim().min(1).max(120),
+  })
+  .strict();
+export type UpdateDisplayNameRequest = z.infer<typeof UpdateDisplayNameRequestSchema>;
+
+export const ProfileSummaryNextEventSchema = z.object({
+  eventId: z.string(),
+  eventName: z.string(),
+  startsAt: z.string().datetime(),
+  location: z.string().nullable(),
+  ticketCount: z.number().int().nonnegative(),
+});
+export type ProfileSummaryNextEvent = z.infer<typeof ProfileSummaryNextEventSchema>;
+
+export const ProfileSummarySchema = z.object({
+  ticketCount: z.number().int().nonnegative(),
+  upcomingEventCount: z.number().int().nonnegative(),
+  nextEvent: ProfileSummaryNextEventSchema.nullable(),
+});
+export type ProfileSummary = z.infer<typeof ProfileSummarySchema>;

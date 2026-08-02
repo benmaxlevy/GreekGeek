@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { AuthService } from './auth.service';
@@ -20,19 +12,23 @@ import {
   AuthTokensResponseSchema,
   LoginRequestSchema,
   LogoutResponseSchema,
+  ProfileSummarySchema,
   PublicUserSchema,
   REFRESH_COOKIE_NAME,
   REFRESH_COOKIE_PATH,
   REFRESH_TOKEN_TTL_MS,
   SignupRequestSchema,
   SignupResponseSchema,
+  UpdateDisplayNameRequestSchema,
   type AccessTokenResponse,
   type AuthTokensResponse,
   type LoginRequest,
   type LogoutResponse,
+  type ProfileSummary,
   type PublicUser,
   type SignupRequest,
   type SignupResponse,
+  type UpdateDisplayNameRequest,
 } from './types/auth.dto';
 
 @Controller('auth')
@@ -96,6 +92,22 @@ export class AuthController {
   @Get('me')
   me(@CurrentUser() user: PublicUser): PublicUser {
     return PublicUserSchema.parse(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me')
+  async updateMe(
+    @Body(new ZodValidationPipe(UpdateDisplayNameRequestSchema))
+    body: UpdateDisplayNameRequest,
+    @CurrentUser() user: PublicUser,
+  ): Promise<PublicUser> {
+    return PublicUserSchema.parse(await this.authService.updateDisplayName(user, body.name));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me/summary')
+  async meSummary(@CurrentUser() user: PublicUser): Promise<ProfileSummary> {
+    return ProfileSummarySchema.parse(await this.authService.getProfileSummary(user));
   }
 
   private setRefreshCookie(res: Response, refreshToken: string) {

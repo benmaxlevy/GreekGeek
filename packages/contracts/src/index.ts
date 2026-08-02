@@ -10,6 +10,9 @@ export {
   AuthTokensResponseSchema,
   AccessTokenResponseSchema,
   LogoutResponseSchema,
+  UpdateDisplayNameRequestSchema,
+  ProfileSummaryNextEventSchema,
+  ProfileSummarySchema,
   type Role,
   type UserStatus,
   type PublicUserMembership,
@@ -20,6 +23,9 @@ export {
   type AuthTokensResponse,
   type AccessTokenResponse,
   type LogoutResponse,
+  type UpdateDisplayNameRequest,
+  type ProfileSummaryNextEvent,
+  type ProfileSummary,
 } from './auth';
 export {
   UniversitySchema,

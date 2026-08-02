@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import {
   ACCESS_TOKEN_TTL,
   REFRESH_TOKEN_TTL_MS,
   type AuthTokensResponse,
+  type ProfileSummary,
   type PublicUser,
   type SignupRequest,
   type SignupResponse,
@@ -70,8 +72,7 @@ export class AuthService {
       status: user.status,
       requestedOrganizationId: user.requestedOrganizationId,
       membership,
-      permissions:
-        user.membership?.permissions?.map((mp) => mp.permission.key) ?? [],
+      permissions: user.membership?.permissions?.map((mp) => mp.permission.key) ?? [],
     };
   }
 
@@ -88,6 +89,88 @@ export class AuthService {
       },
     });
     return user ? this.toPublicUser(user) : null;
+  }
+
+  async updateDisplayName(caller: PublicUser, name: string): Promise<PublicUser> {
+    if (caller.status !== 'ACTIVE') {
+      throw new ForbiddenException('Account is not active');
+    }
+
+    const updated = await this.prisma.user.updateMany({
+      where: { id: caller.id, status: 'ACTIVE' },
+      data: { name },
+    });
+    if (updated.count === 0) {
+      throw new ForbiddenException('Account is not active');
+    }
+
+    const publicUser = await this.getPublicUserById(caller.id);
+    if (!publicUser) {
+      throw new UnauthorizedException('User no longer exists');
+    }
+    return publicUser;
+  }
+
+  async getProfileSummary(caller: PublicUser): Promise<ProfileSummary> {
+    if (caller.status !== 'ACTIVE') {
+      throw new ForbiddenException('Account is not active');
+    }
+
+    const now = new Date();
+    const ownedNonVoidTicket = {
+      holderUserId: caller.id,
+      status: { not: 'void' as const },
+    };
+    const futureOwnedEvent = {
+      startsAt: { gt: now },
+      allocations: {
+        some: {
+          tickets: {
+            some: ownedNonVoidTicket,
+          },
+        },
+      },
+    };
+
+    const [ticketCount, upcomingEventCount, nextEvent] = await Promise.all([
+      this.prisma.ticket.count({ where: ownedNonVoidTicket }),
+      this.prisma.event.count({ where: futureOwnedEvent }),
+      this.prisma.event.findFirst({
+        where: futureOwnedEvent,
+        orderBy: [{ startsAt: 'asc' }, { id: 'asc' }],
+        select: {
+          id: true,
+          name: true,
+          startsAt: true,
+          location: true,
+          allocations: {
+            select: {
+              tickets: {
+                where: ownedNonVoidTicket,
+                select: { id: true },
+              },
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      ticketCount,
+      upcomingEventCount,
+      nextEvent: nextEvent
+        ? {
+            eventId: nextEvent.id,
+            eventName: nextEvent.name,
+            startsAt: nextEvent.startsAt.toISOString(),
+            location: nextEvent.location,
+            ticketCount: nextEvent.allocations.reduce(
+              (count, allocation) => count + allocation.tickets.length,
+              0,
+            ),
+          }
+        : null,
+    };
   }
 
   async validateUser(email: string, password: string): Promise<PublicUser | null> {
