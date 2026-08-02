@@ -36,6 +36,7 @@ export function TicketScanner({ eventId }: Props) {
   const regionId = useId().replace(/:/g, '');
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [cameraOn, setCameraOn] = useState(false);
+  const [cameraStarting, setCameraStarting] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [pasteValue, setPasteValue] = useState('');
   const [resultState, setResultState] = useState<ScannerResultState>('idle');
@@ -80,6 +81,7 @@ export function TicketScanner({ eventId }: Props) {
     scannerRef.current = null;
     if (!scanner) {
       setCameraOn(false);
+      setCameraStarting(false);
       return;
     }
     try {
@@ -91,11 +93,16 @@ export function TicketScanner({ eventId }: Props) {
       // ignore teardown errors
     }
     setCameraOn(false);
+    setCameraStarting(false);
   }, []);
 
   const startCamera = useCallback(async () => {
     setCameraError(null);
     await stopCamera();
+    setCameraStarting(true);
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => resolve());
+    });
     const scanner = new Html5Qrcode(regionId);
     scannerRef.current = scanner;
     try {
@@ -111,10 +118,12 @@ export function TicketScanner({ eventId }: Props) {
         },
       );
       setCameraOn(true);
+      setCameraStarting(false);
     } catch {
       setCameraError('Camera unavailable. Paste credential below.');
       scannerRef.current = null;
       setCameraOn(false);
+      setCameraStarting(false);
     }
   }, [regionId, stopCamera, submitCredential]);
 
@@ -144,7 +153,7 @@ export function TicketScanner({ eventId }: Props) {
 
           <div
             id={regionId}
-            className={`overflow-hidden rounded-md border border-border-subtle bg-black/20 ${cameraOn ? 'min-h-[280px]' : 'hidden'}`}
+            className={`overflow-hidden rounded-md border border-border-subtle bg-black/20 ${cameraOn || cameraStarting ? 'min-h-[280px]' : 'hidden'} [&_video]:h-full [&_video]:w-full [&_video]:object-cover`}
           />
 
           <div className="flex flex-wrap gap-2">
@@ -156,10 +165,10 @@ export function TicketScanner({ eventId }: Props) {
               <Button
                 type="button"
                 variant="outline"
-                disabled={checkInMutation.isPending}
+                disabled={checkInMutation.isPending || cameraStarting}
                 onClick={() => void startCamera()}
               >
-                Start camera
+                {cameraStarting ? 'Starting camera…' : 'Start camera'}
               </Button>
             )}
           </div>
