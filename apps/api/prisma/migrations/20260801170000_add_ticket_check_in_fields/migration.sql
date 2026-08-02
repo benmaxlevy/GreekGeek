@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Ticket" ADD COLUMN "checkedIn" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Ticket" ADD COLUMN "checkedInAt" TIMESTAMP(3);

@@ -144,6 +144,8 @@ model Ticket {
   holder          User?            @relation(fields: [holderUserId], references: [id])
   paidAt          DateTime?
   voidedAt        DateTime?
+  checkedIn       Boolean          @default(false)
+  checkedInAt     DateTime?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 

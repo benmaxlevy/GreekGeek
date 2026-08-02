@@ -24,6 +24,10 @@ const PERMISSIONS = [
     key: 'tickets.manage',
     description: 'Manage event ticketing for the organization',
   },
+  {
+    key: 'tickets.scan',
+    description: 'Scan and check in tickets at hosted events',
+  },
 ] as const;
 
 async function main() {
