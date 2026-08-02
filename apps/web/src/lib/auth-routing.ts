@@ -87,3 +87,17 @@ export function canManageTickets(user: PublicUser): boolean {
     user.permissions.includes('tickets.manage')
   );
 }
+
+/** ACTIVE host-org member with tickets.scan (door staff). Not implied by tickets.manage. */
+export function canScanTickets(user: PublicUser): boolean {
+  return (
+    user.status === 'ACTIVE' &&
+    user.membership != null &&
+    user.permissions.includes('tickets.scan')
+  );
+}
+
+/** Event ticketing page: manage allocations/tickets or host-org scan. */
+export function canAccessEventTicketing(user: PublicUser): boolean {
+  return canManageTickets(user) || canScanTickets(user) || isAdminUser(user);
+}

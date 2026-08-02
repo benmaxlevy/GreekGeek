@@ -23,8 +23,9 @@ import {
   updateAllocation,
   voidTicket,
 } from '@/lib/ticketing-api';
+import { TicketScanner } from '@/components/ticketing/TicketScanner';
 
-type Tab = 'config' | 'allocations' | 'tickets' | 'guests';
+type Tab = 'config' | 'allocations' | 'tickets' | 'guests' | 'scan';
 
 export type TicketPageMode = 'host' | 'invited' | 'admin';
 
@@ -34,6 +35,8 @@ type Props = {
   mode: TicketPageMode;
   user?: PublicUser;
   invitedAllocationId?: string;
+  canManage?: boolean;
+  canScan?: boolean;
 };
 
 function formatCents(cents: number | null): string {
@@ -75,10 +78,18 @@ export function EventTicketsPanel({
   mode,
   user,
   invitedAllocationId,
+  canManage: canManageProp,
+  canScan: canScanProp,
 }: Props) {
   const queryClient = useQueryClient();
   const isHost = mode === 'host' || mode === 'admin';
-  const [tab, setTab] = useState<Tab>(isHost ? 'config' : 'tickets');
+  const canManage =
+    canManageProp ?? (mode === 'invited' || mode === 'admin' || mode === 'host');
+  const canScan = canScanProp ?? mode === 'admin';
+  const scanOnly = canScan && !canManage;
+  const [tab, setTab] = useState<Tab>(
+    scanOnly ? 'scan' : isHost && canManage ? 'config' : 'tickets',
+  );
   const [error, setError] = useState<string | null>(null);
 
   const [ticketingEnabled, setTicketingEnabled] = useState(
@@ -106,7 +117,7 @@ export function EventTicketsPanel({
   const allocationsQuery = useQuery({
     queryKey: ['ticketing', 'allocations', eventId],
     queryFn: () => listAllocations(eventId),
-    enabled: isHost,
+    enabled: isHost && canManage,
   });
 
   const ticketsQuery = useQuery({
@@ -121,13 +132,13 @@ export function EventTicketsPanel({
   const guestsQuery = useQuery({
     queryKey: ['ticketing', 'guests', eventId],
     queryFn: () => guestList(eventId),
-    enabled: isHost && tab === 'guests',
+    enabled: isHost && canManage && tab === 'guests',
   });
 
   const orgsQuery = useQuery({
     queryKey: ['organizations'],
     queryFn: () => listOrganizations({}),
-    enabled: isHost && tab === 'allocations',
+    enabled: isHost && canManage && tab === 'allocations',
   });
 
   const allocations = allocationsQuery.data ?? [];
@@ -231,14 +242,21 @@ export function EventTicketsPanel({
     onError: (err: Error) => setError(err.message),
   });
 
-  const tabs: { id: Tab; label: string }[] = isHost
-    ? [
-        { id: 'config', label: 'Config' },
-        { id: 'allocations', label: 'Allocations' },
-        { id: 'tickets', label: 'Tickets' },
-        { id: 'guests', label: 'Guest list' },
-      ]
-    : [{ id: 'tickets', label: 'Tickets' }];
+  const tabs: { id: Tab; label: string }[] = scanOnly
+    ? [{ id: 'scan', label: 'Scanner' }]
+    : isHost
+      ? [
+          ...(canManage
+            ? ([
+                { id: 'config' as const, label: 'Config' },
+                { id: 'allocations' as const, label: 'Allocations' },
+                { id: 'tickets' as const, label: 'Tickets' },
+                { id: 'guests' as const, label: 'Guest list' },
+              ] as const)
+            : []),
+          ...(canScan ? [{ id: 'scan' as const, label: 'Scanner' }] : []),
+        ]
+      : [{ id: 'tickets', label: 'Tickets' }];
 
   return (
     <div className="space-y-6">
@@ -258,7 +276,7 @@ export function EventTicketsPanel({
         ))}
       </div>
 
-      {tab === 'config' && isHost ? (
+      {tab === 'config' && isHost && canManage ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Ticketing config</CardTitle>
@@ -348,7 +366,7 @@ export function EventTicketsPanel({
         </Card>
       ) : null}
 
-      {tab === 'allocations' && isHost ? (
+      {tab === 'allocations' && isHost && canManage ? (
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -463,7 +481,7 @@ export function EventTicketsPanel({
         </div>
       ) : null}
 
-      {tab === 'tickets' ? (
+      {tab === 'tickets' && canManage ? (
         <div className="space-y-6">
           <p className="text-sm text-ink-500">
             Members buy their own tickets from My tickets. Here you can void or mark
@@ -514,7 +532,7 @@ export function EventTicketsPanel({
         </div>
       ) : null}
 
-      {tab === 'guests' && isHost ? (
+      {tab === 'guests' && isHost && canManage ? (
         <Card>
           <CardContent className="p-0">
             {guestsQuery.isLoading ? (
@@ -542,6 +560,8 @@ export function EventTicketsPanel({
           </CardContent>
         </Card>
       ) : null}
+
+      {tab === 'scan' && canScan ? <TicketScanner eventId={eventId} /> : null}
     </div>
   );
 }

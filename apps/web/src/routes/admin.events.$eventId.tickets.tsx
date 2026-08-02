@@ -39,7 +39,13 @@ function AdminEventTicketsPage() {
         </p>
       ) : null}
 
-      <EventTicketsPanel eventId={eventId} event={event} mode="admin" />
+      <EventTicketsPanel
+        eventId={eventId}
+        event={event}
+        mode="admin"
+        canManage
+        canScan
+      />
     </div>
   );
 }

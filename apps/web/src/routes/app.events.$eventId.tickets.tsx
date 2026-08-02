@@ -2,7 +2,13 @@ import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { EventTicketsPanel } from '@/components/ticketing/EventTicketsPanel';
 import { meQueryOptions } from '@/lib/auth';
-import { canManageTickets, destinationForUser } from '@/lib/auth-routing';
+import {
+  canAccessEventTicketing,
+  canManageTickets,
+  canScanTickets,
+  destinationForUser,
+  isAdminUser,
+} from '@/lib/auth-routing';
 import { getEvent } from '@/lib/events-api';
 import { listAllocations } from '@/lib/ticketing-api';
 
@@ -15,22 +21,34 @@ export const Route = createFileRoute('/app/events/$eventId/tickets')({
     if (user.status !== 'ACTIVE') {
       throw redirect({ to: destinationForUser(user) });
     }
-    if (!canManageTickets(user)) {
+    if (!canAccessEventTicketing(user)) {
       throw redirect({ to: '/app' });
     }
 
     const { eventId } = params;
     let mode: 'host' | 'invited' = 'invited';
     let invitedAllocationId: string | undefined;
+    let canManage = false;
+    let canScan = false;
 
     try {
       const event = await getEvent(eventId);
       const isHost = user.membership?.organizationId === event.organizationId;
-      const allocations = await listAllocations(eventId);
+
       if (isHost) {
+        canManage = canManageTickets(user);
+        canScan = canScanTickets(user) || isAdminUser(user);
+        if (!canManage && !canScan) {
+          throw redirect({ to: '/app' });
+        }
         mode = 'host';
       } else {
+        if (!canManageTickets(user)) {
+          throw redirect({ to: '/app' });
+        }
+        canManage = true;
         mode = 'invited';
+        const allocations = await listAllocations(eventId);
         invitedAllocationId = allocations[0]?.id;
         if (!invitedAllocationId) {
           throw redirect({ to: '/app' });
@@ -43,14 +61,14 @@ export const Route = createFileRoute('/app/events/$eventId/tickets')({
       throw redirect({ to: '/app' });
     }
 
-    return { user, mode, invitedAllocationId };
+    return { user, mode, invitedAllocationId, canManage, canScan };
   },
   component: MemberEventTicketsPage,
 });
 
 function MemberEventTicketsPage() {
   const { eventId } = Route.useParams();
-  const { user, mode, invitedAllocationId } = Route.useRouteContext();
+  const { user, mode, invitedAllocationId, canManage, canScan } = Route.useRouteContext();
 
   const eventQuery = useQuery({
     queryKey: ['events', eventId],
@@ -59,6 +77,7 @@ function MemberEventTicketsPage() {
   });
 
   const event = eventQuery.data;
+  const scanOnly = canScan && !canManage;
 
   return (
     <div className="space-y-6">
@@ -72,9 +91,11 @@ function MemberEventTicketsPage() {
           {event?.name ?? 'Event tickets'}
         </h1>
         <p className="mt-1 text-sm text-ink-500">
-          {mode === 'host'
-            ? 'Manage ticketing, allocations, and guest list.'
-            : `Ticket management for ${user.membership?.organizationName ?? 'your organization'}.`}
+          {scanOnly
+            ? 'Scan tickets at the door for this event.'
+            : mode === 'host'
+              ? 'Manage ticketing, allocations, and guest list.'
+              : `Ticket management for ${user.membership?.organizationName ?? 'your organization'}.`}
         </p>
       </div>
 
@@ -84,6 +105,8 @@ function MemberEventTicketsPage() {
         mode={mode}
         user={user}
         invitedAllocationId={invitedAllocationId}
+        canManage={canManage}
+        canScan={canScan}
       />
     </div>
   );

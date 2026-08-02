@@ -1,4 +1,6 @@
 import {
+  CheckInTicketResponseSchema,
+  CheckInTicketSchema,
   CreateTicketAllocationSchema,
   EventListSchema,
   EventTicketingSchema,
@@ -10,9 +12,11 @@ import {
   PublicClaimResponseSchema,
   TicketAllocationListSchema,
   TicketAllocationSchema,
+  TicketCheckInErrorCodeSchema,
   TicketListSchema,
   TicketSchema,
   UpdateTicketAllocationSchema,
+  type CheckInTicketResponse,
   type CreateTicketAllocation,
   type EventList,
   type EventTicketing,
@@ -29,6 +33,7 @@ import {
   type UpdateTicketAllocation,
 } from '@rally/contracts';
 import { apiFetch, readError } from './api';
+import { TicketCheckInError } from './ticketing/types/check-in';
 
 function toQuery(params: Record<string, string | undefined>): string {
   const search = new URLSearchParams();
@@ -191,4 +196,32 @@ export async function voidTicket(ticketId: string): Promise<Ticket> {
     throw new Error(await readError(res, 'Failed to void ticket'));
   }
   return TicketSchema.parse(await res.json());
+}
+
+export async function checkInTicket(
+  credentialToken: string,
+): Promise<CheckInTicketResponse> {
+  const payload = CheckInTicketSchema.parse({ credentialToken });
+  const res = await apiFetch('/api/tickets/check-in', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    try {
+      const data = (await res.json()) as { code?: string; message?: string };
+      const parsed = TicketCheckInErrorCodeSchema.safeParse(data.code);
+      if (parsed.success) {
+        throw new TicketCheckInError(
+          parsed.data,
+          typeof data.message === 'string' ? data.message : 'Check-in failed',
+        );
+      }
+    } catch (err) {
+      if (err instanceof TicketCheckInError) {
+        throw err;
+      }
+    }
+    throw new Error(await readError(res, 'Check-in failed'));
+  }
+  return CheckInTicketResponseSchema.parse(await res.json());
 }

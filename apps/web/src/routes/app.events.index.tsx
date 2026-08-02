@@ -11,6 +11,7 @@ import {
   canCreateOrgEvents,
   canManageOrgEvents,
   canManageTickets,
+  canScanTickets,
 } from '@/lib/auth-routing';
 import {
   createEvent,
@@ -32,6 +33,8 @@ function AppEventsPage() {
   const canCreate = canCreateOrgEvents(user);
   const canManage = canManageOrgEvents(user);
   const canTickets = canManageTickets(user);
+  const canScan = canScanTickets(user);
+  const canEventTickets = canTickets || canScan;
 
   const [name, setName] = useState('');
   const [type, setType] = useState('');
@@ -270,15 +273,15 @@ function AppEventsPage() {
                       {event.location ? ` · ${event.location}` : ''}
                     </p>
                   </div>
-                  {canManage || canTickets ? (
+                  {canManage || canEventTickets ? (
                     <div className="flex flex-wrap gap-2">
-                      {canTickets ? (
+                      {canEventTickets ? (
                         <Button type="button" size="sm" variant="outline" asChild>
                           <Link
                             to="/app/events/$eventId/tickets"
                             params={{ eventId: event.id }}
                           >
-                            Tickets
+                            {canTickets ? 'Tickets' : 'Scan'}
                           </Link>
                         </Button>
                       ) : null}

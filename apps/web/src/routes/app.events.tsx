@@ -1,6 +1,10 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
 import { meQueryOptions } from '@/lib/auth';
-import { canAccessOrgEvents, destinationForUser } from '@/lib/auth-routing';
+import {
+  canAccessEventTicketing,
+  canAccessOrgEvents,
+  destinationForUser,
+} from '@/lib/auth-routing';
 
 export const Route = createFileRoute('/app/events')({
   beforeLoad: async ({ context }) => {
@@ -11,7 +15,7 @@ export const Route = createFileRoute('/app/events')({
     if (user.status !== 'ACTIVE') {
       throw redirect({ to: destinationForUser(user) });
     }
-    if (!canAccessOrgEvents(user)) {
+    if (!canAccessOrgEvents(user) && !canAccessEventTicketing(user)) {
       throw redirect({ to: '/app' });
     }
     return { user };
