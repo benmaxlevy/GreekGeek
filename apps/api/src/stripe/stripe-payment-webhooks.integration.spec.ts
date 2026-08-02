@@ -16,8 +16,10 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     let orgId = '';
     let eventId = '';
     let allocationId = '';
-    let unpaidTicketId = '';
-    let voidTicketId = '';
+    let buyerId = '';
+    let purchaseId = '';
+    let voidPurchaseId = '';
+    let unpaidTicketIds: string[] = [];
 
     function makeProcessor() {
       const registry = new WebhookHandlerRegistry();
@@ -34,6 +36,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       type: string,
       paymentIntentId: string,
       externalId: string,
+      extraPiFields: Record<string, unknown> = {},
     ) {
       const row = await prisma.webhookEvent.create({
         data: {
@@ -47,7 +50,8 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
               object: {
                 id: paymentIntentId,
                 object: 'payment_intent',
-                metadata: { ticketId: unpaidTicketId },
+                metadata: { purchaseId },
+                ...extraPiFields,
               },
             },
           },
@@ -75,6 +79,15 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
         },
       });
       orgId = org.id;
+      const buyer = await prisma.user.create({
+        data: {
+          email: `pi-wh-buyer-${suffix}@example.com`,
+          name: 'Buyer',
+          passwordHash: 'x',
+          status: 'ACTIVE',
+        },
+      });
+      buyerId = buyer.id;
       const event = await prisma.event.create({
         data: {
           organizationId: orgId,
@@ -98,44 +111,66 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       });
       allocationId = allocation.id;
 
-      const unpaid = await prisma.ticket.create({
+      const purchase = await prisma.purchase.create({
+        data: {
+          buyerUserId: buyerId,
+          eventId,
+          allocationId,
+          quantity: 2,
+          subtotalCents: 2000,
+          feeCents: 200,
+          amountCents: 2200,
+          netCents: 2000,
+          currency: 'usd',
+          status: 'requires_payment',
+          stripePaymentIntentId: `pi_unpaid_${suffix}`,
+        },
+      });
+      purchaseId = purchase.id;
+      const t1 = await prisma.ticket.create({
         data: {
           allocationId,
           status: 'unpaid',
-          credentialToken: `unpaid-${suffix}`,
+          credentialToken: `unpaid-1-${suffix}`,
+          holderUserId: buyerId,
+          purchaseId,
         },
       });
-      unpaidTicketId = unpaid.id;
-      await prisma.ticketPayment.create({
+      const t2 = await prisma.ticket.create({
         data: {
-          ticketId: unpaid.id,
-          stripePaymentIntentId: `pi_unpaid_${suffix}`,
-          amountCents: 1100,
+          allocationId,
+          status: 'unpaid',
+          credentialToken: `unpaid-2-${suffix}`,
+          holderUserId: buyerId,
+          purchaseId,
+        },
+      });
+      unpaidTicketIds = [t1.id, t2.id];
+
+      const voidPurchase = await prisma.purchase.create({
+        data: {
+          buyerUserId: buyerId,
+          eventId,
+          allocationId,
+          quantity: 1,
+          subtotalCents: 1000,
           feeCents: 100,
+          amountCents: 1100,
           netCents: 1000,
           currency: 'usd',
           status: 'requires_payment',
+          stripePaymentIntentId: `pi_void_${suffix}`,
         },
       });
-
-      const voided = await prisma.ticket.create({
+      voidPurchaseId = voidPurchase.id;
+      await prisma.ticket.create({
         data: {
           allocationId,
           status: 'void',
           credentialToken: `void-${suffix}`,
           voidedAt: new Date(),
-        },
-      });
-      voidTicketId = voided.id;
-      await prisma.ticketPayment.create({
-        data: {
-          ticketId: voided.id,
-          stripePaymentIntentId: `pi_void_${suffix}`,
-          amountCents: 1100,
-          feeCents: 100,
-          netCents: 1000,
-          currency: 'usd',
-          status: 'requires_payment',
+          holderUserId: buyerId,
+          purchaseId: voidPurchaseId,
         },
       });
     });
@@ -144,18 +179,17 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       await prisma.webhookEvent.deleteMany({
         where: { externalId: { startsWith: `evt_${suffix}` } },
       });
-      await prisma.ticketPayment.deleteMany({
-        where: { ticket: { allocationId } },
-      });
       await prisma.ticket.deleteMany({ where: { allocationId } });
+      await prisma.purchase.deleteMany({ where: { allocationId } });
       await prisma.ticketAllocation.deleteMany({ where: { id: allocationId } });
       await prisma.event.deleteMany({ where: { id: eventId } });
+      await prisma.user.deleteMany({ where: { id: buyerId } });
       await prisma.organization.deleteMany({ where: { id: orgId } });
       await prisma.university.deleteMany({ where: { id: universityId } });
       await prisma.$disconnect();
     });
 
-    it('payment_intent.succeeded marks unpaid ticket paid; replay is idempotent', async () => {
+    it('payment_intent.succeeded marks all unpaid tickets paid; replay is idempotent', async () => {
       const processor = makeProcessor();
       const piId = `pi_unpaid_${suffix}`;
 
@@ -164,20 +198,25 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
         'payment_intent.succeeded',
         piId,
         `evt_${suffix}_succeeded_1`,
+        { latest_charge: `ch_${suffix}` },
       );
 
-      const ticket = await prisma.ticket.findUnique({
-        where: { id: unpaidTicketId },
+      const tickets = await prisma.ticket.findMany({
+        where: { id: { in: unpaidTicketIds } },
       });
-      expect(ticket?.status).toBe('paid');
-      expect(ticket?.paidAt).not.toBeNull();
-      const payment = await prisma.ticketPayment.findUnique({
-        where: { ticketId: unpaidTicketId },
+      expect(tickets).toHaveLength(2);
+      for (const ticket of tickets) {
+        expect(ticket.status).toBe('paid');
+        expect(ticket.paidAt).not.toBeNull();
+      }
+      const purchase = await prisma.purchase.findUnique({
+        where: { id: purchaseId },
       });
-      expect(payment?.status).toBe('succeeded');
-      expect(payment?.statusMismatch).toBe(false);
+      expect(purchase?.status).toBe('succeeded');
+      expect(purchase?.stripeChargeId).toBe(`ch_${suffix}`);
+      expect(purchase?.statusMismatch).toBe(false);
 
-      const paidAt = ticket?.paidAt;
+      const paidAts = tickets.map((t) => t.paidAt?.getTime());
       await enqueueAndProcess(
         processor,
         'payment_intent.succeeded',
@@ -185,30 +224,44 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
         `evt_${suffix}_succeeded_2`,
       );
 
-      const replay = await prisma.ticket.findUnique({
-        where: { id: unpaidTicketId },
+      const replay = await prisma.ticket.findMany({
+        where: { id: { in: unpaidTicketIds } },
       });
-      expect(replay?.status).toBe('paid');
-      expect(replay?.paidAt?.getTime()).toBe(paidAt?.getTime());
+      expect(replay.map((t) => t.paidAt?.getTime())).toEqual(paidAts);
     });
 
-    it('payment_intent.payment_failed leaves ticket unpaid', async () => {
-      const failedTicket = await prisma.ticket.create({
+    it('payment_intent.payment_failed deletes reserved unpaid tickets', async () => {
+      const failedPurchase = await prisma.purchase.create({
+        data: {
+          buyerUserId: buyerId,
+          eventId,
+          allocationId,
+          quantity: 2,
+          subtotalCents: 2000,
+          feeCents: 200,
+          amountCents: 2200,
+          netCents: 2000,
+          currency: 'usd',
+          status: 'requires_payment',
+          stripePaymentIntentId: `pi_failed_${suffix}`,
+        },
+      });
+      await prisma.ticket.create({
         data: {
           allocationId,
           status: 'unpaid',
-          credentialToken: `failed-${suffix}`,
+          credentialToken: `failed-1-${suffix}`,
+          holderUserId: buyerId,
+          purchaseId: failedPurchase.id,
         },
       });
-      await prisma.ticketPayment.create({
+      await prisma.ticket.create({
         data: {
-          ticketId: failedTicket.id,
-          stripePaymentIntentId: `pi_failed_${suffix}`,
-          amountCents: 1100,
-          feeCents: 100,
-          netCents: 1000,
-          currency: 'usd',
-          status: 'requires_payment',
+          allocationId,
+          status: 'unpaid',
+          credentialToken: `failed-2-${suffix}`,
+          holderUserId: buyerId,
+          purchaseId: failedPurchase.id,
         },
       });
 
@@ -220,14 +273,13 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
         `evt_${suffix}_failed`,
       );
 
-      const ticket = await prisma.ticket.findUnique({
-        where: { id: failedTicket.id },
+      expect(
+        await prisma.ticket.count({ where: { purchaseId: failedPurchase.id } }),
+      ).toBe(0);
+      const purchase = await prisma.purchase.findUnique({
+        where: { id: failedPurchase.id },
       });
-      expect(ticket?.status).toBe('unpaid');
-      const payment = await prisma.ticketPayment.findUnique({
-        where: { ticketId: failedTicket.id },
-      });
-      expect(payment?.status).toBe('failed');
+      expect(purchase?.status).toBe('failed');
     });
 
     it('payment_intent.succeeded on void ticket sets mismatch and keeps void', async () => {
@@ -239,15 +291,15 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
         `evt_${suffix}_void_mismatch`,
       );
 
-      const ticket = await prisma.ticket.findUnique({
-        where: { id: voidTicketId },
+      const ticket = await prisma.ticket.findFirst({
+        where: { purchaseId: voidPurchaseId },
       });
       expect(ticket?.status).toBe('void');
-      const payment = await prisma.ticketPayment.findUnique({
-        where: { ticketId: voidTicketId },
+      const purchase = await prisma.purchase.findUnique({
+        where: { id: voidPurchaseId },
       });
-      expect(payment?.status).toBe('succeeded');
-      expect(payment?.statusMismatch).toBe(true);
+      expect(purchase?.status).toBe('succeeded');
+      expect(purchase?.statusMismatch).toBe(true);
     });
 
     it('unknown PaymentIntent completes without error', async () => {

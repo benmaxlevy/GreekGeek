@@ -5,6 +5,7 @@ import type { WebhookHandlerContext } from '../webhooks/types/webhook-handler.dt
 import {
   STRIPE_PAYMENT_INTENT_WEBHOOK_TYPES,
   extractPaymentIntentId,
+  extractStripeChargeId,
 } from './types/stripe-payment-webhook.dto';
 
 /**
@@ -40,79 +41,107 @@ export class StripePaymentWebhookHandlers implements OnModuleInit {
   }
 
   async handleSucceeded(ctx: WebhookHandlerContext): Promise<void> {
-    const payment = await this.findTicketPayment(ctx);
-    if (!payment) {
+    const purchase = await this.findPurchase(ctx);
+    if (!purchase) {
       return;
     }
 
+    const chargeId = extractStripeChargeId(ctx.payload);
+
     await this.prisma.$transaction(async (tx) => {
-      const locked = await tx.$queryRaw<{ id: string; status: string }[]>`
-        SELECT id, status FROM "Ticket" WHERE id = ${payment.ticketId} FOR UPDATE
+      const lockedPurchase = await tx.$queryRaw<
+        { id: string; status: string }[]
+      >`
+        SELECT id, status FROM "Purchase" WHERE id = ${purchase.id} FOR UPDATE
       `;
-      const ticket = locked[0];
-      if (!ticket) {
-        this.logger.warn(
-          `payment_intent.succeeded ticket missing ticketId=${payment.ticketId} webhookEventId=${ctx.webhookEventId}`,
-        );
+      const row = lockedPurchase[0];
+      if (!row) {
         return;
       }
 
-      if (ticket.status === 'unpaid') {
-        await tx.ticket.update({
-          where: { id: ticket.id },
-          data: { status: 'paid', paidAt: new Date() },
-        });
-        await tx.ticketPayment.update({
-          where: { id: payment.id },
-          data: { status: 'succeeded', statusMismatch: false },
-        });
-        return;
-      }
-
-      if (ticket.status === 'void') {
-        await tx.ticketPayment.update({
-          where: { id: payment.id },
-          data: { status: 'succeeded', statusMismatch: true },
-        });
-        this.logger.warn(
-          `payment_intent.succeeded on void ticket ticketId=${ticket.id} statusMismatch=true webhookEventId=${ctx.webhookEventId}`,
-        );
-        return;
-      }
-
-      // already paid (or other): mark payment succeeded, leave ticket
-      await tx.ticketPayment.update({
-        where: { id: payment.id },
-        data: { status: 'succeeded' },
+      const tickets = await tx.ticket.findMany({
+        where: { purchaseId: purchase.id },
+        select: { id: true, status: true },
       });
+
+      // Lock ticket rows
+      for (const t of tickets) {
+        await tx.$queryRaw`SELECT id FROM "Ticket" WHERE id = ${t.id} FOR UPDATE`;
+      }
+
+      const refreshed = await tx.ticket.findMany({
+        where: { purchaseId: purchase.id },
+        select: { id: true, status: true },
+      });
+
+      let statusMismatch = false;
+      const now = new Date();
+
+      for (const ticket of refreshed) {
+        if (ticket.status === 'unpaid') {
+          await tx.ticket.update({
+            where: { id: ticket.id },
+            data: { status: 'paid', paidAt: now },
+          });
+        } else if (ticket.status === 'void') {
+          statusMismatch = true;
+        }
+      }
+
+      await tx.purchase.update({
+        where: { id: purchase.id },
+        data: {
+          status: 'succeeded',
+          statusMismatch,
+          ...(chargeId ? { stripeChargeId: chargeId } : {}),
+        },
+      });
+
+      if (statusMismatch) {
+        this.logger.warn(
+          `payment_intent.succeeded with void ticket(s) purchaseId=${purchase.id} statusMismatch=true webhookEventId=${ctx.webhookEventId}`,
+        );
+      }
     });
   }
 
   async handleFailed(ctx: WebhookHandlerContext): Promise<void> {
-    const payment = await this.findTicketPayment(ctx);
-    if (!payment) {
+    const purchase = await this.findPurchase(ctx);
+    if (!purchase) {
       return;
     }
-    await this.prisma.ticketPayment.update({
-      where: { id: payment.id },
-      data: { status: 'failed' },
-    });
+    await this.releasePurchaseTickets(purchase.id, 'failed');
   }
 
   async handleCanceled(ctx: WebhookHandlerContext): Promise<void> {
-    const payment = await this.findTicketPayment(ctx);
-    if (!payment) {
+    const purchase = await this.findPurchase(ctx);
+    if (!purchase) {
       return;
     }
-    await this.prisma.ticketPayment.update({
-      where: { id: payment.id },
-      data: { status: 'canceled' },
+    await this.releasePurchaseTickets(purchase.id, 'canceled');
+  }
+
+  private async releasePurchaseTickets(
+    purchaseId: string,
+    status: 'failed' | 'canceled',
+  ): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const locked = await tx.purchase.findUnique({ where: { id: purchaseId } });
+      if (!locked || locked.status !== 'requires_payment') {
+        return;
+      }
+      await tx.ticket.deleteMany({
+        where: { purchaseId, status: 'unpaid' },
+      });
+      await tx.purchase.update({
+        where: { id: purchaseId },
+        data: { status },
+      });
     });
   }
 
-  private async findTicketPayment(ctx: WebhookHandlerContext): Promise<{
+  private async findPurchase(ctx: WebhookHandlerContext): Promise<{
     id: string;
-    ticketId: string;
   } | null> {
     const piId = extractPaymentIntentId(ctx.payload);
     if (!piId) {
@@ -122,18 +151,18 @@ export class StripePaymentWebhookHandlers implements OnModuleInit {
       return null;
     }
 
-    const payment = await this.prisma.ticketPayment.findUnique({
+    const purchase = await this.prisma.purchase.findUnique({
       where: { stripePaymentIntentId: piId },
-      select: { id: true, ticketId: true },
+      select: { id: true },
     });
 
-    if (!payment) {
+    if (!purchase) {
       this.logger.log(
         `PaymentIntent webhook unknown pi=${piId} type=${ctx.type} webhookEventId=${ctx.webhookEventId}`,
       );
       return null;
     }
 
-    return payment;
+    return purchase;
   }
 }
