@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "turbo run dev",
+    "dev:all": "concurrently --kill-others-on-fail \"pnpm run dev\" \"pnpm --filter @rally/api run dev:worker\"",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "concurrently": "^10.0.4",
     "eslint": "^9.32.0",
     "prettier": "^3.6.2",
     "turbo": "^2.5.5",
