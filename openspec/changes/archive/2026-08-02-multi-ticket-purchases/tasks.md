@@ -48,4 +48,4 @@
 
 ## 8. Demo
 
-- [ ] 8.1 Record demo: buyer purchases 2 tickets in one embedded checkout → single PI → both flip paid → 2 QRs scan → abandoned purchase releases held seats
+- [x] 8.1 Record demo: buyer purchases 2 tickets in one embedded checkout → single PI → both flip paid → 2 QRs scan → abandoned purchase releases held seats
