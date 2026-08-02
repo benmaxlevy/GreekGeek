@@ -37,6 +37,7 @@ export function toOrganizationDto(row: {
   stripeAccountId: string | null;
   stripeChargesEnabled: boolean;
   stripePayoutsEnabled: boolean;
+  stripeTransfersEnabled: boolean;
   stripeDetailsSubmitted: boolean;
   stripeRequirementsDue: unknown;
   stripeAccountUpdatedAt: Date | null;
@@ -51,6 +52,7 @@ export function toOrganizationDto(row: {
     stripeAccountId: row.stripeAccountId,
     stripeChargesEnabled: row.stripeChargesEnabled,
     stripePayoutsEnabled: row.stripePayoutsEnabled,
+    stripeTransfersEnabled: row.stripeTransfersEnabled,
     stripeDetailsSubmitted: row.stripeDetailsSubmitted,
     stripeRequirementsDue: row.stripeRequirementsDue ?? null,
     stripeAccountUpdatedAt: row.stripeAccountUpdatedAt

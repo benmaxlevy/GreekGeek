@@ -12,18 +12,20 @@ function isActive(status: CapabilityStatus | undefined): boolean {
 export function mapStripeAccountToOrgFlags(account: Stripe.V2.Core.Account): {
   stripeChargesEnabled: boolean;
   stripePayoutsEnabled: boolean;
+  stripeTransfersEnabled: boolean;
   stripeDetailsSubmitted: boolean;
   stripeRequirementsDue: Prisma.InputJsonValue | typeof Prisma.DbNull;
 } {
   const merchant = account.configuration?.merchant;
   const recipient = account.configuration?.recipient;
 
-  const stripeChargesEnabled = isActive(
-    merchant?.capabilities?.card_payments?.status,
-  );
+  const stripeChargesEnabled = isActive(merchant?.capabilities?.card_payments?.status);
   const stripePayoutsEnabled =
     isActive(merchant?.capabilities?.stripe_balance?.payouts?.status) ||
     isActive(recipient?.capabilities?.stripe_balance?.payouts?.status);
+  const stripeTransfersEnabled = isActive(
+    recipient?.capabilities?.stripe_balance?.stripe_transfers?.status,
+  );
 
   const entries = account.requirements?.entries ?? [];
   const hasBlockingUserRequirements = entries.some(
@@ -43,6 +45,7 @@ export function mapStripeAccountToOrgFlags(account: Stripe.V2.Core.Account): {
   return {
     stripeChargesEnabled,
     stripePayoutsEnabled,
+    stripeTransfersEnabled,
     stripeDetailsSubmitted,
     stripeRequirementsDue,
   };
@@ -107,6 +110,7 @@ export async function syncOrgFromStripeAccount(
     data: {
       stripeChargesEnabled: flags.stripeChargesEnabled,
       stripePayoutsEnabled: flags.stripePayoutsEnabled,
+      stripeTransfersEnabled: flags.stripeTransfersEnabled,
       stripeDetailsSubmitted: flags.stripeDetailsSubmitted,
       stripeRequirementsDue: flags.stripeRequirementsDue,
       stripeAccountUpdatedAt: appliedAt,

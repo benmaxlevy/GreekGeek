@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Organization } from '@prisma/client';
 import type { Env } from '../config/env.schema';
@@ -21,6 +17,7 @@ type OrgStripeRow = Pick<
   | 'stripeAccountId'
   | 'stripeChargesEnabled'
   | 'stripePayoutsEnabled'
+  | 'stripeTransfersEnabled'
   | 'stripeDetailsSubmitted'
   | 'stripeRequirementsDue'
   | 'stripeAccountUpdatedAt'
@@ -64,10 +61,7 @@ export class StripeConnectService {
     organizationId: string,
     contactEmail: string,
   ): Promise<StripeConnectOnboardingLinkResponse> {
-    const accountId = await this.ensureStripeAccountId(
-      organizationId,
-      contactEmail,
-    );
+    const accountId = await this.ensureStripeAccountId(organizationId, contactEmail);
     const org = await this.requireOrg(organizationId);
     const link = await this.mintAccountLink(org, accountId);
     return { url: link.url };
@@ -136,13 +130,9 @@ export class StripeConnectService {
     );
   }
 
-  private async mintAccountLink(
-    org: OrgStripeRow,
-    accountId: string,
-  ): Promise<{ url: string }> {
+  private async mintAccountLink(org: OrgStripeRow, accountId: string): Promise<{ url: string }> {
     const useCaseType =
-      org.stripeDetailsSubmitted &&
-      this.hasOutstandingRequirements(org.stripeRequirementsDue)
+      org.stripeDetailsSubmitted && this.hasOutstandingRequirements(org.stripeRequirementsDue)
         ? 'account_update'
         : 'account_onboarding';
 
@@ -174,6 +164,7 @@ export class StripeConnectService {
         stripeAccountId: true,
         stripeChargesEnabled: true,
         stripePayoutsEnabled: true,
+        stripeTransfersEnabled: true,
         stripeDetailsSubmitted: true,
         stripeRequirementsDue: true,
         stripeAccountUpdatedAt: true,
@@ -190,6 +181,7 @@ export class StripeConnectService {
       stripeAccountId: org.stripeAccountId,
       stripeChargesEnabled: org.stripeChargesEnabled,
       stripePayoutsEnabled: org.stripePayoutsEnabled,
+      stripeTransfersEnabled: org.stripeTransfersEnabled,
       stripeDetailsSubmitted: org.stripeDetailsSubmitted,
       stripeRequirementsDue: org.stripeRequirementsDue ?? null,
       stripeAccountUpdatedAt: org.stripeAccountUpdatedAt
