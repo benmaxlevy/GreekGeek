@@ -18,6 +18,8 @@ export const envSchema = z.object({
   MAX_TICKETS_PER_USER_PER_EVENT: z.coerce.number().int().positive().default(2),
   /** Minutes before open requires_payment purchase expires (default 5). */
   PURCHASE_TTL_MINUTES: z.coerce.number().int().positive().default(5),
+  /** Days after event end/start before automatic payout release (default 5). */
+  PAYOUT_HOLD_DAYS: z.coerce.number().int().nonnegative().default(5),
 });
 
 export type Env = z.infer<typeof envSchema>;
