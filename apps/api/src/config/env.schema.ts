@@ -12,6 +12,8 @@ export const envSchema = z.object({
   /** Pin Stripe Accounts v2 preview (e.g. 2026-07-29.preview). Bump with care. */
   STRIPE_API_VERSION: z.string().min(1),
   APP_URL: z.string().url(),
+  /** Rally platform fee as percent of ticket price (default 10). */
+  RALLY_FEE_PERCENT: z.coerce.number().nonnegative().default(10),
 });
 
 export type Env = z.infer<typeof envSchema>;
