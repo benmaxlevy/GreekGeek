@@ -76,7 +76,7 @@ function MyTicketsPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">My tickets</h1>
         <p className="mt-1 text-sm text-ink-500">
-          View your tickets and buy from on-sale events (your org pool or public).
+          View your tickets and buy from events that are on sale.
           Tap a paid ticket to show its QR at the door.
         </p>
       </div>

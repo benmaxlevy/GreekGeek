@@ -276,8 +276,8 @@ export function EventTicketsPanel({
       ? [
           ...(canManage
             ? ([
-                { id: 'config' as const, label: 'Config' },
-                { id: 'allocations' as const, label: 'Allocations' },
+                { id: 'config' as const, label: 'Settings' },
+                { id: 'allocations' as const, label: 'Ticket pools' },
                 { id: 'tickets' as const, label: 'Tickets' },
                 { id: 'guests' as const, label: 'Guest list' },
               ] as const)
@@ -307,7 +307,7 @@ export function EventTicketsPanel({
       {tab === 'config' && isHost && canManage ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Ticketing config</CardTitle>
+            <CardTitle className="text-lg">Ticketing settings</CardTitle>
           </CardHeader>
           <CardContent>
             <form
@@ -333,7 +333,7 @@ export function EventTicketsPanel({
                     <Label htmlFor="ticket-capacity">
                       Ticket capacity
                       {event?.maxHeadcount
-                        ? ` (max headcount ${event.maxHeadcount})`
+                        ? ` (event max ${event.maxHeadcount})`
                         : ''}
                     </Label>
                     <Input
@@ -394,7 +394,7 @@ export function EventTicketsPanel({
               ) : null}
               <div className="sm:col-span-2">
                 <Button type="submit" isLoading={configMutation.isPending}>
-                  Save config
+                  Save
                 </Button>
               </div>
             </form>
@@ -412,7 +412,7 @@ export function EventTicketsPanel({
           ) : null}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Create allocation</CardTitle>
+              <CardTitle className="text-lg">Create ticket pool</CardTitle>
             </CardHeader>
             <CardContent>
               <form
@@ -491,7 +491,7 @@ export function EventTicketsPanel({
                 </div>
                 <div className="sm:col-span-2">
                   <Button type="submit" isLoading={createAllocMutation.isPending}>
-                    Create allocation
+                    Create ticket pool
                   </Button>
                 </div>
               </form>
@@ -503,7 +503,7 @@ export function EventTicketsPanel({
               {allocationsQuery.isLoading ? (
                 <p className="p-6 text-sm text-ink-500">Loading…</p>
               ) : allocations.length === 0 ? (
-                <p className="p-6 text-sm text-ink-500">No allocations yet.</p>
+                <p className="p-6 text-sm text-ink-500">No ticket pools yet.</p>
               ) : (
                 <ul className="divide-y divide-border-subtle">
                   {allocations.map((alloc) => (
@@ -571,7 +571,7 @@ export function EventTicketsPanel({
                 )
               : (
                   <p className="text-sm text-ink-500">
-                    No allocation for your organization on this event yet.
+                    No ticket pool for your organization on this event yet.
                   </p>
                 )}
         </div>

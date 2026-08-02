@@ -104,7 +104,7 @@ function TicketPayPage() {
           Pay for ticket
         </h1>
         <p className="mt-1 text-sm text-ink-500">
-          Card charges go to Rally. Your QR unlocks after payment confirms.
+          Pay for your ticket. Your QR unlocks after payment confirms.
         </p>
       </div>
 

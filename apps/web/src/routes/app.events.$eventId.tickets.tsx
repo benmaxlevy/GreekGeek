@@ -94,8 +94,8 @@ function MemberEventTicketsPage() {
           {scanOnly
             ? 'Scan tickets at the door for this event.'
             : mode === 'host'
-              ? 'Manage ticketing, allocations, and guest list.'
-              : `Ticket management for ${user.membership?.organizationName ?? 'your organization'}.`}
+              ? 'Manage tickets, ticket pools, and the guest list.'
+              : `Manage tickets for ${user.membership?.organizationName ?? 'your organization'}.`}
         </p>
       </div>
 

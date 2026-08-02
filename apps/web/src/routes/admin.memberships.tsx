@@ -110,8 +110,7 @@ function AdminMembershipsPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Memberships</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Assign ACTIVE users to an organization (one membership per user). Admins cannot hold
-          membership.
+          Assign users to organizations.
         </p>
       </div>
 

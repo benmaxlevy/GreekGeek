@@ -65,10 +65,9 @@ function AdminWebhookEventsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[28px] font-medium tracking-tight">Webhook events</h1>
+        <h1 className="text-[28px] font-medium tracking-tight">Payment events</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Inbox of inbound webhook events. Filter by status; re-enqueue failed
-          rows to retry processing.
+          Review payment events from Stripe and retry ones that failed.
         </p>
       </div>
 
@@ -91,9 +90,9 @@ function AdminWebhookEventsPage() {
       <Card>
         <CardContent className="p-0">
           {listQuery.isLoading ? (
-            <p className="p-6 text-sm text-ink-500">Loading webhook events…</p>
+            <p className="p-6 text-sm text-ink-500">Loading events…</p>
           ) : events.length === 0 ? (
-            <p className="p-6 text-sm text-ink-500">No webhook events for this filter.</p>
+            <p className="p-6 text-sm text-ink-500">No events for this filter.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] text-left text-sm">
@@ -145,7 +144,7 @@ function AdminWebhookEventsPage() {
                             }
                             onClick={() => requeueMutation.mutate(event.id)}
                           >
-                            Re-enqueue
+                            Retry
                           </Button>
                         ) : null}
                       </td>

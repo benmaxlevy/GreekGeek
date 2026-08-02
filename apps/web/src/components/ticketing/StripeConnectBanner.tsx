@@ -19,8 +19,7 @@ export function StripeConnectBanner({
           Connect payout account required
         </p>
         <p className="text-sm text-ink-300">
-          Paid tickets need the host organization&apos;s Stripe Connect account
-          with charges enabled.
+          This chapter needs a payout account before selling paid tickets.
         </p>
         {canManagePayments ? (
           <Button asChild size="sm" variant="outline">

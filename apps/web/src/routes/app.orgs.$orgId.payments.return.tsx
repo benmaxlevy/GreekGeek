@@ -56,11 +56,11 @@ function OrgPaymentsReturnBridge() {
 
   return (
     <div className="space-y-3">
-      <h1 className="text-[28px] font-medium tracking-tight">Returning from Stripe</h1>
+      <h1 className="text-[28px] font-medium tracking-tight">Finishing setup</h1>
       {error ? (
         <p className="text-sm text-[color:var(--error)]">{error}</p>
       ) : (
-        <p className="text-sm text-ink-500">Syncing account status…</p>
+        <p className="text-sm text-ink-500">Updating account…</p>
       )}
     </div>
   );

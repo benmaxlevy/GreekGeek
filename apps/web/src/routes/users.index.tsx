@@ -62,8 +62,7 @@ function OfficerPendingUsersPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Pending approvals</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Applicants who requested your organization. Approve activates with membership to
-          that org; deny blocks access.
+          Approve or deny people who asked to join your organization.
         </p>
       </div>
 

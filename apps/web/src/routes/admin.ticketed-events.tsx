@@ -37,7 +37,7 @@ function AdminTicketedEventsPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Ticketed events</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Events with ticketing enabled. Manage allocations and tickets per event.
+          Browse events with ticketing and manage their tickets.
         </p>
       </div>
 

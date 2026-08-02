@@ -29,7 +29,7 @@ function stripeStatusLabel(org: Organization): string {
   if (state === 'not_started') return 'Not started';
   if (state === 'ready') return 'Ready';
   if (state === 'restricted') return 'Restricted';
-  return 'Requirements due';
+  return 'Action needed';
 }
 
 function AdminOrganizationsPage() {
@@ -115,7 +115,7 @@ function AdminOrganizationsPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Organizations</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Chapters bound to a university. Stripe flags are read-only from Connect sync.
+          Create and manage chapters linked to universities.
         </p>
       </div>
 
@@ -268,7 +268,7 @@ function AdminOrganizationsPage() {
                         <Badge
                           variant={connectState === 'ready' ? 'default' : 'secondary'}
                         >
-                          Stripe: {stripeStatusLabel(org)}
+                          Payouts: {stripeStatusLabel(org)}
                         </Badge>
                       </div>
                       <p className="text-sm text-ink-500">

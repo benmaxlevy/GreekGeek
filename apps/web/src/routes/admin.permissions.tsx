@@ -111,8 +111,7 @@ function AdminPermissionsPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Permissions</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Seeded catalog is read-only (includes payments.manage). Grant or revoke on
-          ACTIVE members only.
+          See available permissions and grant them to active members.
         </p>
       </div>
 
@@ -120,13 +119,13 @@ function AdminPermissionsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Permission catalog</CardTitle>
+          <CardTitle className="text-lg">Available permissions</CardTitle>
         </CardHeader>
         <CardContent>
           {catalogQuery.isLoading ? (
-            <p className="text-sm text-ink-500">Loading catalog…</p>
+            <p className="text-sm text-ink-500">Loading permissions…</p>
           ) : catalog.length === 0 ? (
-            <p className="text-sm text-ink-500">No permissions seeded.</p>
+            <p className="text-sm text-ink-500">No permissions available.</p>
           ) : (
             <ul className="space-y-3">
               {catalog.map((p) => (

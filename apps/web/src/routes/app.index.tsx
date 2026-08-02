@@ -20,8 +20,7 @@ function AppHomePage() {
         <h1 className="text-[28px] font-medium tracking-tight">Hello, {user.name}</h1>
       </CardHeader>
       <CardContent className="space-y-2 text-sm text-ink-300">
-        <p>Authenticated shell is live. Role: {user.role}.</p>
-        <p className="text-ink-500">This placeholder exercises AppShell + route guards.</p>
+        <p>Welcome to Rally. Use the sidebar to manage events and tickets.</p>
       </CardContent>
     </Card>
   );

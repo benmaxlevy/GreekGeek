@@ -53,11 +53,11 @@ function OrgPaymentsRefreshBridge() {
 
   return (
     <div className="space-y-3">
-      <h1 className="text-[28px] font-medium tracking-tight">Refreshing Stripe link</h1>
+      <h1 className="text-[28px] font-medium tracking-tight">Continue setup</h1>
       {error ? (
         <p className="text-sm text-[color:var(--error)]">{error}</p>
       ) : (
-        <p className="text-sm text-ink-500">Opening Stripe onboarding…</p>
+        <p className="text-sm text-ink-500">Opening payout account setup…</p>
       )}
     </div>
   );

@@ -41,22 +41,22 @@ const STATE_COPY: Record<
 > = {
   not_started: {
     title: 'Payout account not connected',
-    body: 'Connect a Stripe payout account before selling paid tickets for this chapter.',
+    body: 'Connect a payout account before selling paid tickets for this chapter.',
     badge: 'Not started',
   },
   requirements_due: {
-    title: 'Finish Stripe onboarding',
-    body: 'Stripe still needs information before this chapter can accept charges.',
-    badge: 'Requirements due',
+    title: 'Finish setup',
+    body: 'More information is needed before this chapter can accept payments.',
+    badge: 'Action needed',
   },
   ready: {
     title: 'Ready for paid tickets',
-    body: 'Charges are enabled. Paid allocations and on-sale events can proceed.',
+    body: 'This chapter can accept payments and sell paid tickets.',
     badge: 'Ready',
   },
   restricted: {
     title: 'Account restricted',
-    body: 'Charges are disabled until outstanding Stripe requirements are resolved.',
+    body: 'Payments are paused until account issues are resolved in Stripe.',
     badge: 'Restricted',
   },
 };
@@ -95,7 +95,7 @@ function OrgPaymentsSettingsPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Payments</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Stripe Connect status for this organization. Flags sync from Stripe only.
+          Connect a payout account so your chapter can sell paid tickets.
         </p>
       </div>
 
@@ -114,7 +114,7 @@ function OrgPaymentsSettingsPage() {
           </CardContent>
         </Card>
       ) : statusQuery.isLoading ? (
-        <p className="text-sm text-ink-500">Loading Connect status…</p>
+        <p className="text-sm text-ink-500">Loading payment status…</p>
       ) : statusQuery.isError ? (
         <p className="text-sm text-[color:var(--error)]">
           {(statusQuery.error as Error).message}
@@ -134,7 +134,7 @@ function OrgPaymentsSettingsPage() {
 
             <dl className="grid gap-3 text-sm sm:grid-cols-2">
               <div>
-                <dt className="text-ink-500">Stripe account</dt>
+                <dt className="text-ink-500">Account</dt>
                 <dd className="mt-1 font-mono text-ink-100">
                   {status.stripeAccountId ?? '—'}
                 </dd>
@@ -160,13 +160,13 @@ function OrgPaymentsSettingsPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-ink-500">Details submitted</dt>
+                <dt className="text-ink-500">Profile complete</dt>
                 <dd className="mt-1 text-ink-100">
                   {status.stripeDetailsSubmitted ? 'Yes' : 'No'}
                 </dd>
               </div>
               <div>
-                <dt className="text-ink-500">Requirements due</dt>
+                <dt className="text-ink-500">Action needed</dt>
                 <dd className="mt-1 text-ink-100">
                   {hasOutstandingRequirements(status.stripeRequirementsDue)
                     ? 'Yes'

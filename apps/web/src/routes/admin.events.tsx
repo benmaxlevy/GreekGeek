@@ -105,7 +105,7 @@ function AdminEventsPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Events</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Manage events across organizations. Create requires an organization.
+          Create and manage events across organizations.
         </p>
       </div>
 

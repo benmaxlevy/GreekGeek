@@ -112,7 +112,7 @@ function AppEventsPage() {
         <p className="mt-1 text-sm text-ink-500">
           {user.membership?.organizationName
             ? `Events for ${user.membership.organizationName}.`
-            : 'Organization events.'}
+            : 'Browse and manage your organization events.'}
         </p>
       </div>
 

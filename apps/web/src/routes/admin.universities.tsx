@@ -83,7 +83,7 @@ function AdminUniversitiesPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Universities</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Create and manage universities. Delete fails with conflict when organizations exist.
+          Create and manage universities.
         </p>
       </div>
 

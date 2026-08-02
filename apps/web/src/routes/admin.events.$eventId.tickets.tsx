@@ -30,7 +30,7 @@ function AdminEventTicketsPage() {
           {event?.name ?? 'Event tickets'}
         </h1>
         <p className="mt-1 text-sm text-ink-500">
-          Admin ticketing config, allocations, and guest list.
+          Set up tickets, ticket pools, and the guest list for this event.
         </p>
       </div>
 

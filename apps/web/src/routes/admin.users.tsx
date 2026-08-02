@@ -159,8 +159,7 @@ function AdminUsersPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Users</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Pending queue shows requested org. Approve confirms or overrides, then activates. Deny /
-          deactivate / reactivate unchanged. Permissions only after ACTIVE.
+          Approve or deny applicants, and manage user accounts.
         </p>
       </div>
 

@@ -177,7 +177,7 @@ export function TicketScanner({ eventId }: Props) {
                 id="credential-paste"
                 value={pasteValue}
                 onChange={(e) => setPasteValue(e.target.value)}
-                placeholder="Paste token from QR"
+                placeholder="Paste code from QR"
                 className="min-h-11 font-mono text-sm"
                 autoComplete="off"
               />
