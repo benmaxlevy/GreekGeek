@@ -8,6 +8,10 @@ export const envSchema = z.object({
   WEB_ORIGIN: z.string().url(),
   REDIS_URL: z.string().url(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1),
+  STRIPE_SECRET_KEY: z.string().min(1),
+  /** Pin Stripe Accounts v2 preview (e.g. 2026-07-29.preview). Bump with care. */
+  STRIPE_API_VERSION: z.string().min(1),
+  APP_URL: z.string().url(),
 });
 
 export type Env = z.infer<typeof envSchema>;

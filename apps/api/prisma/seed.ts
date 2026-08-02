@@ -28,6 +28,10 @@ const PERMISSIONS = [
     key: 'tickets.scan',
     description: 'Scan and check in tickets at hosted events',
   },
+  {
+    key: 'payments.manage',
+    description: 'Manage organization Stripe Connect and payments settings',
+  },
 ] as const;
 
 async function main() {

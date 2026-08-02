@@ -1,16 +1,19 @@
 import { z } from 'zod';
+import { OrgStripeFieldsSchema } from './stripe-connect';
 
 export const OrganizationTypeSchema = z.enum(['FRATERNITY', 'SORORITY']);
 export type OrganizationType = z.infer<typeof OrganizationTypeSchema>;
 
-export const OrganizationSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  type: OrganizationTypeSchema,
-  universityId: z.string(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-});
+export const OrganizationSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    type: OrganizationTypeSchema,
+    universityId: z.string(),
+    createdAt: z.string().datetime(),
+    updatedAt: z.string().datetime(),
+  })
+  .merge(OrgStripeFieldsSchema);
 export type Organization = z.infer<typeof OrganizationSchema>;
 
 export const CreateOrganizationSchema = z.object({

@@ -46,6 +46,16 @@ export {
   type OrganizationList,
 } from './organizations';
 export {
+  StripeRequirementsDueSchema,
+  OrgStripeFieldsSchema,
+  StripeConnectStatusResponseSchema,
+  StripeConnectOnboardingLinkResponseSchema,
+  type StripeRequirementsDue,
+  type OrgStripeFields,
+  type StripeConnectStatusResponse,
+  type StripeConnectOnboardingLinkResponse,
+} from './stripe-connect';
+export {
   MembershipSchema,
   AssignMembershipSchema,
   MembershipListSchema,

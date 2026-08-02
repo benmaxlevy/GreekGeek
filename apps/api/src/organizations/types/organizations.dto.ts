@@ -34,6 +34,12 @@ export function toOrganizationDto(row: {
   name: string;
   type: Organization['type'];
   universityId: string;
+  stripeAccountId: string | null;
+  stripeChargesEnabled: boolean;
+  stripePayoutsEnabled: boolean;
+  stripeDetailsSubmitted: boolean;
+  stripeRequirementsDue: unknown;
+  stripeAccountUpdatedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }): Organization {
@@ -42,6 +48,14 @@ export function toOrganizationDto(row: {
     name: row.name,
     type: row.type,
     universityId: row.universityId,
+    stripeAccountId: row.stripeAccountId,
+    stripeChargesEnabled: row.stripeChargesEnabled,
+    stripePayoutsEnabled: row.stripePayoutsEnabled,
+    stripeDetailsSubmitted: row.stripeDetailsSubmitted,
+    stripeRequirementsDue: row.stripeRequirementsDue ?? null,
+    stripeAccountUpdatedAt: row.stripeAccountUpdatedAt
+      ? row.stripeAccountUpdatedAt.toISOString()
+      : null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };

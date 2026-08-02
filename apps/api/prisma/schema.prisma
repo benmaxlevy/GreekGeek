@@ -80,17 +80,23 @@ model University {
 }
 
 model Organization {
-  id               String           @id @default(cuid())
-  name             String
-  type             OrganizationType
-  universityId     String
-  university       University       @relation(fields: [universityId], references: [id])
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  memberships         Membership[]
-  events              Event[]
-  ticketAllocations   TicketAllocation[]
-  requestedByUsers    User[]             @relation("UserRequestedOrganization")
+  id                       String           @id @default(cuid())
+  name                     String
+  type                     OrganizationType
+  universityId             String
+  university               University       @relation(fields: [universityId], references: [id])
+  stripeAccountId          String?          @unique
+  stripeChargesEnabled     Boolean          @default(false)
+  stripePayoutsEnabled     Boolean          @default(false)
+  stripeDetailsSubmitted   Boolean          @default(false)
+  stripeRequirementsDue    Json?
+  stripeAccountUpdatedAt   DateTime?
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+  memberships              Membership[]
+  events                   Event[]
+  ticketAllocations        TicketAllocation[]
+  requestedByUsers         User[]           @relation("UserRequestedOrganization")
 
   @@unique([universityId, name])
   @@index([universityId])
