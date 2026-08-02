@@ -65,9 +65,9 @@
 
 ## 9. End-to-end verification and demo
 
-- [ ] 9.1 Run end-to-end flow: host, invited, and public sales; event ends; hold or ADMIN early release; one host transfer of net only; Rally fee retained.
-- [ ] 9.2 Demonstrate one disputed purchase excluded while remaining purchases release, including multi-ticket whole-purchase behavior.
-- [ ] 9.3 Demonstrate late sale producing a second batchSeq and transfer eligibility.
-- [ ] 9.4 Demonstrate post-release dispute flagged for later clawback with historical amount unchanged and no automatic reverse transfer.
-- [ ] 9.5 Demonstrate job rerun creates no duplicate EventPayout or Stripe transfer.
+- [x] 9.1 Run end-to-end flow: host, invited, and public sales; event ends; hold or ADMIN early release; one host transfer of net only; Rally fee retained.
+- [x] 9.2 Demonstrate one disputed purchase excluded while remaining purchases release, including multi-ticket whole-purchase behavior.
+- [x] 9.3 Demonstrate late sale producing a second batchSeq and transfer eligibility.
+- [x] 9.4 Demonstrate post-release dispute flagged for later clawback with historical amount unchanged and no automatic reverse transfer.
+- [x] 9.5 Demonstrate job rerun creates no duplicate EventPayout or Stripe transfer.
 - [x] 9.6 Run `openspec validate event-payouts --strict` and record all artifacts ready for implementation.
