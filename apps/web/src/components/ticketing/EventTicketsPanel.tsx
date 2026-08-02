@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { StripeConnectBanner } from '@/components/ticketing/StripeConnectBanner';
 import { TicketScanner } from '@/components/ticketing/TicketScanner';
 import { listOrganizations } from '@/lib/admin-api';
-import { canManageOrgPayments } from '@/lib/auth-routing';
+import { canManageOrgPayments, isAdminUser } from '@/lib/auth-routing';
 import {
   createAllocation,
   guestList,
@@ -88,6 +88,7 @@ export function EventTicketsPanel({
   const canManage =
     canManageProp ?? (mode === 'invited' || mode === 'admin' || mode === 'host');
   const canScan = canScanProp ?? mode === 'admin';
+  const canMarkPaid = Boolean(user && isAdminUser(user)) || mode === 'admin';
   const scanOnly = canScan && !canManage;
   const [tab, setTab] = useState<Tab>(
     scanOnly ? 'scan' : isHost && canManage ? 'config' : 'tickets',
@@ -525,8 +526,9 @@ export function EventTicketsPanel({
       {tab === 'tickets' && canManage ? (
         <div className="space-y-6">
           <p className="text-sm text-ink-500">
-            Members buy their own tickets from My tickets. Here you can void or mark
-            paid tickets that have been purchased.
+            Members buy and pay for their own tickets from My tickets. Here you can
+            void purchased tickets
+            {canMarkPaid ? ' or mark them paid (admin escape hatch)' : ''}.
           </p>
 
           {isHost
@@ -536,6 +538,7 @@ export function EventTicketsPanel({
                   alloc={alloc}
                   tickets={tickets.filter((t) => t.allocationId === alloc.id)}
                   loading={ticketsQuery.isLoading}
+                  canMarkPaid={canMarkPaid}
                   onMarkPaid={(id) => markPaidMutation.mutate(id)}
                   onVoid={(id) => voidMutation.mutate(id)}
                   actionPending={markPaidMutation.isPending || voidMutation.isPending}
@@ -560,6 +563,7 @@ export function EventTicketsPanel({
                     }
                     tickets={tickets}
                     loading={ticketsQuery.isLoading}
+                    canMarkPaid={canMarkPaid}
                     onMarkPaid={(id) => markPaidMutation.mutate(id)}
                     onVoid={(id) => voidMutation.mutate(id)}
                     actionPending={markPaidMutation.isPending || voidMutation.isPending}
@@ -694,6 +698,7 @@ function AllocationTicketsSection({
   alloc,
   tickets,
   loading,
+  canMarkPaid,
   onMarkPaid,
   onVoid,
   actionPending,
@@ -701,6 +706,7 @@ function AllocationTicketsSection({
   alloc: TicketAllocation;
   tickets: Ticket[];
   loading: boolean;
+  canMarkPaid: boolean;
   onMarkPaid: (id: string) => void;
   onVoid: (id: string) => void;
   actionPending: boolean;
@@ -737,7 +743,7 @@ function AllocationTicketsSection({
                   <Badge variant={statusBadgeVariant(ticket.status)}>
                     {ticket.status}
                   </Badge>
-                  {ticket.status === 'unpaid' ? (
+                  {canMarkPaid && ticket.status === 'unpaid' ? (
                     <Button
                       type="button"
                       size="sm"

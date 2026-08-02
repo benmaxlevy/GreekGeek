@@ -13,6 +13,7 @@ import {
   TicketAllocationListSchema,
   TicketAllocationSchema,
   TicketCheckInErrorCodeSchema,
+  TicketCheckoutResponseSchema,
   TicketListSchema,
   TicketSchema,
   UpdateTicketAllocationSchema,
@@ -29,6 +30,7 @@ import {
   type Ticket,
   type TicketAllocation,
   type TicketAllocationList,
+  type TicketCheckoutResponse,
   type TicketList,
   type UpdateTicketAllocation,
 } from '@rally/contracts';
@@ -186,6 +188,19 @@ export async function markTicketPaid(ticketId: string): Promise<Ticket> {
     throw new Error(await readError(res, 'Failed to mark ticket paid'));
   }
   return TicketSchema.parse(await res.json());
+}
+
+export async function checkoutTicket(
+  ticketId: string,
+): Promise<TicketCheckoutResponse> {
+  const res = await apiFetch(`/api/tickets/${ticketId}/checkout`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+  if (!res.ok) {
+    throw new Error(await readError(res, 'Failed to start checkout'));
+  }
+  return TicketCheckoutResponseSchema.parse(await res.json());
 }
 
 export async function voidTicket(ticketId: string): Promise<Ticket> {

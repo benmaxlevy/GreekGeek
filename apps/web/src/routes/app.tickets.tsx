@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { createFileRoute, redirect } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TicketQrCode } from '@/components/ticketing/TicketQrCode';
 import { Badge } from '@/components/ui/badge';
@@ -7,9 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { meQueryOptions } from '@/lib/auth';
 import { destinationForUser } from '@/lib/auth-routing';
-import { listClaimableEvents, listMyTickets, markTicketPaid, publicClaim } from '@/lib/ticketing-api';
+import { listClaimableEvents, listMyTickets, publicClaim } from '@/lib/ticketing-api';
 
 export const Route = createFileRoute('/app/tickets')({
+  validateSearch: (search: Record<string, unknown>): { highlight?: string } => ({
+    highlight:
+      typeof search.highlight === 'string' ? search.highlight : undefined,
+  }),
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient.ensureQueryData(meQueryOptions);
     if (!user) {
@@ -25,8 +29,17 @@ export const Route = createFileRoute('/app/tickets')({
 
 function MyTicketsPage() {
   const queryClient = useQueryClient();
+  const { highlight } = Route.useSearch();
   const [error, setError] = useState<string | null>(null);
-  const [expandedTicketId, setExpandedTicketId] = useState<string | null>(null);
+  const [expandedTicketId, setExpandedTicketId] = useState<string | null>(
+    highlight ?? null,
+  );
+
+  useEffect(() => {
+    if (highlight) {
+      setExpandedTicketId(highlight);
+    }
+  }, [highlight]);
 
   const ticketsQuery = useQuery({
     queryKey: ['tickets', 'mine'],
@@ -36,15 +49,6 @@ function MyTicketsPage() {
   const claimableQuery = useQuery({
     queryKey: ['events', 'claimable'],
     queryFn: () => listClaimableEvents(),
-  });
-
-  const markPaidMutation = useMutation({
-    mutationFn: (ticketId: string) => markTicketPaid(ticketId),
-    onSuccess: async () => {
-      setError(null);
-      await queryClient.invalidateQueries({ queryKey: ['tickets', 'mine'] });
-    },
-    onError: (err: Error) => setError(err.message),
   });
 
   const claimMutation = useMutation({
@@ -123,6 +127,8 @@ function MyTicketsPage() {
               {myTickets.map((ticket) => {
                 const expanded = expandedTicketId === ticket.id;
                 const canRevealQr = ticket.status === 'paid';
+                // Free tickets auto-paid on issue/claim — unpaid always needs Pay.
+                const needsPayment = ticket.status === 'unpaid';
 
                 return (
                   <li key={ticket.id}>
@@ -174,18 +180,15 @@ function MyTicketsPage() {
                         >
                           {ticket.status}
                         </Badge>
-                        {ticket.status === 'unpaid' ? (
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            disabled={markPaidMutation.isPending}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              markPaidMutation.mutate(ticket.id);
-                            }}
-                          >
-                            Mark paid
+                        {needsPayment ? (
+                          <Button asChild size="sm">
+                            <Link
+                              to="/app/tickets/$id/pay"
+                              params={{ id: ticket.id }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Pay
+                            </Link>
                           </Button>
                         ) : null}
                       </div>

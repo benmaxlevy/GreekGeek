@@ -34,12 +34,12 @@
 
 ## 5. Frontend — pay page + holder UI
 
-- [ ] 5.1 Add `@stripe/stripe-js` and `@stripe/react-stripe-js`; Stripe provider with `VITE_STRIPE_PUBLISHABLE_KEY`
-- [ ] 5.2 Route `/app/tickets/$id/pay`: loader calls checkout API; Payment Element with `automatic_payment_methods`; itemized fee display
-- [ ] 5.3 States: loading, error, processing, success; double-submit guard; `confirmPayment` with `redirect: 'if_required'`
-- [ ] 5.4 On success: refetch ticket until paid (poll/refresh); navigate to ticket detail with QR
-- [ ] 5.5 `/app/tickets`: remove holder mark-paid button; add Pay CTA for unpaid paid-allocation tickets
-- [ ] 5.6 Commit: `add embedded ticket payment page and holder pay cta`
+- [x] 5.1 Add `@stripe/stripe-js` and `@stripe/react-stripe-js`; Stripe provider with `VITE_STRIPE_PUBLISHABLE_KEY`
+- [x] 5.2 Route `/app/tickets/$id/pay`: loader calls checkout API; Payment Element with `automatic_payment_methods`; itemized fee display
+- [x] 5.3 States: loading, error, processing, success; double-submit guard; `confirmPayment` with `redirect: 'if_required'`
+- [x] 5.4 On success: refetch ticket until paid (poll/refresh); navigate to ticket detail with QR
+- [x] 5.5 `/app/tickets`: remove holder mark-paid button; add Pay CTA for unpaid paid-allocation tickets
+- [x] 5.6 Commit: `add embedded ticket payment page and holder pay cta`
 
 ## 6. Verification / demos
 
