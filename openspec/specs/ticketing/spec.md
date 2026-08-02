@@ -400,3 +400,4 @@ Paid tickets MUST expose QR (or equivalent scannable encoding) derived from the 
 
 - **WHEN** a holder views a void ticket
 - **THEN** no scannable QR is shown or scan is rejected by check-in
+

@@ -43,8 +43,8 @@
 
 ## 6. Verification / demos
 
-- [ ] 6.1 Playwright demo: connected org → paid allocation → holder pays via embedded Element → worker flips paid → QR visible + host scan succeeds
-- [ ] 6.2 Playwright demo: non-holder blocked from checkout/pay page
-- [ ] 6.3 Playwright demo: unready org cannot create paid allocation (existing gate regression)
-- [ ] 6.4 Manual: `stripe listen` + test card; verify fee line item at 10%
-- [ ] 6.5 Mark all tasks complete; archive when shipped
+- [x] 6.1 Playwright demo: connected org → paid allocation → holder pays via embedded Element → worker flips paid → QR visible + host scan succeeds
+- [x] 6.2 Playwright demo: non-holder blocked from checkout/pay page
+- [x] 6.3 Playwright demo: unready org cannot create paid allocation (existing gate regression)
+- [x] 6.4 Manual: `stripe listen` + test card; verify fee line item at 10%
+- [x] 6.5 Mark all tasks complete; archive when shipped
