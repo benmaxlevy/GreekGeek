@@ -8,12 +8,32 @@ Organization-scoped event records that members with `events.create` / `events.ma
 
 ### Requirement: Event records belong to an organization
 
-The system MUST persist events with a string id, required `organizationId` foreign key, required `name` (non-empty string), required `type` (non-empty free-form string — not an enum registry), required `maxHeadcount` (positive integer), optional `location` (nullable string), optional inline ticketing fields (`ticketingEnabled` boolean default false, `ticketCapacity` nullable integer, `ticketSaleStatus` nullable enum `draft` | `on_sale` | `closed`, `ticketSalesOpenAt` nullable datetime, `ticketSalesCloseAt` nullable datetime), and timestamps. Events MUST NOT require vendor, budget, or location-FK fields. Ticketing config MUST live inline on Event — not a separate config table. When `ticketingEnabled` is true, `ticketCapacity` MUST be required and MUST be ≤ `maxHeadcount`.
+The system MUST persist events with a string id, required `organizationId` foreign key, required `name` (non-empty string), required `type` (non-empty free-form string — not an enum registry), required `maxHeadcount` (positive integer), required non-null `startsAt` datetime, optional nullable `endsAt` datetime, optional `location` (nullable string), optional inline ticketing fields (`ticketingEnabled` boolean default false, `ticketCapacity` nullable integer, `ticketSaleStatus` nullable enum `draft` | `on_sale` | `closed`, `ticketSalesOpenAt` nullable datetime, `ticketSalesCloseAt` nullable datetime), optional nullable `heldAt` datetime, optional nullable `heldByUserId` foreign key, and timestamps. Events MUST NOT require vendor, budget, or location-FK fields. Ticketing config MUST live inline on Event — not a separate config table. When `ticketingEnabled` is true, `ticketCapacity` MUST be required and MUST be ≤ `maxHeadcount`. When `endsAt` is set, it MUST be greater than or equal to `startsAt`. The migration MUST delete all existing events and dependent rows as needed before adding non-null `startsAt`; it MUST NOT backfill missing dates with nullable or synthetic values.
 
-#### Scenario: Event requires organization and core fields
+#### Scenario: Event requires organization, core fields, and start date
 
-- **WHEN** a client creates an event with organizationId, name, type, and maxHeadcount
-- **THEN** the event is persisted and returned with those fields and timestamps
+- **WHEN** a client creates an event with organizationId, name, type, maxHeadcount, and startsAt
+- **THEN** the event is persisted with non-null startsAt and timestamps
+
+#### Scenario: Missing start date is rejected
+
+- **WHEN** a client creates or updates an event without startsAt
+- **THEN** the system returns a client validation error
+
+#### Scenario: End date must not precede start date
+
+- **WHEN** a client submits endsAt earlier than startsAt
+- **THEN** the system returns a client validation error
+
+#### Scenario: Existing rows are removed before required date migration
+
+- **WHEN** the event date migration runs
+- **THEN** all existing events and dependent rows are deleted before startsAt becomes NOT NULL, with no nullable backfill
+
+#### Scenario: Event hold metadata is persisted
+
+- **WHEN** ADMIN holds or clears an event
+- **THEN** heldAt and heldByUserId are set together for a hold and cleared together when released
 
 #### Scenario: Location is optional
 
@@ -37,11 +57,11 @@ The system MUST persist events with a string id, required `organizationId` forei
 
 ### Requirement: Create requires events.create or ADMIN
 
-Creating an event MUST require platform ADMIN, or an ACTIVE member who holds `events.create` for the target organization. Non-admin members MUST create only for their membership organization. ADMIN MUST supply `organizationId` on create. Request and response shapes MUST be validated with shared Zod schemas.
+Creating an event MUST require platform ADMIN, or an ACTIVE member who holds `events.create` for the target organization. Non-admin members MUST create only for their membership organization. ADMIN MUST supply `organizationId` on create. Request and response shapes, including startsAt and endsAt, MUST be validated with shared Zod schemas.
 
 #### Scenario: Member with events.create creates for own org
 
-- **WHEN** an ACTIVE member with `events.create` creates an event for their organization
+- **WHEN** an ACTIVE member with `events.create` creates an event for their organization with valid dates
 - **THEN** the event is persisted under that organization
 
 #### Scenario: Member cannot create for another org
@@ -56,17 +76,22 @@ Creating an event MUST require platform ADMIN, or an ACTIVE member who holds `ev
 
 #### Scenario: Admin creates event for any organization
 
-- **WHEN** a platform ADMIN creates an event with a valid organizationId
+- **WHEN** a platform ADMIN creates an event with a valid organizationId and dates
 - **THEN** the event is persisted under that organization
 
 ### Requirement: Manage requires events.manage or ADMIN
 
-Updating or deleting an event MUST require platform ADMIN, or an ACTIVE member who holds `events.manage` for the event's organization. Hard delete MUST be used (no soft-delete). Members without `events.manage` MUST receive 403 on update/delete even if they hold `events.create`.
+Updating or deleting an event MUST require platform ADMIN, or an ACTIVE member who holds `events.manage` for the event's organization. Hard delete MUST be used (no soft-delete). Members without `events.manage` MUST receive 403 on update/delete even if they hold `events.create`. Updates changing dates MUST enforce the startsAt and endsAt validation rules.
 
 #### Scenario: Member with events.manage updates event
 
-- **WHEN** an ACTIVE member with `events.manage` updates an event in their organization
+- **WHEN** an ACTIVE member with `events.manage` updates an event with valid dates
 - **THEN** the event fields are updated and returned
+
+#### Scenario: Member cannot create invalid date range
+
+- **WHEN** a member with `events.manage` updates endsAt before startsAt
+- **THEN** the system returns a client validation error and leaves dates unchanged
 
 #### Scenario: Member with only events.create cannot update or delete
 
@@ -80,12 +105,12 @@ Updating or deleting an event MUST require platform ADMIN, or an ACTIVE member w
 
 ### Requirement: List and get are scoped by permission
 
-Listing events MUST return: for platform ADMIN, all events (optional filter by organizationId); for members, only events in their organization if they hold `events.create` or `events.manage`; otherwise 403. Getting a single event MUST follow the same org/permission rules (ADMIN any; member own-org with create or manage).
+Listing events MUST return: for platform ADMIN, all events (optional filter by organizationId); for members, only events in their organization if they hold `events.create` or `events.manage`; otherwise 403. Getting a single event MUST follow the same org/permission rules (ADMIN any; member own-org with create or manage). Date fields and hold state MUST be included in authorized event responses.
 
 #### Scenario: Admin lists events filtered by organization
 
-- **WHEN** a platform ADMIN lists events with an organizationId filter
-- **THEN** only events for that organization are returned
+- **WHEN** an ADMIN lists events with an organizationId filter
+- **THEN** only events for that organization are returned with dates and hold state
 
 #### Scenario: Member lists own-org events with create or manage
 
@@ -99,12 +124,12 @@ Listing events MUST return: for platform ADMIN, all events (optional filter by o
 
 ### Requirement: Member and admin event UI
 
-The web app MUST provide member event management under `/app/events` for ACTIVE users who hold `events.create` or `events.manage`, using obsidian-glass AppShell patterns. Platform ADMIN MUST manage events under `/admin/events` with an organization picker on create and list filter. UI MUST support create, list, edit, and delete for authorized actors. Nav MUST link to these surfaces when the user is allowed.
+The web app MUST provide member event management under `/app/events` for ACTIVE users who hold `events.create` or `events.manage`, using obsidian-glass AppShell patterns. Platform ADMIN MUST manage events under `/admin/events` with an organization picker on create and list filter. UI MUST support create, list, edit, and delete for authorized actors, collect startsAt and optional endsAt, reject endsAt before startsAt, and show event hold state where applicable. Nav MUST link to these surfaces when the user is allowed.
 
 #### Scenario: Permitted member opens events page
 
 - **WHEN** an ACTIVE member with `events.create` or `events.manage` navigates to `/app/events`
-- **THEN** the events list/create UI loads inside AppShell
+- **THEN** the events list/create UI loads inside AppShell with date fields
 
 #### Scenario: Member without event permissions redirected from /app/events
 
@@ -114,7 +139,7 @@ The web app MUST provide member event management under `/app/events` for ACTIVE 
 #### Scenario: Admin manages events with org picker
 
 - **WHEN** a platform ADMIN opens `/admin/events`
-- **THEN** they can list events (optionally by org) and create an event specifying organizationId
+- **THEN** they can list events optionally by org and create an event specifying organizationId and valid dates
 
 ### Requirement: Ticketing config is managed on the host event
 

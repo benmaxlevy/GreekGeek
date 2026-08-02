@@ -70,4 +70,4 @@
 - [ ] 9.3 Demonstrate late sale producing a second batchSeq and transfer eligibility.
 - [ ] 9.4 Demonstrate post-release dispute flagged for later clawback with historical amount unchanged and no automatic reverse transfer.
 - [ ] 9.5 Demonstrate job rerun creates no duplicate EventPayout or Stripe transfer.
-- [ ] 9.6 Run `openspec validate event-payouts --strict` and record all artifacts ready for implementation.
+- [x] 9.6 Run `openspec validate event-payouts --strict` and record all artifacts ready for implementation.
