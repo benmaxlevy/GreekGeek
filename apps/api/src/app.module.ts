@@ -10,6 +10,7 @@ import { TicketsModule } from './tickets/tickets.module';
 import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UniversitiesModule } from './universities/universities.module';
+import { StripeModule } from './stripe/stripe.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
@@ -26,6 +27,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     EventsModule,
     TicketsModule,
     WebhooksModule,
+    StripeModule,
   ],
 })
 export class AppModule {}

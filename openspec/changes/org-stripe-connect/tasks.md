@@ -8,13 +8,13 @@
 
 ## 2. Connect API (create/link/return/refresh/status) + perm checks
 
-- [ ] 2.1 Install/configure Stripe SDK with `STRIPE_API_VERSION`; `stripe.module.ts` + `stripe.service.ts` (v2 account create, account links, account retrieve)
-- [ ] 2.2 `POST` connect: idempotent account create (company US recipient+merchant Express), persist `stripeAccountId`, create account_link, redirect to hosted URL
-- [ ] 2.3 `GET` refresh: mint fresh account_link → redirect
-- [ ] 2.4 `GET` return: retrieve account, `syncOrgFromStripeAccount`, redirect to org payments settings
-- [ ] 2.5 `GET` status: return Stripe-derived org fields; guard with `payments.manage` or ADMIN
-- [ ] 2.6 `OrgPermissionGuard` on all Connect routes; 403 without CTA payload for unauthorized callers
-- [ ] 2.7 Commit: `add stripe connect api routes and permission guards`
+- [x] 2.1 Install/configure Stripe SDK with `STRIPE_API_VERSION`; `stripe.module.ts` + `stripe.service.ts` (v2 account create, account links, account retrieve)
+- [x] 2.2 `POST` connect: idempotent account create (company US recipient+merchant Express), persist `stripeAccountId`, create account_link, redirect to hosted URL
+- [x] 2.3 `GET` refresh: mint fresh account_link → redirect
+- [x] 2.4 `GET` return: retrieve account, `syncOrgFromStripeAccount`, redirect to org payments settings
+- [x] 2.5 `GET` status: return Stripe-derived org fields; guard with `payments.manage` or ADMIN
+- [x] 2.6 `OrgPermissionGuard` on all Connect routes; 403 without CTA payload for unauthorized callers
+- [x] 2.7 Commit: `add stripe connect api routes and permission guards`
 
 ## 3. Webhook handlers for account/capability → org flags
 
