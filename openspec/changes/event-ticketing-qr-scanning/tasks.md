@@ -31,21 +31,21 @@
 
 ## 5. Frontend — holder QR (`/app/tickets`)
 
-- [ ] 5.1 Render QR from `credentialToken` for paid tickets
-- [ ] 5.2 Hide or disable QR for unpaid and void tickets
-- [ ] 5.3 Commit: `add holder ticket qr display`
+- [x] 5.1 Render QR from `credentialToken` for paid tickets
+- [x] 5.2 Hide or disable QR for unpaid and void tickets
+- [x] 5.3 Commit: `add holder ticket qr display`
 
 ## 6. Frontend — host scanner
 
-- [ ] 6.1 Scanner tab/sub-route on `/app/events/$eventId/tickets`; gate on host `tickets.scan` (not `tickets.manage` alone)
-- [ ] 6.2 Camera scan + manual credential paste; call check-in API
-- [ ] 6.3 Distinct UI states: success, already in, unpaid, void, invalid, at capacity, forbidden
-- [ ] 6.4 Commit: `add host event ticket scanner ui`
+- [x] 6.1 Scanner tab/sub-route on `/app/events/$eventId/tickets`; gate on host `tickets.scan` (not `tickets.manage` alone)
+- [x] 6.2 Camera scan + manual credential paste; call check-in API
+- [x] 6.3 Distinct UI states: success, already in, unpaid, void, invalid, at capacity, forbidden
+- [x] 6.4 Commit: `add host event ticket scanner ui`
 
 ## 7. Frontend — guest list check-in columns
 
-- [ ] 7.1 Guest list (manage UI): show read-only `checkedIn` and `checkedInAt`; no undo control
-- [ ] 7.2 Commit: `add guest list check-in columns`
+- [x] 7.1 Guest list (manage UI): show read-only `checkedIn` and `checkedInAt`; no undo control
+- [x] 7.2 Commit: `add guest list check-in columns`
 
 ## 8. Verification + demo
 

@@ -544,7 +544,7 @@ export function EventTicketsPanel({
                 {(guestsQuery.data ?? []).map((guest) => (
                   <li
                     key={guest.id}
-                    className="flex flex-col gap-1 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-2 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
                       <p className="font-medium text-ink-100">
@@ -552,7 +552,17 @@ export function EventTicketsPanel({
                       </p>
                       <p className="text-sm text-ink-500">{guest.allocationLabel}</p>
                     </div>
-                    <Badge variant="default">{guest.status}</Badge>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="default">{guest.status}</Badge>
+                      <Badge variant={guest.checkedIn ? 'default' : 'outline'}>
+                        {guest.checkedIn ? 'Checked in' : 'Not checked in'}
+                      </Badge>
+                      {guest.checkedInAt ? (
+                        <span className="text-xs text-ink-500">
+                          {new Date(guest.checkedInAt).toLocaleString()}
+                        </span>
+                      ) : null}
+                    </div>
                   </li>
                 ))}
               </ul>
