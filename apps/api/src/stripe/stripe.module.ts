@@ -4,6 +4,7 @@ import { WebhookHandlerRegistry } from '../webhooks/webhook-handler.registry';
 import { StripeConnectController } from './stripe-connect.controller';
 import { StripeConnectService } from './stripe-connect.service';
 import { StripePaymentWebhookHandlers } from './stripe-payment-webhook.handlers';
+import { StripePayoutWebhookHandlers } from './stripe-payout-webhook.handlers';
 import { StripeService } from './stripe.service';
 import { StripeWebhookHandlers } from './stripe-webhook.handlers';
 
@@ -16,6 +17,7 @@ import { StripeWebhookHandlers } from './stripe-webhook.handlers';
     WebhookHandlerRegistry,
     StripeWebhookHandlers,
     StripePaymentWebhookHandlers,
+    StripePayoutWebhookHandlers,
   ],
   exports: [
     StripeService,
@@ -23,6 +25,7 @@ import { StripeWebhookHandlers } from './stripe-webhook.handlers';
     WebhookHandlerRegistry,
     StripeWebhookHandlers,
     StripePaymentWebhookHandlers,
+    StripePayoutWebhookHandlers,
   ],
 })
 export class StripeModule {}

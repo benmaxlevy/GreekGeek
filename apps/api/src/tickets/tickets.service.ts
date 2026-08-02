@@ -8,12 +8,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type {
-  AllocationStatus,
-  Event,
-  TicketAllocation,
-  TicketSaleStatus,
-} from '@prisma/client';
+import type { AllocationStatus, Event, TicketAllocation, TicketSaleStatus } from '@prisma/client';
 import type { ClaimableEvent } from '@rally/contracts';
 import type { PublicUser } from '../auth/types/auth.dto';
 import type { Env } from '../config/env.schema';
@@ -68,23 +63,17 @@ export class TicketsService {
     const nextSaleStatus = input.ticketSaleStatus ?? event.ticketSaleStatus;
 
     if (nextEnabled && nextCapacity == null) {
-      throw new BadRequestException(
-        'ticketCapacity is required when ticketing is enabled',
-      );
+      throw new BadRequestException('ticketCapacity is required when ticketing is enabled');
     }
     if (nextCapacity != null && nextCapacity > event.maxHeadcount) {
-      throw new BadRequestException(
-        'ticketCapacity must not exceed event maxHeadcount',
-      );
+      throw new BadRequestException('ticketCapacity must not exceed event maxHeadcount');
     }
     if (nextSaleStatus === 'on_sale') {
       const allocationCount = await this.prisma.ticketAllocation.count({
         where: { eventId },
       });
       if (allocationCount < 1) {
-        throw new BadRequestException(
-          'At least one allocation is required before going on sale',
-        );
+        throw new BadRequestException('At least one allocation is required before going on sale');
       }
       await this.assertHostOrgChargeReadyForOnSale(event);
     }
@@ -95,17 +84,13 @@ export class TicketsService {
         ...(input.ticketingEnabled !== undefined
           ? { ticketingEnabled: input.ticketingEnabled }
           : {}),
-        ...(input.ticketCapacity !== undefined
-          ? { ticketCapacity: input.ticketCapacity }
-          : {}),
+        ...(input.ticketCapacity !== undefined ? { ticketCapacity: input.ticketCapacity } : {}),
         ...(input.ticketSaleStatus !== undefined
           ? { ticketSaleStatus: input.ticketSaleStatus }
           : {}),
         ...(input.ticketSalesOpenAt !== undefined
           ? {
-              ticketSalesOpenAt: input.ticketSalesOpenAt
-                ? new Date(input.ticketSalesOpenAt)
-                : null,
+              ticketSalesOpenAt: input.ticketSalesOpenAt ? new Date(input.ticketSalesOpenAt) : null,
             }
           : {}),
         ...(input.ticketSalesCloseAt !== undefined
@@ -120,10 +105,7 @@ export class TicketsService {
     return toEventTicketingDto(updated);
   }
 
-  async listAllocations(
-    eventId: string,
-    caller: PublicUser,
-  ): Promise<TicketAllocationDto[]> {
+  async listAllocations(eventId: string, caller: PublicUser): Promise<TicketAllocationDto[]> {
     const event = await this.requireEvent(eventId);
     const membership = await this.loadMembership(caller);
     const isHost = await this.hasHostTicketManage(event, caller, membership);
@@ -140,16 +122,12 @@ export class TicketsService {
     const rows = await this.prisma.ticketAllocation.findMany({
       where: {
         eventId,
-        ...(organizationFilter
-          ? { organizationId: organizationFilter }
-          : {}),
+        ...(organizationFilter ? { organizationId: organizationFilter } : {}),
       },
       include: { organization: true },
       orderBy: { createdAt: 'asc' },
     });
-    const issuedCounts = await this.countIssuedByAllocation(
-      rows.map((row) => row.id),
-    );
+    const issuedCounts = await this.countIssuedByAllocation(rows.map((row) => row.id));
     return rows.map((row) =>
       toTicketAllocationDto({
         ...row,
@@ -169,10 +147,7 @@ export class TicketsService {
     }
     const membership = await this.loadMembership(caller);
     const orgId = membership?.organizationId ?? null;
-    const eligibleOr = [
-      { organizationId: null },
-      ...(orgId ? [{ organizationId: orgId }] : []),
-    ];
+    const eligibleOr = [{ organizationId: null }, ...(orgId ? [{ organizationId: orgId }] : [])];
 
     const events = await this.prisma.event.findMany({
       where: {
@@ -205,21 +180,16 @@ export class TicketsService {
       const withRemaining = event.allocations.filter(
         (row) => (issuedCounts.get(row.id) ?? 0) < row.quantity,
       );
-      const pool =
-        withRemaining.length > 0 ? withRemaining : event.allocations;
+      const pool = withRemaining.length > 0 ? withRemaining : event.allocations;
       if (pool.length === 0) continue;
 
       const paid = pool.filter((row) => (row.priceCents ?? 0) > 0);
       const candidates = paid.length > 0 ? paid : pool;
 
       let chosen =
-        orgId != null
-          ? candidates.find((row) => row.organizationId === orgId)
-          : undefined;
+        orgId != null ? candidates.find((row) => row.organizationId === orgId) : undefined;
       if (!chosen) {
-        chosen =
-          candidates.find((row) => row.organizationId === null) ??
-          candidates[0];
+        chosen = candidates.find((row) => row.organizationId === null) ?? candidates[0];
       }
       if (!chosen) continue;
 
@@ -276,11 +246,7 @@ export class TicketsService {
 
     if (input.quantity !== undefined) {
       await this.assertAllocationQuantityEdit(event, allocation, input.quantity);
-      await this.assertCapacityForQuantityChange(
-        event,
-        allocation,
-        input.quantity,
-      );
+      await this.assertCapacityForQuantityChange(event, allocation, input.quantity);
     }
 
     const nextPriceCents =
@@ -291,9 +257,7 @@ export class TicketsService {
       where: { id: allocationId },
       data: {
         ...(input.quantity !== undefined ? { quantity: input.quantity } : {}),
-        ...(input.priceCents !== undefined
-          ? { priceCents: input.priceCents }
-          : {}),
+        ...(input.priceCents !== undefined ? { priceCents: input.priceCents } : {}),
         ...(input.status !== undefined ? { status: input.status } : {}),
       },
       include: { organization: true },
@@ -336,10 +300,7 @@ export class TicketsService {
 
     let scopedAllocationId = query.allocationId;
     if (!isAdmin && !isHost) {
-      const invitedAllocation = await this.getInvitedOrgAllocation(
-        eventId,
-        membership,
-      );
+      const invitedAllocation = await this.getInvitedOrgAllocation(eventId, membership);
       if (!invitedAllocation) {
         throw new ForbiddenException('Missing organization permission');
       }
@@ -347,10 +308,7 @@ export class TicketsService {
         throw new ForbiddenException('Missing organization permission');
       }
       scopedAllocationId = invitedAllocation.id;
-      if (
-        query.organizationId &&
-        query.organizationId !== invitedAllocation.organizationId
-      ) {
+      if (query.organizationId && query.organizationId !== invitedAllocation.organizationId) {
         throw new ForbiddenException('Missing organization permission');
       }
     } else if (query.organizationId) {
@@ -410,10 +368,7 @@ export class TicketsService {
     );
   }
 
-  async checkIn(
-    input: CheckInTicket,
-    caller: PublicUser,
-  ): Promise<CheckInTicketResponse> {
+  async checkIn(input: CheckInTicket, caller: PublicUser): Promise<CheckInTicketResponse> {
     const ticket = await this.prisma.ticket.findUnique({
       where: { credentialToken: input.credentialToken },
       include: { allocation: { include: { event: true } } },
@@ -527,12 +482,7 @@ export class TicketsService {
     if (ticket.status === 'void') {
       throw new BadRequestException('Ticket is already void');
     }
-    await this.assertTicketAccess(
-      ticket.allocation.event,
-      ticket.allocation,
-      caller,
-      'void',
-    );
+    await this.assertTicketAccess(ticket.allocation.event, ticket.allocation, caller, 'void');
 
     // Unpaid hold on open purchase → cancel whole purchase + DELETE reserved tickets.
     if (ticket.status === 'unpaid' && ticket.purchaseId) {
@@ -554,19 +504,26 @@ export class TicketsService {
     }
 
     // Paid (or unpaid without open purchase): soft-void; purchase totals unchanged.
-    const updated = await this.prisma.ticket.update({
-      where: { id: ticketId },
-      data: { status: 'void', voidedAt: new Date() },
-      include: { allocation: true },
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const row = await tx.ticket.update({
+        where: { id: ticketId },
+        data: { status: 'void', voidedAt: new Date() },
+        include: { allocation: true },
+      });
+      if (ticket.purchaseId) {
+        await tx.purchase.updateMany({
+          where: { id: ticket.purchaseId, status: 'succeeded' },
+          data: { payoutExcludedReason: 'voided' },
+        });
+      }
+      return row;
     });
     return toTicketDto(updated);
   }
 
   async markPaid(ticketId: string, caller: PublicUser): Promise<Ticket> {
     if (caller.role !== 'ADMIN') {
-      throw new ForbiddenException(
-        'Only platform admins can mark tickets paid',
-      );
+      throw new ForbiddenException('Only platform admins can mark tickets paid');
     }
 
     const ticket = await this.prisma.ticket.findUnique({
@@ -617,9 +574,7 @@ export class TicketsService {
     }
 
     if (!allocation) {
-      throw new BadRequestException(
-        'No active allocation available for you on this event',
-      );
+      throw new BadRequestException('No active allocation available for you on this event');
     }
 
     return this.createTicketInAllocation(allocation.id, caller.id);
@@ -689,9 +644,7 @@ export class TicketsService {
           },
         });
         if (userHeld >= maxPerUser) {
-          throw new ConflictException(
-            'Per-user ticket cap reached for this event',
-          );
+          throw new ConflictException('Per-user ticket cap reached for this event');
         }
       }
 
@@ -703,9 +656,7 @@ export class TicketsService {
           credentialToken: randomBytes(32).toString('hex'),
           holderUserId,
           purchaseId: null,
-          ...(isFree
-            ? { status: 'paid' as const, paidAt: now }
-            : { status: 'unpaid' as const }),
+          ...(isFree ? { status: 'paid' as const, paidAt: now } : { status: 'unpaid' as const }),
         },
         include: { allocation: true },
       });
@@ -730,16 +681,11 @@ export class TicketsService {
       }
     }
 
-    await this.assertHostOrgChargeReady(
-      event.organizationId,
-      input.priceCents ?? null,
-    );
+    await this.assertHostOrgChargeReady(event.organizationId, input.priceCents ?? null);
 
     const currentSum = await this.sumAllocationQuantities(event.id);
     if (currentSum + input.quantity > (event.ticketCapacity ?? 0)) {
-      throw new BadRequestException(
-        'Total allocation quantity would exceed ticket capacity',
-      );
+      throw new BadRequestException('Total allocation quantity would exceed ticket capacity');
     }
 
     try {
@@ -779,8 +725,7 @@ export class TicketsService {
     if (!hostOrg?.stripeChargesEnabled) {
       throw new UnprocessableEntityException({
         code: 'CONNECT_REQUIRED',
-        message:
-          'Stripe Connect onboarding is required before setting paid ticket prices',
+        message: 'Stripe Connect onboarding is required before setting paid ticket prices',
       });
     }
   }
@@ -802,15 +747,12 @@ export class TicketsService {
     if (!hostOrg?.stripeChargesEnabled) {
       throw new UnprocessableEntityException({
         code: 'CONNECT_REQUIRED',
-        message:
-          'Stripe Connect onboarding is required before putting paid tickets on sale',
+        message: 'Stripe Connect onboarding is required before putting paid tickets on sale',
       });
     }
   }
 
-  private async countIssuedByAllocation(
-    allocationIds: string[],
-  ): Promise<Map<string, number>> {
+  private async countIssuedByAllocation(allocationIds: string[]): Promise<Map<string, number>> {
     if (!allocationIds.length) {
       return new Map();
     }
@@ -822,9 +764,7 @@ export class TicketsService {
       },
       _count: { _all: true },
     });
-    return new Map(
-      grouped.map((row) => [row.allocationId, row._count._all]),
-    );
+    return new Map(grouped.map((row) => [row.allocationId, row._count._all]));
   }
 
   private async requireEvent(eventId: string): Promise<Event> {
@@ -901,15 +841,11 @@ export class TicketsService {
     const currentSum = await this.sumAllocationQuantities(event.id);
     const nextSum = currentSum - allocation.quantity + nextQuantity;
     if (event.ticketCapacity != null && nextSum > event.ticketCapacity) {
-      throw new BadRequestException(
-        'Total allocation quantity would exceed ticket capacity',
-      );
+      throw new BadRequestException('Total allocation quantity would exceed ticket capacity');
     }
   }
 
-  private async loadMembership(
-    caller: PublicUser,
-  ): Promise<MembershipWithPermissions | null> {
+  private async loadMembership(caller: PublicUser): Promise<MembershipWithPermissions | null> {
     if (caller.role === 'ADMIN') {
       return null;
     }
@@ -926,9 +862,7 @@ export class TicketsService {
     if (!membership) {
       return false;
     }
-    return membership.permissions.some(
-      (p) => p.permission.key === permissionKey,
-    );
+    return membership.permissions.some((p) => p.permission.key === permissionKey);
   }
 
   private async hasHostTicketManage(
@@ -947,20 +881,14 @@ export class TicketsService {
     );
   }
 
-  private async assertHostTicketManage(
-    event: Event,
-    caller: PublicUser,
-  ): Promise<void> {
+  private async assertHostTicketManage(event: Event, caller: PublicUser): Promise<void> {
     if (await this.hasHostTicketManage(event, caller)) {
       return;
     }
     throw new ForbiddenException('Missing organization permission');
   }
 
-  private async assertHostTicketScan(
-    event: Event,
-    caller: PublicUser,
-  ): Promise<void> {
+  private async assertHostTicketScan(event: Event, caller: PublicUser): Promise<void> {
     if (caller.role === 'ADMIN') {
       return;
     }
