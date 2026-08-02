@@ -147,15 +147,26 @@ export class EventPayoutsService {
   }
 
   async sweepEligible(): Promise<number> {
-    const events = await this.prisma.event.findMany({
-      select: { id: true },
-    });
     let released = 0;
-    for (const event of events) {
-      const payout = await this.releaseEligible(event.id);
-      if (payout?.status === 'released') {
-        released += 1;
+    let page = 0;
+    const pageSize = 100;
+    while (true) {
+      const events = await this.prisma.event.findMany({
+        select: { id: true },
+        orderBy: { id: 'asc' },
+        take: pageSize,
+        skip: page * pageSize,
+      });
+      for (const event of events) {
+        const payout = await this.releaseEligible(event.id);
+        if (payout?.status === 'released') {
+          released += 1;
+        }
       }
+      if (events.length < pageSize) {
+        break;
+      }
+      page += 1;
     }
     return released;
   }
