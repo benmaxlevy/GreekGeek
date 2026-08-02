@@ -1,9 +1,11 @@
 import { Controller, Get, Param, Post, Body } from '@nestjs/common';
-import { EventListSchema, type EventList } from '@rally/contracts';
+import {
+  ClaimableEventListSchema,
+  type ClaimableEventList,
+} from '@rally/contracts';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { PublicUser } from '../auth/types/auth.dto';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
-import { toEventDto } from '../events/types/events.dto';
 import { TicketsService } from './tickets.service';
 import {
   CheckInTicketSchema,
@@ -28,9 +30,12 @@ export class TicketsController {
   }
 
   @Get('claimable')
-  async listClaimable(@CurrentUser() caller: PublicUser): Promise<EventList> {
-    const rows = await this.ticketsService.listClaimableEvents(caller);
-    return EventListSchema.parse(rows.map(toEventDto));
+  async listClaimable(
+    @CurrentUser() caller: PublicUser,
+  ): Promise<ClaimableEventList> {
+    return ClaimableEventListSchema.parse(
+      await this.ticketsService.listClaimableEvents(caller),
+    );
   }
 
   @Post('check-in')

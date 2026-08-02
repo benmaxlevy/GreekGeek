@@ -14,8 +14,10 @@ import type {
   TicketAllocation,
   TicketSaleStatus,
 } from '@prisma/client';
+import type { ClaimableEvent } from '@rally/contracts';
 import type { PublicUser } from '../auth/types/auth.dto';
 import type { Env } from '../config/env.schema';
+import { toEventDto } from '../events/types/events.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { PurchasesService } from './purchases.service';
 import {
@@ -159,30 +161,75 @@ export class TicketsService {
   /**
    * ACTIVE users: on_sale events they can buy —
    * own org allocation and/or public pool.
+   * Returns the allocation checkout/claim should use; does not create tickets.
    */
-  async listClaimableEvents(caller: PublicUser) {
+  async listClaimableEvents(caller: PublicUser): Promise<ClaimableEvent[]> {
     if (caller.status !== 'ACTIVE') {
       throw new ForbiddenException('Account is not active');
     }
     const membership = await this.loadMembership(caller);
     const orgId = membership?.organizationId ?? null;
+    const eligibleOr = [
+      { organizationId: null },
+      ...(orgId ? [{ organizationId: orgId }] : []),
+    ];
 
-    return this.prisma.event.findMany({
+    const events = await this.prisma.event.findMany({
       where: {
         ticketingEnabled: true,
         ticketSaleStatus: 'on_sale',
         allocations: {
           some: {
             status: 'active',
-            OR: [
-              { organizationId: null },
-              ...(orgId ? [{ organizationId: orgId }] : []),
-            ],
+            OR: eligibleOr,
+          },
+        },
+      },
+      include: {
+        allocations: {
+          where: {
+            status: 'active',
+            OR: eligibleOr,
           },
         },
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    const issuedCounts = await this.countIssuedByAllocation(
+      events.flatMap((event) => event.allocations.map((row) => row.id)),
+    );
+
+    const claimable: ClaimableEvent[] = [];
+    for (const event of events) {
+      const withRemaining = event.allocations.filter(
+        (row) => (issuedCounts.get(row.id) ?? 0) < row.quantity,
+      );
+      const pool =
+        withRemaining.length > 0 ? withRemaining : event.allocations;
+      if (pool.length === 0) continue;
+
+      const paid = pool.filter((row) => (row.priceCents ?? 0) > 0);
+      const candidates = paid.length > 0 ? paid : pool;
+
+      let chosen =
+        orgId != null
+          ? candidates.find((row) => row.organizationId === orgId)
+          : undefined;
+      if (!chosen) {
+        chosen =
+          candidates.find((row) => row.organizationId === null) ??
+          candidates[0];
+      }
+      if (!chosen) continue;
+
+      claimable.push({
+        ...toEventDto(event),
+        allocationId: chosen.id,
+        priceCents: chosen.priceCents,
+      });
+    }
+    return claimable;
   }
 
   async createAllocation(

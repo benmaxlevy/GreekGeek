@@ -58,3 +58,13 @@ export type ListEventsQuery = z.infer<typeof ListEventsQuerySchema>;
 
 export const EventListSchema = z.array(EventSchema);
 export type EventList = z.infer<typeof EventListSchema>;
+
+/** On-sale event the caller can buy, with the allocation checkout/claim should use. */
+export const ClaimableEventSchema = EventSchema.extend({
+  allocationId: z.string(),
+  priceCents: z.number().int().min(0).nullable(),
+});
+export type ClaimableEvent = z.infer<typeof ClaimableEventSchema>;
+
+export const ClaimableEventListSchema = z.array(ClaimableEventSchema);
+export type ClaimableEventList = z.infer<typeof ClaimableEventListSchema>;

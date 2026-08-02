@@ -1,8 +1,8 @@
 import {
   CheckInTicketResponseSchema,
   CheckInTicketSchema,
+  ClaimableEventListSchema,
   CreateTicketAllocationSchema,
-  EventListSchema,
   EventTicketingSchema,
   GuestListSchema,
   IssueTicketSchema,
@@ -19,8 +19,8 @@ import {
   TicketSchema,
   UpdateTicketAllocationSchema,
   type CheckInTicketResponse,
+  type ClaimableEventList,
   type CreateTicketAllocation,
-  type EventList,
   type EventTicketing,
   type GuestList,
   type IssueTicket,
@@ -175,12 +175,12 @@ export async function listMyTickets(): Promise<MyTicketList> {
   return MyTicketListSchema.parse(await res.json());
 }
 
-export async function listClaimableEvents(): Promise<EventList> {
+export async function listClaimableEvents(): Promise<ClaimableEventList> {
   const res = await apiFetch('/api/tickets/claimable');
   if (!res.ok) {
     throw new Error(await readError(res, 'Failed to load events available to buy'));
   }
-  return EventListSchema.parse(await res.json());
+  return ClaimableEventListSchema.parse(await res.json());
 }
 
 export async function markTicketPaid(ticketId: string): Promise<Ticket> {

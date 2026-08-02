@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Event, MyTicket } from '@rally/contracts';
+import type { ClaimableEvent, MyTicket } from '@rally/contracts';
 import { TicketQrCode } from '@/components/ticketing/TicketQrCode';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { meQueryOptions } from '@/lib/auth';
 import { destinationForUser } from '@/lib/auth-routing';
 import {
-  listAllocations,
   listClaimableEvents,
   listMyTickets,
   publicClaim,
@@ -87,7 +86,7 @@ function MyTicketsPage() {
       (heldCountByEvent.get(e.id) ?? 0) < DEFAULT_MAX_TICKETS_PER_USER_PER_EVENT,
   );
 
-  async function startBuy(event: Event) {
+  async function startBuy(event: ClaimableEvent) {
     setError(null);
     setBuyingEventId(event.id);
 
@@ -104,45 +103,19 @@ function MyTicketsPage() {
       return;
     }
 
-    try {
-      const allocations = await listAllocations(event.id);
-      const paid = allocations.find(
-        (a) => a.status === 'active' && (a.priceCents ?? 0) > 0,
-      );
-      if (paid) {
-        setBuyingEventId(null);
-        void navigate({
-          to: '/app/tickets/buy/$allocationId',
-          params: { allocationId: paid.id },
-          search: { eventId: event.id, eventName: event.name },
-        });
-        return;
-      }
-      const free = allocations.find(
-        (a) => a.status === 'active' && (a.priceCents ?? 0) === 0,
-      );
-      if (free) {
-        await claimMutation.mutateAsync(event.id);
-        setBuyingEventId(null);
-        return;
-      }
-    } catch {
-      // Guests cannot list allocations — fall through to claim discovery.
-    }
-
-    try {
-      const claimed = await claimMutation.mutateAsync(event.id);
-      if (claimed.status === 'paid') {
-        setBuyingEventId(null);
-        return;
-      }
+    if ((event.priceCents ?? 0) > 0) {
       setBuyingEventId(null);
       void navigate({
         to: '/app/tickets/buy/$allocationId',
-        params: { allocationId: claimed.allocationId },
+        params: { allocationId: event.allocationId },
         search: { eventId: event.id, eventName: event.name },
       });
-    } catch {
+      return;
+    }
+
+    try {
+      await claimMutation.mutateAsync(event.id);
+    } finally {
       setBuyingEventId(null);
     }
   }

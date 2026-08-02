@@ -109,11 +109,15 @@ export {
   UpdateEventSchema,
   ListEventsQuerySchema,
   EventListSchema,
+  ClaimableEventSchema,
+  ClaimableEventListSchema,
   type Event,
   type CreateEvent,
   type UpdateEvent,
   type ListEventsQuery,
   type EventList,
+  type ClaimableEvent,
+  type ClaimableEventList,
 } from './events';
 export {
   TicketSaleStatusSchema,

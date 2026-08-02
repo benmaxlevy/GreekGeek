@@ -657,12 +657,79 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     expect(viewed.id).toBe(eventId);
 
     const claimable = await tickets.listClaimableEvents(asUser(guestUserId));
-    expect(claimable.some((e) => e.id === eventId)).toBe(true);
+    const guestRow = claimable.find((e) => e.id === eventId);
+    expect(guestRow).toBeDefined();
+    expect(guestRow?.allocationId).toBe(publicAllocId);
+    expect(guestRow?.priceCents ?? 0).toBe(0);
 
     await prisma.ticket.deleteMany({
       where: { allocation: { eventId } },
     });
     await prisma.ticketAllocation.deleteMany({ where: { eventId } });
+  });
+
+  it('guest claimable paid public includes allocationId without creating ticket', async () => {
+    await prisma.organization.update({
+      where: { id: hostOrgId },
+      data: { stripeChargesEnabled: true },
+    });
+
+    const paidEvent = await events.create(
+      {
+        organizationId: hostOrgId,
+        name: `Paid Public Claimable ${suffix}`,
+        type: 'Social',
+        maxHeadcount: 20,
+      },
+      asUser(hostManagerId),
+    );
+    await tickets.patchTicketing(
+      paidEvent.id,
+      {
+        ticketingEnabled: true,
+        ticketCapacity: 10,
+        ticketSaleStatus: 'draft',
+      },
+      asUser(hostManagerId),
+    );
+    const publicAlloc = await tickets.createAllocation(
+      paidEvent.id,
+      { organizationId: null, quantity: 5, priceCents: 1500 },
+      asUser(hostManagerId),
+    );
+    const publicId = (publicAlloc as { id: string }).id;
+    await tickets.patchTicketing(
+      paidEvent.id,
+      { ticketSaleStatus: 'on_sale' },
+      asUser(hostManagerId),
+    );
+
+    const ticketsBefore = await prisma.ticket.count({
+      where: { allocation: { eventId: paidEvent.id } },
+    });
+
+    const claimable = await tickets.listClaimableEvents(asUser(guestUserId));
+    const row = claimable.find((e) => e.id === paidEvent.id);
+    expect(row).toBeDefined();
+    expect(row?.allocationId).toBe(publicId);
+    expect(row?.priceCents).toBe(1500);
+
+    const ticketsAfter = await prisma.ticket.count({
+      where: { allocation: { eventId: paidEvent.id } },
+    });
+    expect(ticketsAfter).toBe(ticketsBefore);
+
+    await prisma.ticket.deleteMany({
+      where: { allocation: { eventId: paidEvent.id } },
+    });
+    await prisma.ticketAllocation.deleteMany({
+      where: { eventId: paidEvent.id },
+    });
+    await prisma.event.delete({ where: { id: paidEvent.id } });
+    await prisma.organization.update({
+      where: { id: hostOrgId },
+      data: { stripeChargesEnabled: false },
+    });
   });
 
   it('org member buys from own org allocation, not public', async () => {
@@ -679,12 +746,16 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     expect(bought.organizationId).toBe(hostOrgId);
 
     const buyable = await tickets.listClaimableEvents(asUser(noPermUserId));
-    expect(buyable.some((e) => e.id === eventId)).toBe(true);
+    const hostRow = buyable.find((e) => e.id === eventId);
+    expect(hostRow).toBeDefined();
+    expect(hostRow?.allocationId).toBe(hostAllocId);
 
     const invitedBuyable = await tickets.listClaimableEvents(
       asUser(invitedManagerId),
     );
-    expect(invitedBuyable.some((e) => e.id === eventId)).toBe(true);
+    const invitedRow = invitedBuyable.find((e) => e.id === eventId);
+    expect(invitedRow).toBeDefined();
+    expect(invitedRow?.allocationId).toBe(invitedAllocId);
 
     await prisma.ticket.deleteMany({
       where: { allocation: { eventId } },
