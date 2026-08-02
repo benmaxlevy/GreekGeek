@@ -71,9 +71,7 @@ export class StripeService {
     });
   }
 
-  cancelPaymentIntent(
-    paymentIntentId: string,
-  ): Promise<Stripe.PaymentIntent> {
+  cancelPaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
     return this.client.paymentIntents.cancel(paymentIntentId);
   }
 
@@ -94,10 +92,26 @@ export class StripeService {
     );
   }
 
-  retrievePaymentIntent(
-    paymentIntentId: string,
-  ): Promise<Stripe.PaymentIntent> {
+  retrievePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
     return this.client.paymentIntents.retrieve(paymentIntentId);
+  }
+
+  createTransfer(input: {
+    amountCents: number;
+    currency: string;
+    destinationAccountId: string;
+    metadata: Record<string, string>;
+    idempotencyKey: string;
+  }): Promise<Stripe.Transfer> {
+    return this.client.transfers.create(
+      {
+        amount: input.amountCents,
+        currency: input.currency,
+        destination: input.destinationAccountId,
+        metadata: input.metadata,
+      },
+      { idempotencyKey: input.idempotencyKey },
+    );
   }
 
   updatePaymentIntentAmount(
@@ -120,9 +134,7 @@ export class StripeService {
         ? {
             type: 'account_update' as const,
             account_update: {
-              configurations: ['recipient', 'merchant'] as Array<
-                'recipient' | 'merchant'
-              >,
+              configurations: ['recipient', 'merchant'] as Array<'recipient' | 'merchant'>,
               return_url: input.returnUrl,
               refresh_url: input.refreshUrl,
             },
@@ -130,9 +142,7 @@ export class StripeService {
         : {
             type: 'account_onboarding' as const,
             account_onboarding: {
-              configurations: ['recipient', 'merchant'] as Array<
-                'recipient' | 'merchant'
-              >,
+              configurations: ['recipient', 'merchant'] as Array<'recipient' | 'merchant'>,
               return_url: input.returnUrl,
               refresh_url: input.refreshUrl,
             },

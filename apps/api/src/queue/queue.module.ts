@@ -24,6 +24,10 @@ import { QUEUE_NAMES } from './queue.constants';
         name: QUEUE_NAMES.purchaseTtlSweep,
         defaultJobOptions: DEFAULT_JOB_OPTIONS,
       },
+      {
+        name: QUEUE_NAMES.eventPayoutSweep,
+        defaultJobOptions: DEFAULT_JOB_OPTIONS,
+      },
     ),
   ],
   exports: [BullModule],
