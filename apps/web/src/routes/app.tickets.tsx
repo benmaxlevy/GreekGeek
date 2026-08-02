@@ -26,6 +26,7 @@ export const Route = createFileRoute('/app/tickets')({
 function MyTicketsPage() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [expandedTicketId, setExpandedTicketId] = useState<string | null>(null);
 
   const ticketsQuery = useQuery({
     queryKey: ['tickets', 'mine'],
@@ -72,6 +73,7 @@ function MyTicketsPage() {
         <h1 className="text-[28px] font-medium tracking-tight">My tickets</h1>
         <p className="mt-1 text-sm text-ink-500">
           View your tickets and buy from on-sale events (your org pool or public).
+          Tap a paid ticket to show its QR at the door.
         </p>
       </div>
 
@@ -118,53 +120,85 @@ function MyTicketsPage() {
             <p className="p-6 text-sm text-ink-500">You have no tickets yet.</p>
           ) : (
             <ul className="divide-y divide-border-subtle">
-              {myTickets.map((ticket) => (
-                <li
-                  key={ticket.id}
-                  className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-start sm:justify-between"
-                >
-                  <div className="space-y-1">
-                    <p className="font-medium text-ink-100">{ticket.eventName}</p>
-                    <p className="text-sm text-ink-500">{ticket.allocationLabel}</p>
-                    {ticket.status === 'paid' ? (
-                      <div className="pt-2">
+              {myTickets.map((ticket) => {
+                const expanded = expandedTicketId === ticket.id;
+                const canRevealQr = ticket.status === 'paid';
+
+                return (
+                  <li key={ticket.id}>
+                    <div
+                      className={`flex w-full flex-col gap-3 px-6 py-4 sm:flex-row sm:items-start sm:justify-between ${
+                        canRevealQr
+                          ? 'cursor-pointer transition-colors hover:bg-white/[0.03]'
+                          : ''
+                      }`}
+                      role={canRevealQr ? 'button' : undefined}
+                      tabIndex={canRevealQr ? 0 : undefined}
+                      aria-expanded={canRevealQr ? expanded : undefined}
+                      onClick={() => {
+                        if (!canRevealQr) return;
+                        setExpandedTicketId(expanded ? null : ticket.id);
+                      }}
+                      onKeyDown={(e) => {
+                        if (!canRevealQr) return;
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setExpandedTicketId(expanded ? null : ticket.id);
+                        }
+                      }}
+                    >
+                      <div className="space-y-1">
+                        <p className="font-medium text-ink-100">{ticket.eventName}</p>
+                        <p className="text-sm text-ink-500">{ticket.allocationLabel}</p>
+                        {ticket.status === 'paid' ? (
+                          <p className="text-xs text-ink-500">
+                            {expanded ? 'Hide QR' : 'Tap to show QR'}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-ink-500">
+                            {ticket.status === 'unpaid'
+                              ? 'QR available after payment.'
+                              : 'Ticket void — no entry QR.'}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge
+                          variant={
+                            ticket.status === 'paid'
+                              ? 'default'
+                              : ticket.status === 'void'
+                                ? 'destructive'
+                                : 'secondary'
+                          }
+                        >
+                          {ticket.status}
+                        </Badge>
+                        {ticket.status === 'unpaid' ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            disabled={markPaidMutation.isPending}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markPaidMutation.mutate(ticket.id);
+                            }}
+                          >
+                            Mark paid
+                          </Button>
+                        ) : null}
+                      </div>
+                    </div>
+                    {canRevealQr && expanded ? (
+                      <div className="border-t border-border-subtle px-6 pb-4 pt-3">
                         <p className="mb-2 text-xs text-ink-500">Show this QR at the door</p>
                         <TicketQrCode credentialToken={ticket.credentialToken} />
                       </div>
-                    ) : (
-                      <p className="text-sm text-ink-500">
-                        {ticket.status === 'unpaid'
-                          ? 'QR available after payment.'
-                          : 'Ticket void — no entry QR.'}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge
-                      variant={
-                        ticket.status === 'paid'
-                          ? 'default'
-                          : ticket.status === 'void'
-                            ? 'destructive'
-                            : 'secondary'
-                      }
-                    >
-                      {ticket.status}
-                    </Badge>
-                    {ticket.status === 'unpaid' ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={markPaidMutation.isPending}
-                        onClick={() => markPaidMutation.mutate(ticket.id)}
-                      >
-                        Mark paid
-                      </Button>
                     ) : null}
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </CardContent>
