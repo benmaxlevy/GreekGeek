@@ -26,11 +26,11 @@
 
 ## 4. Webhook PI handlers
 
-- [ ] 4.1 Register `payment_intent.succeeded` / `payment_failed` / `canceled` in existing inbox worker
-- [ ] 4.2 `succeeded`: unpaid ticket → paid + paidAt; TicketPayment succeeded; idempotent replay; void ticket → succeeded payment + mismatch flag, ticket stays void
-- [ ] 4.3 `payment_failed` / `canceled`: update TicketPayment; ticket stays unpaid
-- [ ] 4.4 Integration tests: webhook replay idempotent; failed payment leaves unpaid; void mismatch case
-- [ ] 4.5 Commit: `add payment intent webhook handlers for ticket payments`
+- [x] 4.1 Register `payment_intent.succeeded` / `payment_failed` / `canceled` in existing inbox worker
+- [x] 4.2 `succeeded`: unpaid ticket → paid + paidAt; TicketPayment succeeded; idempotent replay; void ticket → succeeded payment + mismatch flag, ticket stays void
+- [x] 4.3 `payment_failed` / `canceled`: update TicketPayment; ticket stays unpaid
+- [x] 4.4 Integration tests: webhook replay idempotent; failed payment leaves unpaid; void mismatch case
+- [x] 4.5 Commit: `add payment intent webhook handlers for ticket payments`
 
 ## 5. Frontend — pay page + holder UI
 

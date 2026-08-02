@@ -3,6 +3,7 @@ import { PermissionsModule } from '../permissions/permissions.module';
 import { WebhookHandlerRegistry } from '../webhooks/webhook-handler.registry';
 import { StripeConnectController } from './stripe-connect.controller';
 import { StripeConnectService } from './stripe-connect.service';
+import { StripePaymentWebhookHandlers } from './stripe-payment-webhook.handlers';
 import { StripeService } from './stripe.service';
 import { StripeWebhookHandlers } from './stripe-webhook.handlers';
 
@@ -14,12 +15,14 @@ import { StripeWebhookHandlers } from './stripe-webhook.handlers';
     StripeConnectService,
     WebhookHandlerRegistry,
     StripeWebhookHandlers,
+    StripePaymentWebhookHandlers,
   ],
   exports: [
     StripeService,
     StripeConnectService,
     WebhookHandlerRegistry,
     StripeWebhookHandlers,
+    StripePaymentWebhookHandlers,
   ],
 })
 export class StripeModule {}
