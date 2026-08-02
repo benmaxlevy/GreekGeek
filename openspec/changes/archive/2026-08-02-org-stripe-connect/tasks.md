@@ -42,9 +42,9 @@
 
 ## 6. Verification / demos
 
-- [ ] 6.1 Demo: officer without Connect blocked on paid allocation; free allocation succeeds
-- [ ] 6.2 Demo: complete hosted onboarding (test mode) → webhook/refetch flips `stripeChargesEnabled` → paid allocation allowed
-- [ ] 6.3 Demo: `on_sale` with paid allocation blocked then allowed after ready
-- [ ] 6.4 Demo: user without `payments.manage` sees ask-officer message, no CTA
-- [ ] 6.5 Demo: admin views status and generates link without manual flag override
-- [ ] 6.6 Mark all tasks complete; archive when shipped
+- [x] 6.1 Demo: officer without Connect blocked on paid allocation; free allocation succeeds
+- [x] 6.2 Demo: complete hosted onboarding (test mode) → webhook/refetch flips `stripeChargesEnabled` → paid allocation allowed
+- [x] 6.3 Demo: `on_sale` with paid allocation blocked then allowed after ready
+- [x] 6.4 Demo: user without `payments.manage` sees ask-officer message, no CTA
+- [x] 6.5 Demo: admin views status and generates link without manual flag override
+- [x] 6.6 Mark all tasks complete; archive when shipped
