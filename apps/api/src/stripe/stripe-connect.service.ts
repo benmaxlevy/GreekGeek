@@ -62,8 +62,12 @@ export class StripeConnectService {
    */
   async startConnect(
     organizationId: string,
+    contactEmail: string,
   ): Promise<StripeConnectOnboardingLinkResponse> {
-    const accountId = await this.ensureStripeAccountId(organizationId);
+    const accountId = await this.ensureStripeAccountId(
+      organizationId,
+      contactEmail,
+    );
     const org = await this.requireOrg(organizationId);
     const link = await this.mintAccountLink(org, accountId);
     return { url: link.url };
@@ -93,7 +97,10 @@ export class StripeConnectService {
     return this.paymentsSettingsUrl(organizationId);
   }
 
-  private async ensureStripeAccountId(organizationId: string): Promise<string> {
+  private async ensureStripeAccountId(
+    organizationId: string,
+    contactEmail: string,
+  ): Promise<string> {
     return this.prisma.$transaction(
       async (tx) => {
         const locked = await tx.$queryRaw<
@@ -115,6 +122,7 @@ export class StripeConnectService {
         const account = await this.stripe.createConnectAccount({
           displayName: org.name,
           organizationId: org.id,
+          contactEmail,
         });
 
         await tx.organization.update({

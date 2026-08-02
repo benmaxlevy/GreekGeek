@@ -7,6 +7,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import type { Response } from 'express';
+import type { PublicUser } from '@rally/contracts';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { RequireOrgPermission } from '../permissions/decorators/require-org-permission.decorator';
 import { OrgPermissionGuard } from '../permissions/guards/org-permission.guard';
@@ -46,9 +48,10 @@ export class StripeConnectController {
   async connectOnboarding(
     @Param(new ZodValidationPipe(OrgStripeParamsSchema))
     params: OrgStripeParams,
+    @CurrentUser() caller: PublicUser,
   ): Promise<StripeConnectOnboardingLinkResponse> {
     return StripeConnectOnboardingLinkResponseSchema.parse(
-      await this.connect.startConnect(params.organizationId),
+      await this.connect.startConnect(params.organizationId, caller.email),
     );
   }
 

@@ -27,9 +27,11 @@ export class StripeService {
   createConnectAccount(input: {
     displayName: string;
     organizationId: string;
+    contactEmail: string;
   }): Promise<Stripe.V2.Core.Account> {
     return this.client.v2.core.accounts.create({
       display_name: input.displayName,
+      contact_email: input.contactEmail,
       dashboard: 'express',
       identity: {
         country: 'us',
