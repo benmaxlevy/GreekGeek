@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   Event,
+  GuestListEntry,
   PublicUser,
   Ticket,
   TicketAllocation,
@@ -602,38 +603,98 @@ export function EventTicketsPanel({
             ) : (guestsQuery.data ?? []).length === 0 ? (
               <p className="p-6 text-sm text-ink-500">No paid guests yet.</p>
             ) : (
-              <ul className="divide-y divide-border-subtle">
-                {(guestsQuery.data ?? []).map((guest) => (
-                  <li
-                    key={guest.id}
-                    className="flex flex-col gap-2 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div>
-                      <p className="font-medium text-ink-100">
-                        {guest.holderName ?? guest.holderUserId ?? 'Guest'}
-                      </p>
-                      <p className="text-sm text-ink-500">{guest.allocationLabel}</p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="default">{guest.status}</Badge>
-                      <Badge variant={guest.checkedIn ? 'default' : 'outline'}>
-                        {guest.checkedIn ? 'Checked in' : 'Not checked in'}
-                      </Badge>
-                      {guest.checkedInAt ? (
-                        <span className="text-xs text-ink-500">
-                          {new Date(guest.checkedInAt).toLocaleString()}
-                        </span>
-                      ) : null}
-                    </div>
-                  </li>
+              <div className="divide-y divide-border-subtle">
+                {groupGuestList(guestsQuery.data ?? []).map((group) => (
+                  <GuestPurchaseGroup key={group.key} group={group} />
                 ))}
-              </ul>
+              </div>
             )}
           </CardContent>
         </Card>
       ) : null}
 
       {tab === 'scan' && canScan ? <TicketScanner eventId={eventId} /> : null}
+    </div>
+  );
+}
+
+type GuestGroup = {
+  key: string;
+  purchaseId: string | null;
+  holderLabel: string;
+  allocationLabel: string;
+  entries: GuestListEntry[];
+};
+
+function groupGuestList(guests: GuestListEntry[]): GuestGroup[] {
+  const groups = new Map<string, GuestGroup>();
+  for (const guest of guests) {
+    const key =
+      guest.purchaseId ??
+      `holder:${guest.holderUserId ?? 'unassigned'}`;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.entries.push(guest);
+      continue;
+    }
+    groups.set(key, {
+      key,
+      purchaseId: guest.purchaseId,
+      holderLabel: guest.holderName ?? guest.holderUserId ?? 'Guest',
+      allocationLabel: guest.allocationLabel,
+      entries: [guest],
+    });
+  }
+  return [...groups.values()];
+}
+
+function GuestPurchaseGroup({ group }: { group: GuestGroup }) {
+  const multi = group.entries.length > 1;
+  return (
+    <div className="px-6 py-4">
+      {multi ? (
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <div>
+            <p className="font-medium text-ink-100">{group.holderLabel}</p>
+            <p className="text-sm text-ink-500">
+              {group.allocationLabel}
+              {group.purchaseId
+                ? ` · ${group.entries.length} tickets in purchase`
+                : ` · ${group.entries.length} tickets`}
+            </p>
+          </div>
+        </div>
+      ) : null}
+      <ul className={multi ? 'space-y-3 border-l border-border-subtle pl-4' : ''}>
+        {group.entries.map((guest) => (
+          <li
+            key={guest.id}
+            className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              {multi ? (
+                <p className="text-sm text-ink-500">{guest.allocationLabel}</p>
+              ) : (
+                <>
+                  <p className="font-medium text-ink-100">{group.holderLabel}</p>
+                  <p className="text-sm text-ink-500">{guest.allocationLabel}</p>
+                </>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="default">{guest.status}</Badge>
+              <Badge variant={guest.checkedIn ? 'default' : 'outline'}>
+                {guest.checkedIn ? 'Checked in' : 'Not checked in'}
+              </Badge>
+              {guest.checkedInAt ? (
+                <span className="text-xs text-ink-500">
+                  {new Date(guest.checkedInAt).toLocaleString()}
+                </span>
+              ) : null}
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
