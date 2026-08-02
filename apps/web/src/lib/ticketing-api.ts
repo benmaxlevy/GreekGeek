@@ -10,10 +10,11 @@ import {
   MyTicketListSchema,
   PatchEventTicketingSchema,
   PublicClaimResponseSchema,
+  PurchaseCheckoutRequestSchema,
+  PurchaseCheckoutResponseSchema,
   TicketAllocationListSchema,
   TicketAllocationSchema,
   TicketCheckInErrorCodeSchema,
-  TicketCheckoutResponseSchema,
   TicketListSchema,
   TicketSchema,
   UpdateTicketAllocationSchema,
@@ -27,15 +28,17 @@ import {
   type MyTicketList,
   type PatchEventTicketing,
   type PublicClaimResponse,
+  type PurchaseCheckoutRequest,
+  type PurchaseCheckoutResponse,
   type Ticket,
   type TicketAllocation,
   type TicketAllocationList,
-  type TicketCheckoutResponse,
   type TicketList,
   type UpdateTicketAllocation,
 } from '@rally/contracts';
 import { apiFetch, readError } from './api';
 import { TicketCheckInError } from './ticketing/types/check-in';
+import { PurchaseCheckoutError } from './ticketing/types/purchase';
 
 function toQuery(params: Record<string, string | undefined>): string {
   const search = new URLSearchParams();
@@ -190,17 +193,36 @@ export async function markTicketPaid(ticketId: string): Promise<Ticket> {
   return TicketSchema.parse(await res.json());
 }
 
-export async function checkoutTicket(
-  ticketId: string,
-): Promise<TicketCheckoutResponse> {
-  const res = await apiFetch(`/api/tickets/${ticketId}/checkout`, {
+export async function checkoutPurchase(
+  body: PurchaseCheckoutRequest,
+): Promise<PurchaseCheckoutResponse> {
+  const payload = PurchaseCheckoutRequestSchema.parse(body);
+  const res = await apiFetch('/api/ticket-purchases/checkout', {
     method: 'POST',
-    body: JSON.stringify({}),
+    body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    throw new Error(await readError(res, 'Failed to start checkout'));
+    let remaining: number | undefined;
+    let message = `Failed to start checkout (${res.status})`;
+    try {
+      const data = (await res.json()) as {
+        message?: string | string[];
+        remaining?: number;
+      };
+      if (typeof data.remaining === 'number') {
+        remaining = data.remaining;
+      }
+      if (typeof data.message === 'string') {
+        message = data.message;
+      } else if (Array.isArray(data.message)) {
+        message = data.message.join(', ');
+      }
+    } catch {
+      message = await readError(res, 'Failed to start checkout');
+    }
+    throw new PurchaseCheckoutError(message, remaining);
   }
-  return TicketCheckoutResponseSchema.parse(await res.json());
+  return PurchaseCheckoutResponseSchema.parse(await res.json());
 }
 
 export async function voidTicket(ticketId: string): Promise<Ticket> {
