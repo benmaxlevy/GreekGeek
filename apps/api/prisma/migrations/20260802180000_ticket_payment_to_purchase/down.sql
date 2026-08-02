@@ -1,0 +1,27 @@
+-- Down migration (manual): reverse Purchase → TicketPayment 1:1
+-- Only safe when every Purchase has exactly one Ticket with purchaseId set.
+--
+-- ALTER TABLE "Ticket" DROP CONSTRAINT "Ticket_purchaseId_fkey";
+-- ALTER TABLE "Purchase" DROP CONSTRAINT "Purchase_allocationId_fkey";
+-- ALTER TABLE "Purchase" DROP CONSTRAINT "Purchase_eventId_fkey";
+-- ALTER TABLE "Purchase" DROP CONSTRAINT "Purchase_buyerUserId_fkey";
+-- DROP INDEX IF EXISTS "Ticket_purchaseId_idx";
+-- DROP INDEX IF EXISTS "Purchase_buyerUserId_allocationId_status_idx";
+-- DROP INDEX IF EXISTS "Purchase_eventId_idx";
+-- ALTER TABLE "Purchase" RENAME TO "TicketPayment";
+-- ALTER TABLE "TicketPayment" RENAME CONSTRAINT "Purchase_pkey" TO "TicketPayment_pkey";
+-- ALTER INDEX "Purchase_stripePaymentIntentId_key" RENAME TO "TicketPayment_stripePaymentIntentId_key";
+-- ALTER TABLE "TicketPayment" ADD COLUMN "ticketId" TEXT;
+-- UPDATE "TicketPayment" AS tp SET "ticketId" = t.id FROM "Ticket" AS t WHERE t."purchaseId" = tp.id;
+-- ALTER TABLE "TicketPayment" ALTER COLUMN "ticketId" SET NOT NULL;
+-- CREATE UNIQUE INDEX "TicketPayment_ticketId_key" ON "TicketPayment"("ticketId");
+-- ALTER TABLE "TicketPayment" ADD CONSTRAINT "TicketPayment_ticketId_fkey"
+--   FOREIGN KEY ("ticketId") REFERENCES "Ticket"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+-- ALTER TABLE "Ticket" DROP COLUMN "purchaseId";
+-- ALTER TABLE "TicketPayment" DROP COLUMN "stripeChargeId";
+-- ALTER TABLE "TicketPayment" DROP COLUMN "subtotalCents";
+-- ALTER TABLE "TicketPayment" DROP COLUMN "quantity";
+-- ALTER TABLE "TicketPayment" DROP COLUMN "allocationId";
+-- ALTER TABLE "TicketPayment" DROP COLUMN "eventId";
+-- ALTER TABLE "TicketPayment" DROP COLUMN "buyerUserId";
+-- ALTER TYPE "PurchaseStatus" RENAME TO "TicketPaymentStatus";

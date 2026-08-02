@@ -40,7 +40,7 @@ enum TicketStatus {
   void
 }
 
-enum TicketPaymentStatus {
+enum PurchaseStatus {
   requires_payment
   succeeded
   failed
@@ -62,6 +62,7 @@ model User {
   refreshTokens           RefreshToken[]
   membership              Membership?
   heldTickets             Ticket[]
+  purchases               Purchase[]
 
   @@index([requestedOrganizationId])
 }
@@ -125,6 +126,7 @@ model Event {
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
   allocations         TicketAllocation[]
+  purchases           Purchase[]
 
   @@index([organizationId])
 }
@@ -139,6 +141,7 @@ model TicketAllocation {
   priceCents     Int?
   status         AllocationStatus @default(active)
   tickets        Ticket[]
+  purchases      Purchase[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 
@@ -155,31 +158,44 @@ model Ticket {
   credentialToken String           @unique
   holderUserId    String?
   holder          User?            @relation(fields: [holderUserId], references: [id])
+  purchaseId      String?
+  purchase        Purchase?        @relation(fields: [purchaseId], references: [id], onDelete: SetNull)
   paidAt          DateTime?
   voidedAt        DateTime?
   checkedIn       Boolean          @default(false)
   checkedInAt     DateTime?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  payment         TicketPayment?
 
   @@index([allocationId])
   @@index([holderUserId])
+  @@index([purchaseId])
 }
 
-model TicketPayment {
-  id                    String              @id @default(cuid())
-  ticketId              String              @unique
-  ticket                Ticket              @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  stripePaymentIntentId String              @unique
-  amountCents           Int
+model Purchase {
+  id                    String           @id @default(cuid())
+  buyerUserId           String
+  buyer                 User             @relation(fields: [buyerUserId], references: [id], onDelete: Restrict)
+  eventId               String
+  event                 Event            @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  allocationId          String
+  allocation            TicketAllocation @relation(fields: [allocationId], references: [id], onDelete: Restrict)
+  quantity              Int
+  subtotalCents         Int
   feeCents              Int
+  amountCents           Int
   netCents              Int
-  currency              String              @default("usd")
-  status                TicketPaymentStatus
-  statusMismatch        Boolean             @default(false)
-  createdAt             DateTime            @default(now())
-  updatedAt             DateTime            @updatedAt
+  currency              String           @default("usd")
+  status                PurchaseStatus
+  stripePaymentIntentId String           @unique
+  stripeChargeId        String?
+  statusMismatch        Boolean          @default(false)
+  tickets               Ticket[]
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  @@index([eventId])
+  @@index([buyerUserId, allocationId, status])
 }
 
 model Membership {
