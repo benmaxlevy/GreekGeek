@@ -14,8 +14,8 @@ Rally needs durable async job processing before payment webhooks land. Stripe (a
 - Worker runs as own process/entrypoint (`start:worker`), same codebase
 - Graceful shutdown drains in-flight jobs
 - Health endpoint reports Redis reachable (`redis: 'up'|'down'`; overall status degraded if Redis or database down); extend `@rally/contracts` `HealthResponseSchema`
-- One trivial ADMIN-only enqueue endpoint proves end-to-end enqueue → process → log
 - Job failures logged with job id + payload keys (no PII dumps)
+- Temporary ADMIN prove enqueue used for smoke only — removed after confirmed
 
 ### Slice A — Generic webhook inbox
 
@@ -41,7 +41,7 @@ Rally needs durable async job processing before payment webhooks land. Stripe (a
 
 ### New Capabilities
 
-- `job-queue`: Redis + BullMQ infrastructure, shared queue module, worker entrypoint, graceful shutdown, health Redis probe, prove-job ADMIN endpoint
+- `job-queue`: Redis + BullMQ infrastructure, shared queue module, worker entrypoint, graceful shutdown, health Redis probe
 - `webhook-inbox`: `WebhookEvent` persistence, Stripe signature verification + ingest, async processing with idempotency and retries, ADMIN ops API (list failed/unprocessed, re-enqueue)
 
 ### Modified Capabilities

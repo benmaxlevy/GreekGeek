@@ -6,7 +6,6 @@ import { HealthModule } from './health/health.module';
 import { MembershipsModule } from './memberships/memberships.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { PermissionsModule } from './permissions/permissions.module';
-import { AdminQueueModule } from './queue/admin-queue.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -26,7 +25,6 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     PermissionsModule,
     EventsModule,
     TicketsModule,
-    AdminQueueModule,
     WebhooksModule,
   ],
 })

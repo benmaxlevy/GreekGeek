@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppConfigModule } from './config/config.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { ProveProcessor } from './queue/prove.processor';
 import { QueueModule } from './queue/queue.module';
 import { WebhookProcessProcessor } from './webhooks/webhook-process.processor';
 
@@ -10,6 +9,6 @@ import { WebhookProcessProcessor } from './webhooks/webhook-process.processor';
  */
 @Module({
   imports: [AppConfigModule, PrismaModule, QueueModule],
-  providers: [ProveProcessor, WebhookProcessProcessor],
+  providers: [WebhookProcessProcessor],
 })
 export class WorkerModule {}

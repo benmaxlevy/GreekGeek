@@ -16,10 +16,6 @@ import { QUEUE_NAMES } from './queue.constants';
       }),
     }),
     BullModule.registerQueue({
-      name: QUEUE_NAMES.prove,
-      defaultJobOptions: DEFAULT_JOB_OPTIONS,
-    }),
-    BullModule.registerQueue({
       name: QUEUE_NAMES.webhookProcess,
       defaultJobOptions: DEFAULT_JOB_OPTIONS,
     }),

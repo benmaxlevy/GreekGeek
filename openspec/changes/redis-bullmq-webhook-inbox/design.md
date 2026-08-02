@@ -108,12 +108,10 @@ export const HealthResponseSchema = z.object({
 - API healthy without worker running — worker absence does not degrade health
 - Rationale: ops visibility; matches existing database pattern
 
-### 7. Prove job (slice 0 E2E)
+### 7. Prove job (slice 0 E2E) — removed after smoke
 
-- ADMIN-only `POST /api/admin/queue/prove` enqueues `{ message: string }` to `QUEUE_NAMES.prove`
-- Processor logs `job.id` + payload keys at info level
-- On failure: log `job.id` + Object.keys(payload) only — no full payload / PII
-- Rationale: validates enqueue → Redis → worker path before webhook complexity
+- Temporary ADMIN prove enqueue validated Redis → worker path
+- Removed after confirmed (no permanent prove endpoint/processor/queue)
 
 ### 8. WebhookEvent Prisma model
 

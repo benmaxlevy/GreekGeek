@@ -78,21 +78,11 @@ The health response contract MUST include a `redis` field with values `up` or `d
 - **WHEN** a client calls the health endpoint and the database is down but Redis is up
 - **THEN** the response includes `status: 'degraded'`
 
-### Requirement: ADMIN can enqueue a prove job for end-to-end validation
+### Requirement: Job failure logs omit PII
 
-An ADMIN-only HTTP endpoint MUST enqueue a trivial prove job. The worker processor MUST log successful processing including the job id. On job failure, logs MUST include the job id and payload key names only — MUST NOT dump full payload values or PII.
+On job failure, worker logs MUST include the job id and payload key names only — MUST NOT dump full payload values or PII.
 
-#### Scenario: Prove job enqueued and processed
+#### Scenario: Failed job logs safely
 
-- **WHEN** an ACTIVE platform ADMIN calls the prove enqueue endpoint and the worker is running
-- **THEN** the job is enqueued, processed by the worker, and a success log line includes the job id
-
-#### Scenario: Non-admin cannot enqueue prove job
-
-- **WHEN** a non-ADMIN user calls the prove enqueue endpoint
-- **THEN** the system returns 403 Forbidden
-
-#### Scenario: Failed prove job logs safely
-
-- **WHEN** a prove job fails in the worker
+- **WHEN** a queue job fails in the worker
 - **THEN** error logs include the job id and payload object keys but not full payload content

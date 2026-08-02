@@ -23,14 +23,14 @@
 
 ## 3. Slice A — Admin FE
 
-- [ ] 3.1 Add admin API client helpers (`listWebhookEvents`, `requeueWebhookEvent`) in `apps/web`
-- [ ] 3.2 Create `/admin/webhook-events` route: table, unprocessed/failed/all filters, re-enqueue action on failed rows; obsidian-glass styling
-- [ ] 3.3 Add admin nav link to webhook events (ADMIN only)
+- [x] 3.1 Add admin API client helpers (`listWebhookEvents`, `requeueWebhookEvent`) in `apps/web`
+- [x] 3.2 Create `/admin/webhook-events` route: table, unprocessed/failed/all filters, re-enqueue action on failed rows; obsidian-glass styling
+- [x] 3.3 Add admin nav link to webhook events (ADMIN only)
 - [ ] 3.4 Commit: `add admin webhook events inbox ui`
 
 ## 4. Verification / demos
 
-- [ ] 4.1 Manual verify: `docker compose up` + API + `start:worker` → prove job enqueued and logged; API healthy without worker
+- [x] 4.1 Manual verify: `docker compose up` + API + `start:worker` → prove smoke then removed; health `redis:up` without worker required
 - [ ] 4.2 Manual verify: Stripe CLI forward → event stored, processed once; replay → 200 no duplicate processing
 - [ ] 4.3 Manual verify: induce handler failure → retries → visible in admin failed list → re-enqueue succeeds
 - [ ] 4.4 Mark all tasks complete; archive when shipped

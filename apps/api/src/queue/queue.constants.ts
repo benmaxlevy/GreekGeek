@@ -1,5 +1,4 @@
 export const QUEUE_NAMES = {
-  prove: 'prove',
   webhookProcess: 'webhook-process',
 } as const;
 
