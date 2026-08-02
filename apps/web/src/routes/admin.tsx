@@ -14,6 +14,7 @@ const ADMIN_NAV = [
   { label: 'Ticketed events', to: '/admin/ticketed-events' },
   { label: 'Memberships', to: '/admin/memberships' },
   { label: 'Permissions', to: '/admin/permissions' },
+  { label: 'Webhook events', to: '/admin/webhook-events' },
   { label: 'App home', to: '/app' },
 ];
 

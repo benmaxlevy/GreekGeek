@@ -26,7 +26,7 @@
 - [x] 3.1 Add admin API client helpers (`listWebhookEvents`, `requeueWebhookEvent`) in `apps/web`
 - [x] 3.2 Create `/admin/webhook-events` route: table, unprocessed/failed/all filters, re-enqueue action on failed rows; obsidian-glass styling
 - [x] 3.3 Add admin nav link to webhook events (ADMIN only)
-- [ ] 3.4 Commit: `add admin webhook events inbox ui`
+- [x] 3.4 Commit: `add admin webhook events inbox ui`
 
 ## 4. Verification / demos
 
