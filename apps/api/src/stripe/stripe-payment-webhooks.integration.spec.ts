@@ -23,10 +23,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
 
     function makeProcessor() {
       const registry = new WebhookHandlerRegistry();
-      const handlers = new StripePaymentWebhookHandlers(
-        registry,
-        prisma as never,
-      );
+      const handlers = new StripePaymentWebhookHandlers(registry, prisma as never);
       handlers.onModuleInit();
       return new WebhookProcessProcessor(prisma as never, registry);
     }
@@ -94,6 +91,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
           name: `PI WH Event ${suffix}`,
           type: 'Social',
           maxHeadcount: 20,
+          startsAt: new Date('2026-08-10T18:00:00.000Z'),
           ticketingEnabled: true,
           ticketCapacity: 10,
           ticketSaleStatus: 'on_sale',
@@ -273,9 +271,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
         `evt_${suffix}_failed`,
       );
 
-      expect(
-        await prisma.ticket.count({ where: { purchaseId: failedPurchase.id } }),
-      ).toBe(0);
+      expect(await prisma.ticket.count({ where: { purchaseId: failedPurchase.id } })).toBe(0);
       const purchase = await prisma.purchase.findUnique({
         where: { id: failedPurchase.id },
       });

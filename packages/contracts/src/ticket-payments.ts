@@ -1,12 +1,14 @@
 import { z } from 'zod';
+import { PayoutExcludedReasonSchema } from './event-payouts';
 
-export const PurchaseStatusSchema = z.enum([
-  'requires_payment',
-  'succeeded',
-  'failed',
-  'canceled',
-]);
+export const PurchaseStatusSchema = z.enum(['requires_payment', 'succeeded', 'failed', 'canceled']);
 export type PurchaseStatus = z.infer<typeof PurchaseStatusSchema>;
+
+export const PurchasePayoutFieldsSchema = z.object({
+  eventPayoutId: z.string().nullable(),
+  payoutExcludedReason: PayoutExcludedReasonSchema.nullable(),
+});
+export type PurchasePayoutFields = z.infer<typeof PurchasePayoutFieldsSchema>;
 
 /** @deprecated Use PurchaseStatusSchema */
 export const TicketPaymentStatusSchema = PurchaseStatusSchema;
@@ -48,11 +50,7 @@ export function computeRallyFee(
   amountCents: number;
   netCents: number;
 } {
-  const { feeCents, amountCents, netCents } = computePurchaseAmounts(
-    1,
-    priceCents,
-    feePercent,
-  );
+  const { feeCents, amountCents, netCents } = computePurchaseAmounts(1, priceCents, feePercent);
   return { feeCents, amountCents, netCents };
 }
 
@@ -60,9 +58,7 @@ export const PurchaseCheckoutRequestSchema = z.object({
   allocationId: z.string().min(1),
   quantity: z.number().int().positive(),
 });
-export type PurchaseCheckoutRequest = z.infer<
-  typeof PurchaseCheckoutRequestSchema
->;
+export type PurchaseCheckoutRequest = z.infer<typeof PurchaseCheckoutRequestSchema>;
 
 export const PurchaseCheckoutResponseSchema = z.object({
   purchaseId: z.string().min(1),
@@ -75,9 +71,7 @@ export const PurchaseCheckoutResponseSchema = z.object({
   currency: z.literal('usd'),
   ticketIds: z.array(z.string().min(1)).min(1),
 });
-export type PurchaseCheckoutResponse = z.infer<
-  typeof PurchaseCheckoutResponseSchema
->;
+export type PurchaseCheckoutResponse = z.infer<typeof PurchaseCheckoutResponseSchema>;
 
 /** @deprecated Use PurchaseCheckoutRequestSchema */
 export const TicketCheckoutRequestSchema = z.object({}).strict();
@@ -100,6 +94,4 @@ export const TicketCheckoutResponseSchema = z.object({
   currency: z.literal('usd'),
 });
 /** @deprecated */
-export type TicketCheckoutResponse = z.infer<
-  typeof TicketCheckoutResponseSchema
->;
+export type TicketCheckoutResponse = z.infer<typeof TicketCheckoutResponseSchema>;

@@ -52,10 +52,7 @@ function mockContext(
   let managerMembershipId = '';
   let noPermUserId = '';
 
-  function asUser(
-    id: string,
-    role: 'USER' | 'ADMIN' = 'USER',
-  ): PublicUser {
+  function asUser(id: string, role: 'USER' | 'ADMIN' = 'USER'): PublicUser {
     return {
       id,
       email: `${id}@example.com`,
@@ -78,11 +75,7 @@ function mockContext(
       prisma as never,
     );
 
-    for (const key of [
-      'members.manage_permissions',
-      'events.create',
-      'events.manage',
-    ] as const) {
+    for (const key of ['members.manage_permissions', 'events.create', 'events.manage'] as const) {
       await prisma.permission.upsert({
         where: { key },
         update: {},
@@ -198,21 +191,18 @@ function mockContext(
       name: `Formal ${suffix}`,
       type: 'Fraternity Formal',
       maxHeadcount: 80,
+      startsAt: '2026-08-10T18:00:00.000Z',
       location: 'Nashville',
     };
     await expect(
-      createGuard.canActivate(
-        mockContext(asUser(creatorUserId), { body }),
-      ),
+      createGuard.canActivate(mockContext(asUser(creatorUserId), { body })),
     ).resolves.toBe(true);
 
     const created = await events.create(body, asUser(creatorUserId));
     expect(created.organizationId).toBe(orgAId);
     expect(created.maxHeadcount).toBe(80);
 
-    await expect(events.list({}, asUser(noPermUserId))).rejects.toBeInstanceOf(
-      ForbiddenException,
-    );
+    await expect(events.list({}, asUser(noPermUserId))).rejects.toBeInstanceOf(ForbiddenException);
 
     const listed = await events.list({}, asUser(creatorUserId));
     expect(listed.some((e) => e.id === created.id)).toBe(true);
@@ -225,17 +215,26 @@ function mockContext(
         name: `Party ${suffix}`,
         type: 'Date Party',
         maxHeadcount: 40,
+        startsAt: '2026-08-11T18:00:00.000Z',
       },
       asUser(creatorUserId),
     );
 
     await expect(
-      events.update(created.id, { name: 'Nope' }, asUser(creatorUserId)),
+      events.update(
+        created.id,
+        { name: 'Nope', startsAt: '2026-08-11T18:00:00.000Z' },
+        asUser(creatorUserId),
+      ),
     ).rejects.toBeInstanceOf(ForbiddenException);
 
     const updated = await events.update(
       created.id,
-      { name: 'Updated Party', location: null },
+      {
+        name: 'Updated Party',
+        startsAt: '2026-08-11T18:00:00.000Z',
+        location: null,
+      },
       asUser(managerUserId),
     );
     expect(updated.name).toBe('Updated Party');
@@ -249,6 +248,7 @@ function mockContext(
         name: `Other ${suffix}`,
         type: 'Concert',
         maxHeadcount: 10,
+        startsAt: '2026-08-12T18:00:00.000Z',
       },
       admin,
     );
@@ -267,6 +267,7 @@ function mockContext(
         name: `Block delete ${suffix}`,
         type: 'Other',
         maxHeadcount: 5,
+        startsAt: '2026-08-13T18:00:00.000Z',
       },
       admin,
     );
@@ -274,9 +275,7 @@ function mockContext(
     expect(filtered.every((e) => e.organizationId === orgBId)).toBe(true);
     expect(filtered.some((e) => e.id === ev.id)).toBe(true);
 
-    await expect(organizations.remove(orgBId)).rejects.toBeInstanceOf(
-      ConflictException,
-    );
+    await expect(organizations.remove(orgBId)).rejects.toBeInstanceOf(ConflictException);
 
     await events.remove(ev.id, admin);
   });

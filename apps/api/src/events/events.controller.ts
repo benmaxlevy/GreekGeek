@@ -21,11 +21,13 @@ import {
   CreateEventSchema,
   EventListSchema,
   EventSchema,
+  HoldEventSchema,
   ListEventsQuerySchema,
   UpdateEventSchema,
   type CreateEvent,
   type Event,
   type EventList,
+  type HoldEvent,
   type ListEventsQuery,
   type UpdateEvent,
 } from './types/events.dto';
@@ -44,10 +46,7 @@ export class EventsController {
   }
 
   @Get(':id')
-  async get(
-    @Param('id') id: string,
-    @CurrentUser() caller: PublicUser,
-  ): Promise<Event> {
+  async get(@Param('id') id: string, @CurrentUser() caller: PublicUser): Promise<Event> {
     return EventSchema.parse(await this.eventsService.get(id, caller));
   }
 
@@ -67,17 +66,30 @@ export class EventsController {
     @Body(new ZodValidationPipe(UpdateEventSchema)) body: UpdateEvent,
     @CurrentUser() caller: PublicUser,
   ): Promise<Event> {
-    return EventSchema.parse(
-      await this.eventsService.update(id, body, caller),
-    );
+    return EventSchema.parse(await this.eventsService.update(id, body, caller));
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(
-    @Param('id') id: string,
-    @CurrentUser() caller: PublicUser,
-  ): Promise<void> {
+  async remove(@Param('id') id: string, @CurrentUser() caller: PublicUser): Promise<void> {
     await this.eventsService.remove(id, caller);
+  }
+
+  @Post(':id/hold')
+  async hold(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(HoldEventSchema)) body: HoldEvent,
+    @CurrentUser() caller: PublicUser,
+  ): Promise<Event> {
+    return EventSchema.parse(await this.eventsService.hold(id, body.reason, caller));
+  }
+
+  @Post(':id/clear-hold')
+  async clearHold(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(HoldEventSchema)) body: HoldEvent,
+    @CurrentUser() caller: PublicUser,
+  ): Promise<Event> {
+    return EventSchema.parse(await this.eventsService.clearHold(id, body.reason, caller));
   }
 }

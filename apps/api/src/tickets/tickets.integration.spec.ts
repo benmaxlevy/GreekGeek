@@ -35,16 +35,8 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       return 10;
     }),
   };
-  const purchases = new PurchasesService(
-    prisma as never,
-    stripe as never,
-    config as never,
-  );
-  const tickets = new TicketsService(
-    prisma as never,
-    config as never,
-    purchases,
-  );
+  const purchases = new PurchasesService(prisma as never, stripe as never, config as never);
+  const tickets = new TicketsService(prisma as never, config as never, purchases);
 
   const suffix = Date.now();
   let universityId = '';
@@ -61,10 +53,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
   let invitedAllocId = '';
   let publicAllocId = '';
 
-  function asUser(
-    id: string,
-    role: 'USER' | 'ADMIN' = 'USER',
-  ): PublicUser {
+  function asUser(id: string, role: 'USER' | 'ADMIN' = 'USER'): PublicUser {
     return {
       id,
       email: `${id}@example.com`,
@@ -105,11 +94,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       asUser(hostManagerId),
     );
     publicAllocId = (publicAlloc as { id: string }).id;
-    await tickets.patchTicketing(
-      eventId,
-      { ticketSaleStatus: 'on_sale' },
-      asUser(hostManagerId),
-    );
+    await tickets.patchTicketing(eventId, { ticketSaleStatus: 'on_sale' }, asUser(hostManagerId));
   }
 
   beforeAll(async () => {
@@ -252,6 +237,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
         name: `Ticketing Event ${suffix}`,
         type: 'Formal',
         maxHeadcount: 50,
+        startsAt: '2026-08-10T18:00:00.000Z',
       },
       asUser(hostManagerId),
     );
@@ -316,21 +302,11 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     expect(invitedTicket.allocationId).toBe(invitedAllocId);
 
     await expect(
-      tickets.issueTicket(
-        eventId,
-        publicAllocId,
-        {},
-        asUser(invitedManagerId),
-      ),
+      tickets.issueTicket(eventId, publicAllocId, {}, asUser(invitedManagerId)),
     ).rejects.toBeInstanceOf(ForbiddenException);
 
     await expect(
-      tickets.issueTicket(
-        eventId,
-        hostAllocId,
-        {},
-        asUser(invitedManagerId),
-      ),
+      tickets.issueTicket(eventId, hostAllocId, {}, asUser(invitedManagerId)),
     ).rejects.toBeInstanceOf(ForbiddenException);
 
     await expect(
@@ -353,6 +329,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
         name: `Capacity Event ${suffix}`,
         type: 'Party',
         maxHeadcount: 30,
+        startsAt: '2026-08-11T18:00:00.000Z',
       },
       asUser(hostManagerId),
     );
@@ -368,11 +345,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     );
 
     await expect(
-      tickets.patchTicketing(
-        capEvent.id,
-        { ticketCapacity: 100 },
-        asUser(hostManagerId),
-      ),
+      tickets.patchTicketing(capEvent.id, { ticketCapacity: 100 }, asUser(hostManagerId)),
     ).rejects.toBeInstanceOf(BadRequestException);
 
     await tickets.createAllocation(
@@ -390,30 +363,16 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     ).rejects.toBeInstanceOf(BadRequestException);
 
     await expect(
-      tickets.patchTicketing(
-        capEvent.id,
-        { ticketSaleStatus: 'on_sale' },
-        asUser(hostManagerId),
-      ),
+      tickets.patchTicketing(capEvent.id, { ticketSaleStatus: 'on_sale' }, asUser(hostManagerId)),
     ).resolves.toBeDefined();
 
     const capAlloc = await prisma.ticketAllocation.findFirst({
       where: { eventId: capEvent.id, organizationId: hostOrgId },
     });
-    const issued = await tickets.issueTicket(
-      capEvent.id,
-      capAlloc!.id,
-      {},
-      asUser(hostManagerId),
-    );
+    const issued = await tickets.issueTicket(capEvent.id, capAlloc!.id, {}, asUser(hostManagerId));
 
     await expect(
-      tickets.updateAllocation(
-        capEvent.id,
-        capAlloc!.id,
-        { quantity: 0 },
-        asUser(hostManagerId),
-      ),
+      tickets.updateAllocation(capEvent.id, capAlloc!.id, { quantity: 0 }, asUser(hostManagerId)),
     ).rejects.toBeInstanceOf(BadRequestException);
 
     await tickets.voidTicket(issued.id, asUser(hostManagerId));
@@ -441,6 +400,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
         name: `Race Event ${suffix}`,
         type: 'Rush',
         maxHeadcount: 10,
+        startsAt: '2026-08-12T18:00:00.000Z',
       },
       asUser(hostManagerId),
     );
@@ -474,9 +434,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     const rejected = results.filter((r) => r.status === 'rejected');
     expect(fulfilled).toHaveLength(1);
     expect(rejected).toHaveLength(1);
-    expect(
-      (rejected[0] as PromiseRejectedResult).reason,
-    ).toBeInstanceOf(ConflictException);
+    expect((rejected[0] as PromiseRejectedResult).reason).toBeInstanceOf(ConflictException);
 
     await prisma.ticket.deleteMany({
       where: { allocation: { eventId: raceEvent.id } },
@@ -494,6 +452,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
         name: `Claim Event ${suffix}`,
         type: 'Social',
         maxHeadcount: 20,
+        startsAt: '2026-08-13T18:00:00.000Z',
       },
       asUser(hostManagerId),
     );
@@ -524,10 +483,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     expect(claimed.paidAt).toBeTruthy();
     expect(claimed.allocationId).toBe(publicId);
 
-    const guestList = await tickets.guestList(
-      claimEvent.id,
-      asUser(hostManagerId),
-    );
+    const guestList = await tickets.guestList(claimEvent.id, asUser(hostManagerId));
     expect(guestList).toHaveLength(1);
     expect(guestList[0]?.allocationLabel).toBe('Public');
     expect(guestList[0]?.holderUserId).toBe(guestUserId);
@@ -570,17 +526,14 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       },
     });
 
-    await expect(
-      tickets.markPaid(unpaidRow.id, asUser(guestUserId)),
-    ).rejects.toBeInstanceOf(ForbiddenException);
-    await expect(
-      tickets.markPaid(unpaidRow.id, asUser(hostManagerId)),
-    ).rejects.toBeInstanceOf(ForbiddenException);
-
-    const adminPaid = await tickets.markPaid(
-      unpaidRow.id,
-      asUser('admin-mark-paid', 'ADMIN'),
+    await expect(tickets.markPaid(unpaidRow.id, asUser(guestUserId))).rejects.toBeInstanceOf(
+      ForbiddenException,
     );
+    await expect(tickets.markPaid(unpaidRow.id, asUser(hostManagerId))).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+
+    const adminPaid = await tickets.markPaid(unpaidRow.id, asUser('admin-mark-paid', 'ADMIN'));
     expect(adminPaid.status).toBe('paid');
 
     const openPurchase = await prisma.purchase.create({
@@ -615,9 +568,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       where: { id: openPurchase.id },
     });
     expect(payment?.status).toBe('canceled');
-    expect(
-      await prisma.ticket.count({ where: { purchaseId: openPurchase.id } }),
-    ).toBe(0);
+    expect(await prisma.ticket.count({ where: { purchaseId: openPurchase.id } })).toBe(0);
 
     await prisma.purchase.deleteMany({ where: { eventId } });
     await prisma.ticket.deleteMany({
@@ -633,9 +584,9 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     const listed = await events.list({}, asUser(hostScannerId));
     expect(listed.some((e) => e.id === eventId)).toBe(true);
 
-    await expect(
-      events.get(eventId, asUser(invitedScannerId)),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(events.get(eventId, asUser(invitedScannerId))).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
   });
 
   it('invited lists own allocation; guest lists claimable; tickets.manage can get event', async () => {
@@ -645,10 +596,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     await prisma.ticketAllocation.deleteMany({ where: { eventId } });
     await enableTicketingOnSale(3);
 
-    const invitedAllocs = await tickets.listAllocations(
-      eventId,
-      asUser(invitedManagerId),
-    );
+    const invitedAllocs = await tickets.listAllocations(eventId, asUser(invitedManagerId));
     expect(invitedAllocs).toHaveLength(1);
     expect(invitedAllocs[0]?.id).toBe(invitedAllocId);
     expect(invitedAllocs[0]?.organizationId).toBe(invitedOrgId);
@@ -680,6 +628,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
         name: `Paid Public Claimable ${suffix}`,
         type: 'Social',
         maxHeadcount: 20,
+        startsAt: '2026-08-14T18:00:00.000Z',
       },
       asUser(hostManagerId),
     );
@@ -750,9 +699,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     expect(hostRow).toBeDefined();
     expect(hostRow?.allocationId).toBe(hostAllocId);
 
-    const invitedBuyable = await tickets.listClaimableEvents(
-      asUser(invitedManagerId),
-    );
+    const invitedBuyable = await tickets.listClaimableEvents(asUser(invitedManagerId));
     const invitedRow = invitedBuyable.find((e) => e.id === eventId);
     expect(invitedRow).toBeDefined();
     expect(invitedRow?.allocationId).toBe(invitedAllocId);
@@ -808,15 +755,9 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     });
 
     it('second scan of same token fails as already checked in', async () => {
-      await tickets.checkIn(
-        { credentialToken: paidCredential },
-        asUser(hostScannerId),
-      );
+      await tickets.checkIn({ credentialToken: paidCredential }, asUser(hostScannerId));
       await expect(
-        tickets.checkIn(
-          { credentialToken: paidCredential },
-          asUser(hostScannerId),
-        ),
+        tickets.checkIn({ credentialToken: paidCredential }, asUser(hostScannerId)),
       ).rejects.toMatchObject({
         constructor: ConflictException,
         response: {
@@ -836,38 +777,24 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       });
 
       await expect(
-        tickets.checkIn(
-          { credentialToken: unpaid.credentialToken },
-          asUser(hostScannerId),
-        ),
+        tickets.checkIn({ credentialToken: unpaid.credentialToken }, asUser(hostScannerId)),
       ).rejects.toMatchObject({
         constructor: UnprocessableEntityException,
         response: { code: 'TICKET_UNPAID' },
       });
 
-      const voided = await tickets.issueTicket(
-        eventId,
-        hostAllocId,
-        {},
-        asUser(hostManagerId),
-      );
+      const voided = await tickets.issueTicket(eventId, hostAllocId, {}, asUser(hostManagerId));
       await tickets.voidTicket(voided.id, asUser(hostManagerId));
 
       await expect(
-        tickets.checkIn(
-          { credentialToken: voided.credentialToken },
-          asUser(hostScannerId),
-        ),
+        tickets.checkIn({ credentialToken: voided.credentialToken }, asUser(hostScannerId)),
       ).rejects.toMatchObject({
         constructor: UnprocessableEntityException,
         response: { code: 'TICKET_VOID' },
       });
 
       await expect(
-        tickets.checkIn(
-          { credentialToken: 'nonexistent-credential-token' },
-          asUser(hostScannerId),
-        ),
+        tickets.checkIn({ credentialToken: 'nonexistent-credential-token' }, asUser(hostScannerId)),
       ).rejects.toMatchObject({
         constructor: NotFoundException,
         response: { code: 'TICKET_NOT_FOUND' },
@@ -876,17 +803,11 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
 
     it('forbids invited-org scanner and manage-only host member', async () => {
       await expect(
-        tickets.checkIn(
-          { credentialToken: paidCredential },
-          asUser(invitedScannerId),
-        ),
+        tickets.checkIn({ credentialToken: paidCredential }, asUser(invitedScannerId)),
       ).rejects.toBeInstanceOf(ForbiddenException);
 
       await expect(
-        tickets.checkIn(
-          { credentialToken: paidCredential },
-          asUser(hostManagerId),
-        ),
+        tickets.checkIn({ credentialToken: paidCredential }, asUser(hostManagerId)),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
@@ -911,17 +832,10 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
         asUser(hostManagerId),
       );
       const capAllocId = (capAlloc as { id: string }).id;
-      await tickets.patchTicketing(
-        eventId,
-        { ticketSaleStatus: 'on_sale' },
-        asUser(hostManagerId),
-      );
+      await tickets.patchTicketing(eventId, { ticketSaleStatus: 'on_sale' }, asUser(hostManagerId));
 
       const first = await issuePaidTicket(capAllocId);
-      await tickets.checkIn(
-        { credentialToken: first.credentialToken },
-        asUser(hostScannerId),
-      );
+      await tickets.checkIn({ credentialToken: first.credentialToken }, asUser(hostScannerId));
 
       const driftToken = `drift-${suffix}`;
       await prisma.ticket.create({
@@ -935,10 +849,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       });
 
       await expect(
-        tickets.checkIn(
-          { credentialToken: driftToken },
-          asUser(hostScannerId),
-        ),
+        tickets.checkIn({ credentialToken: driftToken }, asUser(hostScannerId)),
       ).rejects.toMatchObject({
         constructor: ConflictException,
         response: { code: 'EVENT_AT_CAPACITY' },
@@ -947,23 +858,15 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
 
     it('concurrent scans allow at most one success', async () => {
       const results = await Promise.allSettled([
-        tickets.checkIn(
-          { credentialToken: paidCredential },
-          asUser(hostScannerId),
-        ),
-        tickets.checkIn(
-          { credentialToken: paidCredential },
-          asUser(hostScannerId),
-        ),
+        tickets.checkIn({ credentialToken: paidCredential }, asUser(hostScannerId)),
+        tickets.checkIn({ credentialToken: paidCredential }, asUser(hostScannerId)),
       ]);
 
       const fulfilled = results.filter((r) => r.status === 'fulfilled');
       const rejected = results.filter((r) => r.status === 'rejected');
       expect(fulfilled).toHaveLength(1);
       expect(rejected).toHaveLength(1);
-      expect(
-        (rejected[0] as PromiseRejectedResult).reason,
-      ).toBeInstanceOf(ConflictException);
+      expect((rejected[0] as PromiseRejectedResult).reason).toBeInstanceOf(ConflictException);
 
       const row = await prisma.ticket.findFirst({
         where: { credentialToken: paidCredential },
@@ -985,6 +888,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
           name,
           type: 'Party',
           maxHeadcount: 50,
+          startsAt: '2026-08-15T18:00:00.000Z',
         },
         asUser(hostManagerId),
       );
@@ -1095,12 +999,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       const allocId = (free as { id: string }).id;
 
       await expect(
-        tickets.updateAllocation(
-          id,
-          allocId,
-          { priceCents: 2000 },
-          asUser(hostManagerId),
-        ),
+        tickets.updateAllocation(id, allocId, { priceCents: 2000 }, asUser(hostManagerId)),
       ).rejects.toMatchObject(connectRequired);
 
       const row = await prisma.ticketAllocation.findUnique({
@@ -1155,11 +1054,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       await setHostChargesEnabled(false);
 
       await expect(
-        tickets.patchTicketing(
-          id,
-          { ticketSaleStatus: 'on_sale' },
-          asUser(hostManagerId),
-        ),
+        tickets.patchTicketing(id, { ticketSaleStatus: 'on_sale' }, asUser(hostManagerId)),
       ).rejects.toMatchObject(connectRequired);
 
       const ev = await prisma.event.findUnique({ where: { id } });

@@ -8,6 +8,7 @@ export const OrgStripeFieldsSchema = z.object({
   stripeAccountId: z.string().nullable(),
   stripeChargesEnabled: z.boolean(),
   stripePayoutsEnabled: z.boolean(),
+  stripeTransfersEnabled: z.boolean(),
   stripeDetailsSubmitted: z.boolean(),
   stripeRequirementsDue: StripeRequirementsDueSchema,
   stripeAccountUpdatedAt: z.string().datetime().nullable(),
@@ -15,9 +16,7 @@ export const OrgStripeFieldsSchema = z.object({
 export type OrgStripeFields = z.infer<typeof OrgStripeFieldsSchema>;
 
 export const StripeConnectStatusResponseSchema = OrgStripeFieldsSchema;
-export type StripeConnectStatusResponse = z.infer<
-  typeof StripeConnectStatusResponseSchema
->;
+export type StripeConnectStatusResponse = z.infer<typeof StripeConnectStatusResponseSchema>;
 
 /** Hosted onboarding / account-link URL for client redirect. */
 export const StripeConnectOnboardingLinkResponseSchema = z.object({
@@ -31,12 +30,8 @@ export type StripeConnectOnboardingLinkResponse = z.infer<
 export const StripeConnectReturnSyncResponseSchema = z.object({
   redirectTo: z.string().url(),
 });
-export type StripeConnectReturnSyncResponse = z.infer<
-  typeof StripeConnectReturnSyncResponseSchema
->;
+export type StripeConnectReturnSyncResponse = z.infer<typeof StripeConnectReturnSyncResponseSchema>;
 
 /** FE bridge: mint refresh link as JSON (no 303). */
-export const StripeConnectRefreshLinkResponseSchema =
-  StripeConnectOnboardingLinkResponseSchema;
-export type StripeConnectRefreshLinkResponse =
-  StripeConnectOnboardingLinkResponse;
+export const StripeConnectRefreshLinkResponseSchema = StripeConnectOnboardingLinkResponseSchema;
+export type StripeConnectRefreshLinkResponse = StripeConnectOnboardingLinkResponse;

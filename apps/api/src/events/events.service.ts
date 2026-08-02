@@ -57,17 +57,15 @@ export class EventsService {
         name: input.name,
         type: input.type,
         maxHeadcount: input.maxHeadcount,
+        startsAt: new Date(input.startsAt),
+        endsAt: input.endsAt ? new Date(input.endsAt) : null,
         location: input.location ?? null,
       },
     });
     return toEventDto(row);
   }
 
-  async update(
-    id: string,
-    input: UpdateEvent,
-    caller: PublicUser,
-  ): Promise<Event> {
+  async update(id: string, input: UpdateEvent, caller: PublicUser): Promise<Event> {
     const existing = await this.prisma.event.findUnique({ where: { id } });
     if (!existing) {
       throw new NotFoundException('Event not found');
@@ -78,11 +76,56 @@ export class EventsService {
       data: {
         ...(input.name !== undefined ? { name: input.name } : {}),
         ...(input.type !== undefined ? { type: input.type } : {}),
-        ...(input.maxHeadcount !== undefined
-          ? { maxHeadcount: input.maxHeadcount }
+        ...(input.maxHeadcount !== undefined ? { maxHeadcount: input.maxHeadcount } : {}),
+        startsAt: new Date(input.startsAt),
+        ...(input.endsAt !== undefined
+          ? { endsAt: input.endsAt ? new Date(input.endsAt) : null }
           : {}),
         ...(input.location !== undefined ? { location: input.location } : {}),
       },
+    });
+    return toEventDto(row);
+  }
+
+  async hold(id: string, reason: string, caller: PublicUser): Promise<Event> {
+    if (caller.role !== 'ADMIN') {
+      throw new ForbiddenException('Payout operations require ADMIN');
+    }
+    const existing = await this.prisma.event.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException('Event not found');
+    }
+    const heldAt = new Date();
+    const row = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.event.update({
+        where: { id },
+        data: { heldAt, heldByUserId: caller.id },
+      });
+      await tx.eventPayoutAudit.create({
+        data: { eventId: id, actorUserId: caller.id, action: 'hold', reason },
+      });
+      return updated;
+    });
+    return toEventDto(row);
+  }
+
+  async clearHold(id: string, reason: string, caller: PublicUser): Promise<Event> {
+    if (caller.role !== 'ADMIN') {
+      throw new ForbiddenException('Payout operations require ADMIN');
+    }
+    const existing = await this.prisma.event.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException('Event not found');
+    }
+    const row = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.event.update({
+        where: { id },
+        data: { heldAt: null, heldByUserId: null },
+      });
+      await tx.eventPayoutAudit.create({
+        data: { eventId: id, actorUserId: caller.id, action: 'clear', reason },
+      });
+      return updated;
     });
     return toEventDto(row);
   }
@@ -166,10 +209,7 @@ export class EventsService {
     throw new ForbiddenException('Missing organization permission');
   }
 
-  private async assertCanManageOrg(
-    organizationId: string,
-    caller: PublicUser,
-  ): Promise<void> {
+  private async assertCanManageOrg(organizationId: string, caller: PublicUser): Promise<void> {
     if (caller.role === 'ADMIN') {
       return;
     }
@@ -180,18 +220,13 @@ export class EventsService {
     if (!membership || membership.organizationId !== organizationId) {
       throw new ForbiddenException('Missing organization permission');
     }
-    const hasManage = membership.permissions.some(
-      (p) => p.permission.key === 'events.manage',
-    );
+    const hasManage = membership.permissions.some((p) => p.permission.key === 'events.manage');
     if (!hasManage) {
       throw new ForbiddenException('Missing organization permission');
     }
   }
 
-  private async assertMemberOfOrg(
-    organizationId: string,
-    userId: string,
-  ): Promise<void> {
+  private async assertMemberOfOrg(organizationId: string, userId: string): Promise<void> {
     const membership = await this.prisma.membership.findUnique({
       where: { userId },
     });

@@ -3,11 +3,13 @@ import {
   EventListSchema,
   EventSchema,
   ListEventsQuerySchema,
+  PayoutReasonSchema,
   UpdateEventSchema,
   type CreateEvent,
   type Event,
   type EventList,
   type ListEventsQuery,
+  type PayoutReason,
   type UpdateEvent,
 } from '@rally/contracts';
 
@@ -16,16 +18,14 @@ export {
   EventListSchema,
   EventSchema,
   ListEventsQuerySchema,
+  PayoutReasonSchema,
   UpdateEventSchema,
 };
 
-export type {
-  CreateEvent,
-  Event,
-  EventList,
-  ListEventsQuery,
-  UpdateEvent,
-};
+export type { CreateEvent, Event, EventList, ListEventsQuery, PayoutReason, UpdateEvent };
+
+export const HoldEventSchema = PayoutReasonSchema;
+export type HoldEvent = PayoutReason;
 
 export function toEventDto(row: {
   id: string;
@@ -39,6 +39,10 @@ export function toEventDto(row: {
   ticketSaleStatus: 'draft' | 'on_sale' | 'closed' | null;
   ticketSalesOpenAt: Date | null;
   ticketSalesCloseAt: Date | null;
+  startsAt: Date;
+  endsAt: Date | null;
+  heldAt: Date | null;
+  heldByUserId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }): Event {
@@ -54,6 +58,10 @@ export function toEventDto(row: {
     ticketSaleStatus: row.ticketSaleStatus,
     ticketSalesOpenAt: row.ticketSalesOpenAt?.toISOString() ?? null,
     ticketSalesCloseAt: row.ticketSalesCloseAt?.toISOString() ?? null,
+    startsAt: row.startsAt.toISOString(),
+    endsAt: row.endsAt?.toISOString() ?? null,
+    heldAt: row.heldAt?.toISOString() ?? null,
+    heldByUserId: row.heldByUserId,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
