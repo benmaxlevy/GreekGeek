@@ -48,16 +48,60 @@ export function mapStripeAccountToOrgFlags(account: Stripe.V2.Core.Account): {
   };
 }
 
+export type SyncOrgFromStripeOptions = {
+  /**
+   * Event/account timestamp for out-of-order detection.
+   * When omitted (e.g. return-URL refetch), apply account as authoritative now.
+   */
+  eventTimestamp?: Date;
+  /**
+   * Called when existing `stripeAccountUpdatedAt` is newer than `eventTimestamp`.
+   * Refetched account is applied; never regresses charges when refetch shows enabled.
+   */
+  refetchAccount?: () => Promise<Stripe.V2.Core.Account>;
+};
+
 /**
  * Persist Stripe-derived Connect flags on the organization.
- * Slice 2: apply refetch state directly. Slice 3 adds webhook out-of-order guards.
+ * Out-of-order: if org timestamp is newer than the event, refetch (when provided)
+ * and apply refetched state — never set charges false if refetch shows true.
  */
 export async function syncOrgFromStripeAccount(
   prisma: PrismaService,
   orgId: string,
   account: Stripe.V2.Core.Account,
+  options?: SyncOrgFromStripeOptions,
 ): Promise<void> {
-  const flags = mapStripeAccountToOrgFlags(account);
+  const org = await prisma.organization.findUnique({
+    where: { id: orgId },
+    select: { stripeAccountUpdatedAt: true },
+  });
+  if (!org) {
+    return;
+  }
+
+  let accountToApply = account;
+  let appliedAt = options?.eventTimestamp ?? new Date();
+
+  const isStale =
+    options?.eventTimestamp != null &&
+    org.stripeAccountUpdatedAt != null &&
+    org.stripeAccountUpdatedAt.getTime() > options.eventTimestamp.getTime();
+
+  if (isStale) {
+    if (!options?.refetchAccount) {
+      // Avoid regressing newer state without a live refetch.
+      return;
+    }
+    accountToApply = await options.refetchAccount();
+    appliedAt = new Date();
+  }
+
+  const flags = mapStripeAccountToOrgFlags(accountToApply);
+
+  // After stale→refetch, flags come from live Stripe. If refetch shows charges
+  // enabled, we keep true (never regress from a stale false snapshot). If refetch
+  // shows disabled, trust Stripe. Without refetch, stale path already returned.
   await prisma.organization.update({
     where: { id: orgId },
     data: {
@@ -65,7 +109,7 @@ export async function syncOrgFromStripeAccount(
       stripePayoutsEnabled: flags.stripePayoutsEnabled,
       stripeDetailsSubmitted: flags.stripeDetailsSubmitted,
       stripeRequirementsDue: flags.stripeRequirementsDue,
-      stripeAccountUpdatedAt: new Date(),
+      stripeAccountUpdatedAt: appliedAt,
     },
   });
 }

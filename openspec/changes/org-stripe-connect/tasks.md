@@ -18,11 +18,11 @@
 
 ## 3. Webhook handlers for account/capability → org flags
 
-- [ ] 3.1 Implement `syncOrgFromStripeAccount` with out-of-order protection (timestamp compare or refetch)
-- [ ] 3.2 Register inbox worker handlers for Stripe account/capability events; resolve org by `stripeAccountId`
-- [ ] 3.3 Unknown `stripeAccountId` → log and complete without retry storm
-- [ ] 3.4 Integration tests: webhook updates flags; stale event does not regress; unknown account no-op
-- [ ] 3.5 Commit: `add stripe connect webhook handlers and sync`
+- [x] 3.1 Implement `syncOrgFromStripeAccount` with out-of-order protection (timestamp compare or refetch)
+- [x] 3.2 Register inbox worker handlers for Stripe account/capability events; resolve org by `stripeAccountId`
+- [x] 3.3 Unknown `stripeAccountId` → log and complete without retry storm
+- [x] 3.4 Integration tests: webhook updates flags; stale event does not regress; unknown account no-op
+- [x] 3.5 Commit: `add stripe connect webhook handlers and sync`
 
 ## 4. Sale gates (allocation + on_sale)
 

@@ -1,5 +1,6 @@
 import type { Job } from 'bullmq';
 import { PrismaService } from '../prisma/prisma.service';
+import { WebhookHandlerRegistry } from './webhook-handler.registry';
 import { WebhookProcessProcessor } from './webhook-process.processor';
 import type { WebhookProcessJob } from './types/webhook-process-job.dto';
 
@@ -16,6 +17,7 @@ describe('WebhookProcessProcessor', () => {
             id: 'wh_1',
             service: 'stripe',
             type: 'some.unknown.type',
+            payload: {},
             processedAt: null,
           }),
         update: overrides.update ?? jest.fn().mockResolvedValue({}),
@@ -23,10 +25,19 @@ describe('WebhookProcessProcessor', () => {
     } as unknown as PrismaService;
   }
 
+  function makeRegistry(handler?: jest.Mock) {
+    const registry = new WebhookHandlerRegistry();
+    if (handler) {
+      registry.register('account.updated', handler);
+    }
+    return registry;
+  }
+
   it('marks unknown type processed', async () => {
     const update = jest.fn().mockResolvedValue({});
     const processor = new WebhookProcessProcessor(
       makePrisma({ update }),
+      makeRegistry(),
     );
 
     await processor.process({
@@ -43,18 +54,57 @@ describe('WebhookProcessProcessor', () => {
     });
   });
 
-  it('already processed is no-op', async () => {
-    const update = jest.fn();
+  it('invokes registered handler then marks processed', async () => {
+    const handler = jest.fn().mockResolvedValue(undefined);
+    const update = jest.fn().mockResolvedValue({});
     const processor = new WebhookProcessProcessor(
       makePrisma({
         findUnique: jest.fn().mockResolvedValue({
           id: 'wh_1',
           service: 'stripe',
-          type: 'invoice.paid',
+          type: 'account.updated',
+          payload: { id: 'evt_1', type: 'account.updated' },
+          processedAt: null,
+        }),
+        update,
+      }),
+      makeRegistry(handler),
+    );
+
+    await processor.process({
+      id: 'job-handler',
+      data: { webhookEventId: 'wh_1' },
+    } as Job<WebhookProcessJob>);
+
+    expect(handler).toHaveBeenCalledWith({
+      type: 'account.updated',
+      payload: { id: 'evt_1', type: 'account.updated' },
+      webhookEventId: 'wh_1',
+    });
+    expect(update).toHaveBeenCalledWith({
+      where: { id: 'wh_1' },
+      data: {
+        processedAt: expect.any(Date),
+        lastError: null,
+      },
+    });
+  });
+
+  it('already processed is no-op', async () => {
+    const update = jest.fn();
+    const handler = jest.fn();
+    const processor = new WebhookProcessProcessor(
+      makePrisma({
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'wh_1',
+          service: 'stripe',
+          type: 'account.updated',
+          payload: {},
           processedAt: new Date(),
         }),
         update,
       }),
+      makeRegistry(handler),
     );
 
     await processor.process({
@@ -62,6 +112,7 @@ describe('WebhookProcessProcessor', () => {
       data: { webhookEventId: 'wh_1' },
     } as Job<WebhookProcessJob>);
 
+    expect(handler).not.toHaveBeenCalled();
     expect(update).not.toHaveBeenCalled();
   });
 
@@ -72,6 +123,7 @@ describe('WebhookProcessProcessor', () => {
       .mockResolvedValueOnce({});
     const processor = new WebhookProcessProcessor(
       makePrisma({ update }),
+      makeRegistry(),
     );
     const errorLog = jest
       .spyOn(

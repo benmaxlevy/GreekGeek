@@ -4,12 +4,16 @@ import { Job } from 'bullmq';
 import { PrismaService } from '../prisma/prisma.service';
 import { QUEUE_NAMES } from '../queue/queue.constants';
 import type { WebhookProcessJob } from './types/webhook-process-job.dto';
+import { WebhookHandlerRegistry } from './webhook-handler.registry';
 
 @Processor(QUEUE_NAMES.webhookProcess)
 export class WebhookProcessProcessor extends WorkerHost {
   private readonly logger = new Logger(WebhookProcessProcessor.name);
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly handlers: WebhookHandlerRegistry,
+  ) {
     super();
   }
 
@@ -32,7 +36,15 @@ export class WebhookProcessProcessor extends WorkerHost {
         return;
       }
 
-      // Stub: known Stripe types and unknown types both mark processed (no business handlers yet).
+      const handler = this.handlers.get(event.type);
+      if (handler) {
+        await handler({
+          type: event.type,
+          payload: event.payload,
+          webhookEventId: event.id,
+        });
+      }
+
       await this.prisma.webhookEvent.update({
         where: { id: event.id },
         data: {
