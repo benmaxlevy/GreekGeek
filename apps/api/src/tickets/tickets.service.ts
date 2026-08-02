@@ -144,17 +144,29 @@ export class TicketsService {
     );
   }
 
-  /** ACTIVE users: on_sale events with an active public allocation. */
+  /**
+   * ACTIVE users: on_sale events they can buy —
+   * own org allocation and/or public pool.
+   */
   async listClaimableEvents(caller: PublicUser) {
     if (caller.status !== 'ACTIVE') {
       throw new ForbiddenException('Account is not active');
     }
+    const membership = await this.loadMembership(caller);
+    const orgId = membership?.organizationId ?? null;
+
     return this.prisma.event.findMany({
       where: {
         ticketingEnabled: true,
         ticketSaleStatus: 'on_sale',
         allocations: {
-          some: { organizationId: null, status: 'active' },
+          some: {
+            status: 'active',
+            OR: [
+              { organizationId: null },
+              ...(orgId ? [{ organizationId: orgId }] : []),
+            ],
+          },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -388,15 +400,38 @@ export class TicketsService {
     return toTicketDto(updated);
   }
 
+  /**
+   * Member self-buy: prefer caller's org allocation, else public pool.
+   * Does not require tickets.manage — officers allocate; members buy.
+   */
   async publicClaim(eventId: string, caller: PublicUser): Promise<Ticket> {
+    if (caller.status !== 'ACTIVE') {
+      throw new ForbiddenException('Account is not active');
+    }
     const event = await this.requireEvent(eventId);
     this.assertSalesOpen(event);
 
-    const publicAllocation = await this.prisma.ticketAllocation.findFirst({
-      where: { eventId, organizationId: null, status: 'active' },
-    });
-    if (!publicAllocation) {
-      throw new BadRequestException('No active public allocation for this event');
+    const membership = await this.loadMembership(caller);
+    let allocation = membership
+      ? await this.prisma.ticketAllocation.findFirst({
+          where: {
+            eventId,
+            organizationId: membership.organizationId,
+            status: 'active',
+          },
+        })
+      : null;
+
+    if (!allocation) {
+      allocation = await this.prisma.ticketAllocation.findFirst({
+        where: { eventId, organizationId: null, status: 'active' },
+      });
+    }
+
+    if (!allocation) {
+      throw new BadRequestException(
+        'No active allocation available for you on this event',
+      );
     }
 
     const existing = await this.prisma.ticket.findFirst({
@@ -410,7 +445,7 @@ export class TicketsService {
       throw new ConflictException('You already hold a ticket for this event');
     }
 
-    return this.createTicketInAllocation(publicAllocation.id, caller.id);
+    return this.createTicketInAllocation(allocation.id, caller.id);
   }
 
   async listMine(caller: PublicUser): Promise<MyTicket[]> {

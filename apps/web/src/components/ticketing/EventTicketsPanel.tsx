@@ -16,7 +16,6 @@ import { listOrganizations } from '@/lib/admin-api';
 import {
   createAllocation,
   guestList,
-  issueTicket,
   listAllocations,
   listTickets,
   markTicketPaid,
@@ -191,15 +190,6 @@ export function EventTicketsPanel({
       setAllocPublic(false);
       setAllocQty('10');
       setAllocPrice('');
-      setError(null);
-      await invalidateTicketing();
-    },
-    onError: (err: Error) => setError(err.message),
-  });
-
-  const issueMutation = useMutation({
-    mutationFn: (allocationId: string) => issueTicket(eventId, allocationId, {}),
-    onSuccess: async () => {
       setError(null);
       await invalidateTicketing();
     },
@@ -463,8 +453,6 @@ export function EventTicketsPanel({
                       onUpdate={(body) =>
                         updateAllocMutation.mutate({ allocationId: alloc.id, ...body })
                       }
-                      onIssue={() => issueMutation.mutate(alloc.id)}
-                      issuePending={issueMutation.isPending}
                       updatePending={updateAllocMutation.isPending}
                     />
                   ))}
@@ -477,12 +465,10 @@ export function EventTicketsPanel({
 
       {tab === 'tickets' ? (
         <div className="space-y-6">
-          {!isHost && !resolvedInvitedAllocId ? (
-            <p className="text-sm text-ink-500">
-              No tickets issued yet for your organization. Ask the host to issue the
-              first ticket, then refresh to manage allocations.
-            </p>
-          ) : null}
+          <p className="text-sm text-ink-500">
+            Members buy their own tickets from My tickets. Here you can void or mark
+            paid tickets that have been purchased.
+          </p>
 
           {isHost
             ? visibleAllocations.map((alloc) => (
@@ -491,10 +477,8 @@ export function EventTicketsPanel({
                   alloc={alloc}
                   tickets={tickets.filter((t) => t.allocationId === alloc.id)}
                   loading={ticketsQuery.isLoading}
-                  onIssue={() => issueMutation.mutate(alloc.id)}
                   onMarkPaid={(id) => markPaidMutation.mutate(id)}
                   onVoid={(id) => voidMutation.mutate(id)}
-                  issuePending={issueMutation.isPending}
                   actionPending={markPaidMutation.isPending || voidMutation.isPending}
                 />
               ))
@@ -517,14 +501,16 @@ export function EventTicketsPanel({
                     }
                     tickets={tickets}
                     loading={ticketsQuery.isLoading}
-                    onIssue={() => issueMutation.mutate(resolvedInvitedAllocId)}
                     onMarkPaid={(id) => markPaidMutation.mutate(id)}
                     onVoid={(id) => voidMutation.mutate(id)}
-                    issuePending={issueMutation.isPending}
                     actionPending={markPaidMutation.isPending || voidMutation.isPending}
                   />
                 )
-              : null}
+              : (
+                  <p className="text-sm text-ink-500">
+                    No allocation for your organization on this event yet.
+                  </p>
+                )}
         </div>
       ) : null}
 
@@ -563,14 +549,10 @@ export function EventTicketsPanel({
 function AllocationRow({
   alloc,
   onUpdate,
-  onIssue,
-  issuePending,
   updatePending,
 }: {
   alloc: TicketAllocation;
   onUpdate: (body: { quantity?: number; status?: 'active' | 'closed' }) => void;
-  onIssue: () => void;
-  issuePending: boolean;
   updatePending: boolean;
 }) {
   const [qty, setQty] = useState(String(alloc.quantity));
@@ -581,20 +563,11 @@ function AllocationRow({
         <div>
           <p className="font-medium text-ink-100">{allocationLabel(alloc)}</p>
           <p className="text-sm text-ink-500">
-            {alloc.issuedCount} / {alloc.quantity} issued · {formatCents(alloc.priceCents)}
+            {alloc.issuedCount} / {alloc.quantity} sold · {formatCents(alloc.priceCents)}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={statusBadgeVariant(alloc.status)}>{alloc.status}</Badge>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={issuePending || alloc.status === 'closed'}
-            onClick={onIssue}
-          >
-            Issue
-          </Button>
         </div>
       </div>
       <div className="flex flex-wrap items-end gap-2">
@@ -650,39 +623,30 @@ function AllocationTicketsSection({
   alloc,
   tickets,
   loading,
-  onIssue,
   onMarkPaid,
   onVoid,
-  issuePending,
   actionPending,
 }: {
   alloc: TicketAllocation;
   tickets: Ticket[];
   loading: boolean;
-  onIssue: () => void;
   onMarkPaid: (id: string) => void;
   onVoid: (id: string) => void;
-  issuePending: boolean;
   actionPending: boolean;
 }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-2">
         <CardTitle className="text-lg">{allocationLabel(alloc)}</CardTitle>
-        <Button
-          type="button"
-          size="sm"
-          disabled={issuePending}
-          onClick={onIssue}
-        >
-          Issue ticket
-        </Button>
+        <p className="text-sm text-ink-500">
+          {alloc.issuedCount} / {alloc.quantity} sold
+        </p>
       </CardHeader>
       <CardContent className="p-0">
         {loading ? (
           <p className="p-6 text-sm text-ink-500">Loading…</p>
         ) : tickets.length === 0 ? (
-          <p className="p-6 text-sm text-ink-500">No tickets issued.</p>
+          <p className="p-6 text-sm text-ink-500">No tickets purchased yet.</p>
         ) : (
           <ul className="divide-y divide-border-subtle">
             {tickets.map((ticket) => (

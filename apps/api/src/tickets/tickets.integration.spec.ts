@@ -507,4 +507,31 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     });
     await prisma.ticketAllocation.deleteMany({ where: { eventId } });
   });
+
+  it('org member buys from own org allocation, not public', async () => {
+    await prisma.ticket.deleteMany({
+      where: { allocation: { eventId } },
+    });
+    await prisma.ticketAllocation.deleteMany({ where: { eventId } });
+    await enableTicketingOnSale(3);
+
+    const bought = await tickets.publicClaim(eventId, asUser(noPermUserId));
+    expect(bought.holderUserId).toBe(noPermUserId);
+    expect(bought.status).toBe('unpaid');
+    expect(bought.allocationId).toBe(hostAllocId);
+    expect(bought.organizationId).toBe(hostOrgId);
+
+    const buyable = await tickets.listClaimableEvents(asUser(noPermUserId));
+    expect(buyable.some((e) => e.id === eventId)).toBe(true);
+
+    const invitedBuyable = await tickets.listClaimableEvents(
+      asUser(invitedManagerId),
+    );
+    expect(invitedBuyable.some((e) => e.id === eventId)).toBe(true);
+
+    await prisma.ticket.deleteMany({
+      where: { allocation: { eventId } },
+    });
+    await prisma.ticketAllocation.deleteMany({ where: { eventId } });
+  });
 });

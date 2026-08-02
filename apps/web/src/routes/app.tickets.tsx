@@ -70,7 +70,7 @@ function MyTicketsPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">My tickets</h1>
         <p className="mt-1 text-sm text-ink-500">
-          View your tickets and buy from public on-sale events.
+          View your tickets and buy from on-sale events (your org pool or public).
         </p>
       </div>
 
@@ -106,7 +106,7 @@ function MyTicketsPage() {
           </CardContent>
         </Card>
       ) : claimableQuery.isSuccess ? (
-        <p className="text-sm text-ink-500">No public on-sale events available to buy.</p>
+        <p className="text-sm text-ink-500">No on-sale events available to buy.</p>
       ) : null}
 
       <Card>
