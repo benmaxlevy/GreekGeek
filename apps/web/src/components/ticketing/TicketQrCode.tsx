@@ -37,12 +37,14 @@ export function TicketQrCode({ credentialToken, size = 200 }: Props) {
   }
 
   return (
-    <img
-      src={dataUrl}
-      alt="Ticket QR code"
-      width={size}
-      height={size}
-      className="rounded-md border border-border-subtle bg-white p-2"
-    />
+    <div className="inline-flex rounded-[var(--radius-lg)] border border-white/[0.16] bg-white/[0.04] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
+      <img
+        src={dataUrl}
+        alt="Ticket QR code"
+        width={size}
+        height={size}
+        className="rounded-md border border-border-subtle bg-white p-2"
+      />
+    </div>
   );
 }

@@ -98,15 +98,24 @@ function AdminEventPayoutsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-[28px] font-medium tracking-tight">Event payouts</h1>
-        <p className="mt-1 text-sm text-ink-500">
+      <div className="space-y-2">
+        <p className="rl-eyebrow">Admin / finance</p>
+        <h1 className="display-sm">Event payouts</h1>
+        <p className="max-w-2xl text-sm leading-6 text-ink-500">
           Review payout readiness, release state, exclusions, and audited operations.
         </p>
       </div>
 
-      {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
-      {auditResult ? <p className="text-sm text-ink-300">{auditResult}</p> : null}
+      {error ? (
+        <p className="rounded-lg border border-[color:var(--error)]/30 bg-[color:var(--error)]/10 px-4 py-3 text-sm text-[color:var(--error)]">
+          {error}
+        </p>
+      ) : null}
+      {auditResult ? (
+        <p className="rounded-lg border border-border-subtle bg-white/[0.03] px-4 py-3 text-sm text-ink-300">
+          {auditResult}
+        </p>
+      ) : null}
 
       {queueQuery.isLoading ? (
         <p className="text-sm text-ink-500">Loading payout queue…</p>
@@ -137,10 +146,11 @@ function AdminEventPayoutsPage() {
             const latestAudit = item.audits[item.audits.length - 1];
 
             return (
-              <Card key={item.eventId}>
+              <Card key={item.eventId} className="overflow-hidden">
                 <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
                   <div>
-                    <CardTitle className="text-lg">Event {item.eventId}</CardTitle>
+                    <p className="rl-eyebrow">Payout queue</p>
+                    <CardTitle className="display-sm">Event {item.eventId}</CardTitle>
                     <p className="mt-1 text-sm text-ink-500">
                       Expected payout {formatDateTime(item.expectedPayoutDate)}
                     </p>
@@ -153,20 +163,20 @@ function AdminEventPayoutsPage() {
                   <dl className="grid gap-3 text-sm sm:grid-cols-3">
                     <div>
                       <dt className="text-ink-500">Gross / fee / net</dt>
-                      <dd className="mt-1 text-ink-100">
+                      <dd className="num mt-1 text-ink-100">
                         {formatCents(item.grossAmountCents)} / {formatCents(item.feeCents)} /{' '}
                         {formatCents(item.netCents)}
                       </dd>
                     </div>
                     <div>
                       <dt className="text-ink-500">Released / pending</dt>
-                      <dd className="mt-1 text-ink-100">
+                      <dd className="num mt-1 text-ink-100">
                         {formatCents(item.releasedCents)} / {formatCents(item.pendingCents)}
                       </dd>
                     </div>
                     <div>
                       <dt className="text-ink-500">Excluded</dt>
-                      <dd className="mt-1 text-ink-100">
+                      <dd className="num mt-1 text-ink-100">
                         {formatCents(item.excludedCents)} ({item.excludedCount})
                       </dd>
                     </div>

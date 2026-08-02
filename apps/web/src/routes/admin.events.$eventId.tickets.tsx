@@ -20,22 +20,20 @@ function AdminEventTicketsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-sm text-ink-500">
-          <Link to="/admin/ticketed-events" className="hover:text-ink-100">
+      <div className="space-y-2">
+        <p className="rl-eyebrow">
+          <Link to="/admin/ticketed-events" className="transition-colors hover:text-ink-100">
             ← Ticketed events
           </Link>
         </p>
-        <h1 className="mt-2 text-[28px] font-medium tracking-tight">
-          {event?.name ?? 'Event tickets'}
-        </h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <h1 className="display-sm">{event?.name ?? 'Event tickets'}</h1>
+        <p className="max-w-2xl text-sm leading-6 text-ink-500">
           Set up tickets, ticket pools, and the guest list for this event.
         </p>
       </div>
 
       {eventQuery.isError ? (
-        <p className="text-sm text-[color:var(--error)]">
+        <p className="rounded-lg border border-[color:var(--error)]/30 bg-[color:var(--error)]/10 px-4 py-3 text-sm text-[color:var(--error)]">
           Failed to load event. Ticket controls may still work below.
         </p>
       ) : null}

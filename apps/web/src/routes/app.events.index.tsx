@@ -122,9 +122,10 @@ function AppEventsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-[28px] font-medium tracking-tight">Events</h1>
-        <p className="mt-1 text-sm text-ink-500">
+      <div className="space-y-2">
+        <p className="rl-eyebrow">Chapter calendar</p>
+        <h1 className="display-md font-display">Events</h1>
+        <p className="max-w-2xl text-sm text-ink-500">
           {user.membership?.organizationName
             ? `Events for ${user.membership.organizationName}.`
             : 'Browse and manage your organization events.'}
@@ -134,11 +135,12 @@ function AppEventsPage() {
       {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
 
       {canCreate ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Create event</CardTitle>
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b border-border-subtle pb-5">
+            <p className="rl-eyebrow">New listing</p>
+            <CardTitle className="display-sm font-display mt-2">Create event</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-5">
             <form
               className="grid gap-3 sm:grid-cols-2"
               onSubmit={(e: FormEvent) => {
@@ -221,11 +223,12 @@ function AppEventsPage() {
       ) : null}
 
       {editing && canManage ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Edit event</CardTitle>
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b border-border-subtle pb-5">
+            <p className="rl-eyebrow">Event details</p>
+            <CardTitle className="display-sm font-display mt-2">Edit event</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-5">
             <form
               className="grid gap-3 sm:grid-cols-2"
               onSubmit={(e: FormEvent) => {
@@ -309,12 +312,27 @@ function AppEventsPage() {
         </Card>
       ) : null}
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {listQuery.isLoading ? (
-            <p className="p-6 text-sm text-ink-500">Loading…</p>
+            <p className="p-6 text-sm text-ink-500">Loading events…</p>
           ) : events.length === 0 ? (
-            <p className="p-6 text-sm text-ink-500">No events yet.</p>
+            <div className="space-y-4 p-6">
+              <div>
+                <p className="display-sm font-display">Your calendar is clear.</p>
+                <p className="mt-1 text-sm text-ink-500">
+                  Create your first event to start selling and managing tickets.
+                </p>
+              </div>
+              {canCreate ? (
+                <Button
+                  type="button"
+                  onClick={() => document.getElementById('event-name')?.focus()}
+                >
+                  Create your first event
+                </Button>
+              ) : null}
+            </div>
           ) : (
             <ul className="divide-y divide-border-subtle">
               {events.map((event) => (
@@ -330,7 +348,7 @@ function AppEventsPage() {
                         {new Date(event.startsAt).toLocaleString()}
                         {event.endsAt ? ` – ${new Date(event.endsAt).toLocaleString()}` : ''}
                         {' · '}
-                        Max {event.maxHeadcount}
+                        Max <span className="num">{event.maxHeadcount}</span>
                         {event.location ? ` · ${event.location}` : ''}
                       </p>
                     </div>

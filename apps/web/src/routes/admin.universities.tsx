@@ -80,18 +80,22 @@ function AdminUniversitiesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-[28px] font-medium tracking-tight">Universities</h1>
-        <p className="mt-1 text-sm text-ink-500">
-          Create and manage universities.
-        </p>
+      <div className="space-y-2">
+        <p className="rl-eyebrow">Admin / directory</p>
+        <h1 className="display-sm">Universities</h1>
+        <p className="max-w-2xl text-sm leading-6 text-ink-500">Create and manage universities.</p>
       </div>
 
-      {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
+      {error ? (
+        <p className="rounded-lg border border-[color:var(--error)]/30 bg-[color:var(--error)]/10 px-4 py-3 text-sm text-[color:var(--error)]">
+          {error}
+        </p>
+      ) : null}
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-lg">Create university</CardTitle>
+          <p className="rl-eyebrow">Directory setup</p>
+          <CardTitle className="display-sm">Create university</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={onCreate}>
@@ -113,9 +117,10 @@ function AdminUniversitiesPage() {
       </Card>
 
       {editing ? (
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-lg">Edit university</CardTitle>
+            <p className="rl-eyebrow">Directory setup</p>
+            <CardTitle className="display-sm">Edit university</CardTitle>
           </CardHeader>
           <CardContent>
             <form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={onUpdate}>
@@ -147,7 +152,7 @@ function AdminUniversitiesPage() {
         </Card>
       ) : null}
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {listQuery.isLoading ? (
             <p className="p-6 text-sm text-ink-500">Loading…</p>
@@ -158,7 +163,7 @@ function AdminUniversitiesPage() {
               {universities.map((uni) => (
                 <li
                   key={uni.id}
-                  className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <p className="font-medium text-ink-100">{uni.name}</p>
                   <div className="flex flex-wrap gap-2">

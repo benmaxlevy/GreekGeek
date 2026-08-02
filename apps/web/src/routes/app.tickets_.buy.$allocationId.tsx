@@ -2,12 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
 import { computePurchaseAmounts } from '@rally/contracts';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import {
-  createFileRoute,
-  Link,
-  redirect,
-  useNavigate,
-} from '@tanstack/react-router';
+import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { TicketPayForm } from '@/components/ticketing/TicketPayForm';
 import { TicketQrCode } from '@/components/ticketing/TicketQrCode';
 import { Button } from '@/components/ui/button';
@@ -17,11 +12,7 @@ import { Label } from '@/components/ui/label';
 import { meQueryOptions } from '@/lib/auth';
 import { destinationForUser } from '@/lib/auth-routing';
 import { getStripe } from '@/lib/stripe';
-import {
-  checkoutPurchase,
-  listAllocations,
-  listMyTickets,
-} from '@/lib/ticketing-api';
+import { checkoutPurchase, listAllocations, listMyTickets } from '@/lib/ticketing-api';
 import {
   DEFAULT_MAX_TICKETS_PER_USER_PER_EVENT,
   DEFAULT_RALLY_FEE_PERCENT,
@@ -33,12 +24,9 @@ const PAID_POLL_INTERVAL_MS = 1500;
 const PAID_POLL_MAX_MS = 30_000;
 
 export const Route = createFileRoute('/app/tickets_/buy/$allocationId')({
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): { eventId?: string; eventName?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { eventId?: string; eventName?: string } => ({
     eventId: typeof search.eventId === 'string' ? search.eventId : undefined,
-    eventName:
-      typeof search.eventName === 'string' ? search.eventName : undefined,
+    eventName: typeof search.eventName === 'string' ? search.eventName : undefined,
   }),
   beforeLoad: async ({ context }) => {
     const user = await context.queryClient.ensureQueryData(meQueryOptions);
@@ -55,15 +43,12 @@ export const Route = createFileRoute('/app/tickets_/buy/$allocationId')({
 
 function TicketBuyPage() {
   const { allocationId } = Route.useParams();
-  const { eventId: searchEventId, eventName: searchEventName } =
-    Route.useSearch();
+  const { eventId: searchEventId, eventName: searchEventName } = Route.useSearch();
   const navigate = useNavigate();
 
   const [quantity, setQuantity] = useState(1);
   const [serverRemaining, setServerRemaining] = useState<number | null>(null);
-  const [phase, setPhase] = useState<'select' | 'pay' | 'confirming' | 'success'>(
-    'select',
-  );
+  const [phase, setPhase] = useState<'select' | 'pay' | 'confirming' | 'success'>('select');
   const [ticketIds, setTicketIds] = useState<string[]>([]);
   const [pollTimedOut, setPollTimedOut] = useState(false);
   const pollStartedAt = useRef<number | null>(null);
@@ -75,16 +60,12 @@ function TicketBuyPage() {
 
   const existingForAlloc = useMemo(
     () =>
-      (mineQuery.data ?? []).filter(
-        (t) => t.allocationId === allocationId && t.status !== 'void',
-      ),
+      (mineQuery.data ?? []).filter((t) => t.allocationId === allocationId && t.status !== 'void'),
     [mineQuery.data, allocationId],
   );
 
-  const eventId =
-    searchEventId ?? existingForAlloc[0]?.eventId ?? undefined;
-  const eventName =
-    searchEventName ?? existingForAlloc[0]?.eventName ?? 'Event';
+  const eventId = searchEventId ?? existingForAlloc[0]?.eventId ?? undefined;
+  const eventName = searchEventName ?? existingForAlloc[0]?.eventName ?? 'Event';
 
   // Open purchase unpaid holds are replaced on re-checkout — exclude from headroom.
   const heldForEvent = useMemo(() => {
@@ -93,11 +74,7 @@ function TicketBuyPage() {
       if (eventId ? t.eventId !== eventId : t.allocationId !== allocationId) {
         return false;
       }
-      if (
-        t.status === 'unpaid' &&
-        t.purchaseId != null &&
-        t.allocationId === allocationId
-      ) {
+      if (t.status === 'unpaid' && t.purchaseId != null && t.allocationId === allocationId) {
         return false;
       }
       return true;
@@ -113,15 +90,10 @@ function TicketBuyPage() {
 
   const allocation = allocationsQuery.data?.find((a) => a.id === allocationId);
 
-  const userHeadroom = Math.max(
-    0,
-    DEFAULT_MAX_TICKETS_PER_USER_PER_EVENT - heldForEvent,
-  );
+  const userHeadroom = Math.max(0, DEFAULT_MAX_TICKETS_PER_USER_PER_EVENT - heldForEvent);
 
   const allocationRemaining =
-    allocation != null
-      ? Math.max(0, allocation.quantity - allocation.issuedCount)
-      : null;
+    allocation != null ? Math.max(0, allocation.quantity - allocation.issuedCount) : null;
 
   const maxQuantity = Math.max(
     0,
@@ -146,11 +118,7 @@ function TicketBuyPage() {
 
   const preview =
     unitPriceCents != null && unitPriceCents > 0
-      ? computePurchaseAmounts(
-          quantity,
-          unitPriceCents,
-          DEFAULT_RALLY_FEE_PERCENT,
-        )
+      ? computePurchaseAmounts(quantity, unitPriceCents, DEFAULT_RALLY_FEE_PERCENT)
       : null;
 
   const checkoutMutation = useMutation({
@@ -177,9 +145,8 @@ function TicketBuyPage() {
       if (phase !== 'confirming') return false;
       if (pollTimedOut) return false;
       const paidCount =
-        query.state.data?.filter(
-          (t) => ticketIds.includes(t.id) && t.status === 'paid',
-        ).length ?? 0;
+        query.state.data?.filter((t) => ticketIds.includes(t.id) && t.status === 'paid').length ??
+        0;
       if (ticketIds.length > 0 && paidCount >= ticketIds.length) return false;
       return PAID_POLL_INTERVAL_MS;
     },
@@ -188,8 +155,7 @@ function TicketBuyPage() {
   const paidTickets = (ticketsQuery.data ?? []).filter(
     (t) => ticketIds.includes(t.id) && t.status === 'paid',
   );
-  const allPaid =
-    ticketIds.length > 0 && paidTickets.length >= ticketIds.length;
+  const allPaid = ticketIds.length > 0 && paidTickets.length >= ticketIds.length;
 
   useEffect(() => {
     if (phase !== 'confirming') return;
@@ -201,11 +167,14 @@ function TicketBuyPage() {
       return;
     }
     const started = pollStartedAt.current;
-    const timer = window.setTimeout(() => {
-      if (Date.now() - started >= PAID_POLL_MAX_MS) {
-        setPollTimedOut(true);
-      }
-    }, PAID_POLL_MAX_MS - (Date.now() - started));
+    const timer = window.setTimeout(
+      () => {
+        if (Date.now() - started >= PAID_POLL_MAX_MS) {
+          setPollTimedOut(true);
+        }
+      },
+      PAID_POLL_MAX_MS - (Date.now() - started),
+    );
     return () => window.clearTimeout(timer);
   }, [phase, allPaid]);
 
@@ -222,29 +191,29 @@ function TicketBuyPage() {
   }, [phase, allPaid, navigate, paidTickets]);
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
-      <div>
+    <div className="w-full space-y-6">
+      <div className="space-y-2">
         <p className="text-sm text-ink-500">
           <Link to="/app/tickets" className="hover:text-ink-100">
             ← My tickets
           </Link>
         </p>
-        <h1 className="mt-2 text-[28px] font-medium tracking-tight">
-          Buy tickets
-        </h1>
-        <p className="mt-1 text-sm text-ink-500">
-          {eventName}. Choose quantity, then pay. QR codes unlock after payment
-          confirms.
+        <p className="rl-eyebrow">Checkout</p>
+        <h1 className="display-md font-display">Buy tickets</h1>
+        <p className="max-w-2xl text-sm text-ink-500">
+          {eventName}. Choose quantity, then pay. QR codes unlock after payment confirms.
         </p>
       </div>
 
       {maxQuantity < 1 && phase === 'select' ? (
-        <Card>
+        <Card className="overflow-hidden">
           <CardContent className="space-y-4 p-6">
-            <p className="text-sm text-[color:var(--error)]">
-              No tickets available to buy for this event. You may already be at
-              the per-user limit, or the pool is sold out.
-            </p>
+            <div className="space-y-2">
+              <p className="display-sm font-display">Tickets unavailable.</p>
+              <p className="text-sm text-[color:var(--error)]">
+                You may already be at the per-user limit, or the pool is sold out.
+              </p>
+            </div>
             <Button asChild variant="outline">
               <Link to="/app/tickets">Back to My tickets</Link>
             </Button>
@@ -253,7 +222,11 @@ function TicketBuyPage() {
       ) : null}
 
       {(phase === 'select' || phase === 'pay') && maxQuantity >= 1 ? (
-        <Card>
+        <Card className="overflow-hidden">
+          <div className="border-b border-border-subtle px-6 py-4">
+            <p className="rl-eyebrow">Reserve your entry</p>
+            <p className="display-sm font-display mt-1">{eventName}</p>
+          </div>
           <CardContent className="space-y-6 p-6">
             <div className="space-y-2">
               <Label htmlFor="ticket-qty">Quantity</Label>
@@ -267,9 +240,7 @@ function TicketBuyPage() {
                 onChange={(e) => {
                   const next = Number(e.target.value);
                   if (!Number.isFinite(next)) return;
-                  setQuantity(
-                    Math.min(maxQuantity, Math.max(1, Math.floor(next))),
-                  );
+                  setQuantity(Math.min(maxQuantity, Math.max(1, Math.floor(next))));
                   if (phase === 'pay') {
                     setPhase('select');
                     checkoutMutation.reset();
@@ -278,10 +249,13 @@ function TicketBuyPage() {
                 className="min-h-11 w-28"
               />
               <p className="text-xs text-ink-500">
-                Up to {maxQuantity} for this event
-                {allocationRemaining != null
-                  ? ` · ${allocationRemaining} left in pool`
-                  : ''}
+                Up to <span className="num">{maxQuantity}</span> for this event
+                {allocationRemaining != null ? (
+                  <>
+                    {' · '}
+                    <span className="num">{allocationRemaining}</span> left in pool
+                  </>
+                ) : null}
               </p>
             </div>
 
@@ -303,9 +277,7 @@ function TicketBuyPage() {
                 preview
               />
             ) : (
-              <p className="text-sm text-ink-500">
-                Price confirmed at checkout.
-              </p>
+              <p className="text-sm text-ink-500">Price confirmed at checkout.</p>
             )}
 
             {checkoutMutation.isError ? (
@@ -361,14 +333,17 @@ function TicketBuyPage() {
       ) : null}
 
       {phase === 'confirming' ? (
-        <Card>
+        <Card className="overflow-hidden">
+          <div className="border-b border-border-subtle px-6 py-4">
+            <p className="rl-eyebrow">Payment status</p>
+            <p className="display-sm font-display mt-1">Payment received</p>
+          </div>
           <CardContent className="space-y-3 p-6">
-            <p className="font-medium text-ink-100">Payment received</p>
             {pollTimedOut ? (
               <>
                 <p className="text-sm text-ink-500">
-                  Payment is still processing. Your QR codes will appear on My
-                  tickets once confirmed — usually within a minute.
+                  Payment is still processing. Your QR codes will appear on My tickets once
+                  confirmed — usually within a minute.
                 </p>
                 <Button asChild variant="outline">
                   <Link to="/app/tickets">Back to My tickets</Link>
@@ -377,8 +352,7 @@ function TicketBuyPage() {
             ) : (
               <p className="text-sm text-ink-500">
                 Confirming {ticketIds.length} ticket
-                {ticketIds.length === 1 ? '' : 's'}… this can take a few
-                seconds.
+                {ticketIds.length === 1 ? '' : 's'}… this can take a few seconds.
               </p>
             )}
           </CardContent>
@@ -386,13 +360,14 @@ function TicketBuyPage() {
       ) : null}
 
       {phase === 'success' && allPaid ? (
-        <Card>
-          <CardContent className="space-y-4 p-6">
-            <p className="font-medium text-ink-100">
-              {paidTickets.length === 1
-                ? 'Ticket paid'
-                : `${paidTickets.length} tickets paid`}
+        <Card className="overflow-hidden">
+          <div className="border-b border-border-subtle px-6 py-4">
+            <p className="rl-eyebrow">Confirmed</p>
+            <p className="display-sm font-display mt-1">
+              {paidTickets.length === 1 ? 'Ticket paid' : `${paidTickets.length} tickets paid`}
             </p>
+          </div>
+          <CardContent className="space-y-4 p-6">
             <p className="text-sm text-ink-500">
               Show these QR codes at the door. Redirecting to My tickets…
             </p>
@@ -407,10 +382,7 @@ function TicketBuyPage() {
               ))}
             </ul>
             <Button asChild variant="outline">
-              <Link
-                to="/app/tickets"
-                search={{ highlight: paidTickets[0]?.id }}
-              >
+              <Link to="/app/tickets" search={{ highlight: paidTickets[0]?.id }}>
                 View in My tickets
               </Link>
             </Button>
@@ -438,16 +410,14 @@ function ItemizedSummary({
 }) {
   return (
     <div className="space-y-1 text-sm">
-      <p className="font-medium text-ink-100">
+      <p className="num font-medium text-ink-100">
         {quantity} × {formatUsd(unitPriceCents)} = {formatUsd(subtotalCents)}
       </p>
-      <p className="text-ink-300">
+      <p className="num text-ink-300">
         Rally fee {formatUsd(feeCents)}
         {preview ? ' (estimate)' : ''}
       </p>
-      <p className="font-medium text-ink-100">
-        Total {formatUsd(amountCents)}
-      </p>
+      <p className="num font-medium text-ink-100">Total {formatUsd(amountCents)}</p>
       <p className="text-ink-500">Includes platform fee · USD</p>
     </div>
   );

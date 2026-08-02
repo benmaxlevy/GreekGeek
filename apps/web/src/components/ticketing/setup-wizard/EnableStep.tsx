@@ -14,7 +14,7 @@ export function EnableStep({ event, state, onChange }: Props) {
   const maxHeadcount = event?.maxHeadcount;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid gap-4 rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025] p-4 sm:grid-cols-2">
       <ToggleSwitch
         id="wizard-ticketing-enabled"
         label="Enable ticketing"

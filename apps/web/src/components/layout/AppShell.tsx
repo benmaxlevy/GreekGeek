@@ -15,15 +15,21 @@ export interface AppShellProps {
   children: ReactNode;
   navItems?: AppShellNavItem[];
   footer?: ReactNode;
+  portal?: 'member' | 'exec';
 }
 
 const DEFAULT_NAV: AppShellNavItem[] = [{ label: 'Home', to: '/app' }];
 
-export function AppShell({ children, navItems = DEFAULT_NAV, footer }: AppShellProps) {
+export function AppShell({
+  children,
+  navItems = DEFAULT_NAV,
+  footer,
+  portal,
+}: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen w-full" data-portal={portal}>
       <aside
         className={cn(
           'surface-glass-panel fixed inset-y-0 left-0 z-40 hidden w-[var(--sidebar-width)] flex-col border-r border-border-subtle md:flex',
@@ -38,7 +44,8 @@ export function AppShell({ children, navItems = DEFAULT_NAV, footer }: AppShellP
               key={`${item.to}:${JSON.stringify(item.params ?? {})}`}
               to={item.to}
               params={item.params}
-              className="flex min-h-11 items-center rounded-md px-3 text-sm text-ink-300 transition-colors hover:bg-surface-input hover:text-ink-100"
+              className="rl-sidebar-link min-h-11"
+              activeProps={{ 'data-active': true }}
             >
               {item.label}
             </Link>
@@ -88,7 +95,8 @@ export function AppShell({ children, navItems = DEFAULT_NAV, footer }: AppShellP
                     key={`${item.to}:${JSON.stringify(item.params ?? {})}`}
                     to={item.to}
                     params={item.params}
-                    className="flex min-h-11 items-center rounded-md px-3 text-sm text-ink-300 hover:bg-surface-input hover:text-ink-100"
+                    className="rl-sidebar-link min-h-11"
+                    activeProps={{ 'data-active': true }}
                     onClick={() => setMobileOpen(false)}
                   >
                     {item.label}

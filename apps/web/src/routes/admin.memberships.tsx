@@ -55,9 +55,7 @@ function AdminMembershipsPage() {
 
   const assignableUsers = useMemo(
     () =>
-      (activeUsersQuery.data ?? []).filter(
-        (u) => u.role === 'USER' && !memberUserIds.has(u.id),
-      ),
+      (activeUsersQuery.data ?? []).filter((u) => u.role === 'USER' && !memberUserIds.has(u.id)),
     [activeUsersQuery.data, memberUserIds],
   );
 
@@ -107,18 +105,22 @@ function AdminMembershipsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-[28px] font-medium tracking-tight">Memberships</h1>
-        <p className="mt-1 text-sm text-ink-500">
-          Assign users to organizations.
-        </p>
+      <div className="space-y-2">
+        <p className="rl-eyebrow">Admin / access</p>
+        <h1 className="display-sm">Memberships</h1>
+        <p className="max-w-2xl text-sm leading-6 text-ink-500">Assign users to organizations.</p>
       </div>
 
-      {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
+      {error ? (
+        <p className="rounded-lg border border-[color:var(--error)]/30 bg-[color:var(--error)]/10 px-4 py-3 text-sm text-[color:var(--error)]">
+          {error}
+        </p>
+      ) : null}
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-lg">Assign membership</CardTitle>
+          <p className="rl-eyebrow">Access control</p>
+          <CardTitle className="display-sm">Assign membership</CardTitle>
         </CardHeader>
         <CardContent>
           <form
@@ -171,7 +173,7 @@ function AdminMembershipsPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {membershipsQuery.isLoading ? (
             <p className="p-6 text-sm text-ink-500">Loading…</p>
@@ -182,13 +184,13 @@ function AdminMembershipsPage() {
               {memberships.map((m) => (
                 <li
                   key={m.id}
-                  className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="space-y-1 text-sm">
-                    <p className="font-medium text-ink-100">
-                      {userName.get(m.userId) ?? m.userId}
+                    <p className="font-medium text-ink-100">{userName.get(m.userId) ?? m.userId}</p>
+                    <p className="text-ink-500">
+                      {orgLabel.get(m.organizationId) ?? m.organizationId}
                     </p>
-                    <p className="text-ink-500">{orgLabel.get(m.organizationId) ?? m.organizationId}</p>
                   </div>
                   <Button
                     type="button"

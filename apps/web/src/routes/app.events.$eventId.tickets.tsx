@@ -83,16 +83,15 @@ function MemberEventTicketsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="space-y-2">
         <p className="text-sm text-ink-500">
           <Link to="/app/events" className="hover:text-ink-100">
             ← Events
           </Link>
         </p>
-        <h1 className="mt-2 text-[28px] font-medium tracking-tight">
-          {event?.name ?? 'Event tickets'}
-        </h1>
-        <p className="mt-1 text-sm text-ink-500">
+        <p className="rl-eyebrow">Ticket operations</p>
+        <h1 className="display-md font-display">{event?.name ?? 'Event tickets'}</h1>
+        <p className="max-w-2xl text-sm text-ink-500">
           {scanOnly
             ? 'Scan tickets at the door for this event.'
             : mode === 'host'

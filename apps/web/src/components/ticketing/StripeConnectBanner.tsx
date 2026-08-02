@@ -8,25 +8,18 @@ type Props = {
 };
 
 /** Blocking banner when paid ticketing needs host org Stripe charges enabled. */
-export function StripeConnectBanner({
-  organizationId,
-  canManagePayments,
-}: Props) {
+export function StripeConnectBanner({ organizationId, canManagePayments }: Props) {
   return (
-    <Card className="border-[color:var(--error)]/40">
-      <CardContent className="space-y-3 p-4">
-        <p className="text-sm font-medium text-ink-100">
-          Connect payout account required
-        </p>
+    <Card className="overflow-hidden border-[color:var(--error)]/40">
+      <CardContent className="space-y-3 p-5">
+        <p className="rl-eyebrow text-[color:var(--error)]">Payment gate</p>
+        <p className="display-sm font-display">Connect payout account</p>
         <p className="text-sm text-ink-300">
           This chapter needs a payout account before selling paid tickets.
         </p>
         {canManagePayments ? (
           <Button asChild size="sm" variant="outline">
-            <Link
-              to="/app/orgs/$orgId/payments"
-              params={{ orgId: organizationId }}
-            >
+            <Link to="/app/orgs/$orgId/payments" params={{ orgId: organizationId }}>
               Open payments settings
             </Link>
           </Button>

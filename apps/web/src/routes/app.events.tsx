@@ -24,5 +24,9 @@ export const Route = createFileRoute('/app/events')({
 });
 
 function AppEventsLayout() {
-  return <Outlet />;
+  return (
+    <div className="w-full">
+      <Outlet />
+    </div>
+  );
 }

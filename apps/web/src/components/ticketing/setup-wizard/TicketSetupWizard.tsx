@@ -131,20 +131,20 @@ export function TicketSetupWizard({
   }
 
   const nextDisabled =
-    step === 1 &&
-    (validateAllocateStep(state) != null || state.pools.length === 0);
+    step === 1 && (validateAllocateStep(state) != null || state.pools.length === 0);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Ticket setup</CardTitle>
-        <ol className="mt-3 flex flex-wrap gap-2">
+    <Card className="overflow-hidden">
+      <CardHeader className="border-b border-border-subtle pb-5">
+        <p className="rl-eyebrow">Guided setup</p>
+        <CardTitle className="display-sm font-display mt-2">Ticket setup</CardTitle>
+        <ol className="mt-4 flex flex-wrap gap-2">
           {WIZARD_STEP_LABELS.map((label, index) => (
             <li
               key={label}
               className={`rounded-full px-3 py-1 text-xs font-medium ${
                 index === step
-                  ? 'bg-accent text-accent-foreground'
+                  ? 'bg-white text-black'
                   : index < step
                     ? 'bg-surface-raised text-ink-300'
                     : 'border border-border-subtle text-ink-500'
@@ -155,18 +155,12 @@ export function TicketSetupWizard({
           ))}
         </ol>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-5">
         {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
 
-        {step === 0 ? (
-          <EnableStep event={event} state={state} onChange={patchState} />
-        ) : null}
+        {step === 0 ? <EnableStep event={event} state={state} onChange={patchState} /> : null}
         {step === 1 ? (
-          <AllocateStep
-            organizations={organizations}
-            state={state}
-            onChange={patchState}
-          />
+          <AllocateStep organizations={organizations} state={state} onChange={patchState} />
         ) : null}
         {step === 2 ? (
           <PriceStep

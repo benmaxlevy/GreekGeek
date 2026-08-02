@@ -21,24 +21,19 @@ export function PriceStep({
   const hasPaidPrice = state.pools.some(
     (pool) => pool.priceUsd.trim() !== '' && Number(pool.priceUsd) > 0,
   );
-  const showStripeBanner =
-    Boolean(hostOrgId) && !chargesEnabled && hasPaidPrice;
+  const showStripeBanner = Boolean(hostOrgId) && !chargesEnabled && hasPaidPrice;
 
   return (
     <div className="space-y-6">
       {showStripeBanner && hostOrgId ? (
-        <StripeConnectBanner
-          organizationId={hostOrgId}
-          canManagePayments={canManageHostPayments}
-        />
+        <StripeConnectBanner organizationId={hostOrgId} canManagePayments={canManageHostPayments} />
       ) : null}
 
       <p className="text-sm text-ink-500">
-        Set a USD price per pool. Leave blank for free tickets. Prices are fixed at
-        creation.
+        Set a USD price per pool. Leave blank for free tickets. Prices are fixed at creation.
       </p>
 
-      <ul className="divide-y divide-border-subtle rounded-md border border-border-subtle">
+      <ul className="divide-y divide-border-subtle rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025]">
         {state.pools.map((pool) => (
           <li
             key={poolRowKey(pool)}
@@ -46,7 +41,9 @@ export function PriceStep({
           >
             <div>
               <p className="text-sm font-medium text-ink-100">{pool.orgName}</p>
-              <p className="text-xs text-ink-500">{pool.quantity} tickets</p>
+              <p className="text-xs text-ink-500">
+                <span className="num">{pool.quantity}</span> tickets
+              </p>
             </div>
             <div className="space-y-1">
               <Label htmlFor={`wizard-price-${poolRowKey(pool)}`} className="text-xs">

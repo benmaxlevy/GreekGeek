@@ -51,8 +51,7 @@ function AdminOrganizationsPage() {
 
   const listQuery = useQuery({
     queryKey: ['admin', 'organizations', universityFilter],
-    queryFn: () =>
-      listOrganizations(universityFilter ? { universityId: universityFilter } : {}),
+    queryFn: () => listOrganizations(universityFilter ? { universityId: universityFilter } : {}),
   });
 
   function invalidate() {
@@ -112,16 +111,21 @@ function AdminOrganizationsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-[28px] font-medium tracking-tight">Organizations</h1>
-        <p className="mt-1 text-sm text-ink-500">
+      <div className="space-y-2">
+        <p className="rl-eyebrow">Admin / directory</p>
+        <h1 className="display-sm">Organizations</h1>
+        <p className="max-w-2xl text-sm leading-6 text-ink-500">
           Create and manage chapters linked to universities.
         </p>
       </div>
 
-      {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
+      {error ? (
+        <p className="rounded-lg border border-[color:var(--error)]/30 bg-[color:var(--error)]/10 px-4 py-3 text-sm text-[color:var(--error)]">
+          {error}
+        </p>
+      ) : null}
 
-      <div className="space-y-2">
+      <div className="space-y-2 rounded-lg border border-border-subtle bg-white/[0.02] p-4">
         <Label htmlFor="org-filter">Filter by university</Label>
         <select
           id="org-filter"
@@ -138,9 +142,10 @@ function AdminOrganizationsPage() {
         </select>
       </div>
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-lg">Create organization</CardTitle>
+          <p className="rl-eyebrow">Directory setup</p>
+          <CardTitle className="display-sm">Create organization</CardTitle>
         </CardHeader>
         <CardContent>
           <form
@@ -199,9 +204,10 @@ function AdminOrganizationsPage() {
       </Card>
 
       {editing ? (
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-lg">Edit organization</CardTitle>
+            <p className="rl-eyebrow">Directory setup</p>
+            <CardTitle className="display-sm">Edit organization</CardTitle>
           </CardHeader>
           <CardContent>
             <form
@@ -246,7 +252,7 @@ function AdminOrganizationsPage() {
         </Card>
       ) : null}
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {listQuery.isLoading ? (
             <p className="p-6 text-sm text-ink-500">Loading…</p>
@@ -259,15 +265,13 @@ function AdminOrganizationsPage() {
                 return (
                   <li
                     key={org.id}
-                    className="flex flex-col gap-3 px-6 py-4 lg:flex-row lg:items-start lg:justify-between"
+                    className="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-start lg:justify-between"
                   >
                     <div className="min-w-0 flex-1 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium text-ink-100">{org.name}</p>
                         <Badge variant="outline">{org.type}</Badge>
-                        <Badge
-                          variant={connectState === 'ready' ? 'default' : 'secondary'}
-                        >
+                        <Badge variant={connectState === 'ready' ? 'default' : 'secondary'}>
                           Payouts: {stripeStatusLabel(org)}
                         </Badge>
                       </div>
@@ -300,9 +304,7 @@ function AdminOrganizationsPage() {
                         <div>
                           Requirements:{' '}
                           <span className="text-ink-300">
-                            {hasOutstandingRequirements(org.stripeRequirementsDue)
-                              ? 'due'
-                              : 'none'}
+                            {hasOutstandingRequirements(org.stripeRequirementsDue) ? 'due' : 'none'}
                           </span>
                         </div>
                         <div>
@@ -320,9 +322,7 @@ function AdminOrganizationsPage() {
                         type="button"
                         size="sm"
                         variant="outline"
-                        isLoading={
-                          connectMutation.isPending && connectingOrgId === org.id
-                        }
+                        isLoading={connectMutation.isPending && connectingOrgId === org.id}
                         onClick={() => connectMutation.mutate(org.id)}
                       >
                         Generate onboarding link

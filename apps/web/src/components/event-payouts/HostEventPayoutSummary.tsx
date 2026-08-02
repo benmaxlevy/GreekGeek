@@ -16,8 +16,9 @@ export function HostEventPayoutSummary({ eventId }: HostEventPayoutSummaryProps)
 
   if (summaryQuery.isLoading) {
     return (
-      <Card>
-        <CardContent>
+      <Card className="overflow-hidden">
+        <CardContent className="p-5">
+          <p className="rl-eyebrow">Event finance</p>
           <p className="text-sm text-ink-500">Loading payout summary…</p>
         </CardContent>
       </Card>

@@ -1,44 +1,45 @@
-import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
+import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold tracking-[-0.005em] cursor-pointer transition-[background,border-color,opacity,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--navy-900)] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40 active:translate-y-px [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        // Black-chrome hardware — the default action. Gradient/shadow recipe lives in
-        // the .btn-chrome utility (styles.css) to match the design handoff exactly.
-        default: "btn-chrome text-ink-100",
-        // Rounded-full white pill — marketing CTAs only (e.g. "Book a demo"), never used
-        // for in-app actions.
-        pill: "btn-chrome text-ink-100 rounded-full",
+        // White primary action from the mockup handoff.
+        default: 'border border-white bg-white text-black hover:bg-[#e9e9e9]',
+        primary: 'border border-white bg-white text-black hover:bg-[#e9e9e9]',
+        chrome: 'btn-chrome text-ink-100',
+        pill: 'btn-chrome text-ink-100 rounded-full',
+        danger:
+          'border border-[rgba(229,84,75,0.4)] bg-[color:var(--status-overdue-bg)] text-[color:var(--status-overdue)] hover:brightness-110',
         destructive:
-          "bg-[color:var(--status-overdue)] text-white shadow-sm hover:brightness-110 active:brightness-95 disabled:shadow-none",
+          'border border-[rgba(229,84,75,0.4)] bg-[color:var(--status-overdue-bg)] text-[color:var(--status-overdue)] hover:brightness-110',
         outline:
-          "border border-border-strong bg-transparent text-ink-100 hover:bg-surface-input hover:border-border-accent active:bg-white/10",
+          'border border-border-strong bg-transparent text-ink-100 hover:border-border-accent hover:bg-white/[0.04]',
         secondary:
-          "border border-border-strong bg-transparent text-ink-100 hover:bg-surface-input hover:border-border-accent active:bg-white/10",
-        ghost: "text-ink-300 hover:text-ink-100 hover:bg-surface-input active:bg-white/10",
-        // Frosted translucent — floating controls over imagery/nav bars.
+          'border border-border-strong bg-transparent text-ink-100 hover:border-border-accent hover:bg-white/[0.04]',
+        ghost: 'border border-border-strong bg-white/[0.04] text-ink-100 hover:bg-white/[0.08]',
+        quiet:
+          'border border-transparent bg-transparent text-ink-300 hover:bg-white/[0.04] hover:text-ink-100',
         glass:
-          "bg-surface-glass backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.16] text-ink-100 shadow-[0_1px_2px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.16)] hover:bg-surface-glass-strong hover:border-border-accent",
-        link: "text-ink-100 underline-offset-4 hover:underline disabled:no-underline",
+          'bg-surface-glass backdrop-blur-2xl backdrop-saturate-150 border border-white/[0.16] text-ink-100 shadow-[0_1px_2px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.16)] hover:bg-surface-glass-strong hover:border-border-accent',
+        link: 'text-ink-100 underline-offset-4 hover:underline disabled:no-underline',
       },
       size: {
         // 44px minimum tap target for chapter-facing UI (rally-design hard rule).
-        default: "h-11 px-5 py-2",
-        // sm stays compact for dense admin/desktop consoles only.
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-12 rounded-md px-8 text-base",
-        icon: "h-11 w-11",
+        default: 'h-11 px-[18px] py-2',
+        sm: 'h-[34px] rounded-md px-3 text-[13px]',
+        lg: 'h-[52px] rounded-full px-7 text-[15px]',
+        icon: 'h-11 w-11',
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: 'default',
+      size: 'default',
     },
   },
 );
@@ -51,7 +52,7 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, isLoading = false, children, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
+    const Comp = asChild ? Slot : 'button';
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
@@ -92,6 +93,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     );
   },
 );
-Button.displayName = "Button";
+Button.displayName = 'Button';
 
 export { Button, buttonVariants };

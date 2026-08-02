@@ -41,9 +41,7 @@ function OrgPaymentsRefreshBridge() {
         window.location.href = url;
       } catch (err) {
         if (cancelled) return;
-        setError(
-          err instanceof Error ? err.message : 'Failed to refresh Stripe onboarding link',
-        );
+        setError(err instanceof Error ? err.message : 'Failed to refresh Stripe onboarding link');
       }
     })();
     return () => {
@@ -52,13 +50,16 @@ function OrgPaymentsRefreshBridge() {
   }, [orgId]);
 
   return (
-    <div className="space-y-3">
-      <h1 className="text-[28px] font-medium tracking-tight">Continue setup</h1>
-      {error ? (
-        <p className="text-sm text-[color:var(--error)]">{error}</p>
-      ) : (
-        <p className="text-sm text-ink-500">Opening payout account setup…</p>
-      )}
+    <div className="w-full">
+      <div className="surface-glass-panel space-y-3 rounded-[var(--radius-lg)] p-6">
+        <p className="rl-eyebrow">Chapter finance</p>
+        <h1 className="display-sm font-display">Continue setup</h1>
+        {error ? (
+          <p className="text-sm text-[color:var(--error)]">{error}</p>
+        ) : (
+          <p className="text-sm text-ink-500">Opening payout account setup…</p>
+        )}
+      </div>
     </div>
   );
 }

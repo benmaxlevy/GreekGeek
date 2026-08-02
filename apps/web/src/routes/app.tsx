@@ -62,6 +62,7 @@ function AuthenticatedLayout() {
 
   return (
     <AppShell
+      portal="member"
       navItems={navItems}
       footer={
         <div className="space-y-2">

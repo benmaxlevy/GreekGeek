@@ -50,6 +50,7 @@ function AdminLayout() {
 
   return (
     <AppShell
+      portal="exec"
       navItems={ADMIN_NAV}
       footer={
         <div className="space-y-2">

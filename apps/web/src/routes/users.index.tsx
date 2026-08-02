@@ -35,8 +35,7 @@ function OfficerPendingUsersPage() {
   }
 
   const approveMutation = useMutation({
-    mutationFn: (userId: string) =>
-      approvePendingApplicant(organizationId, userId),
+    mutationFn: (userId: string) => approvePendingApplicant(organizationId, userId),
     onSuccess: async () => {
       setError(null);
       await invalidateApplicants();
@@ -45,8 +44,7 @@ function OfficerPendingUsersPage() {
   });
 
   const denyMutation = useMutation({
-    mutationFn: (userId: string) =>
-      denyPendingApplicant(organizationId, userId),
+    mutationFn: (userId: string) => denyPendingApplicant(organizationId, userId),
     onSuccess: async () => {
       setError(null);
       await invalidateApplicants();
@@ -59,16 +57,21 @@ function OfficerPendingUsersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-[28px] font-medium tracking-tight">Pending approvals</h1>
-        <p className="mt-1 text-sm text-ink-500">
+      <div className="space-y-2">
+        <p className="rl-eyebrow">Organization / people</p>
+        <h1 className="display-sm">Pending approvals</h1>
+        <p className="max-w-2xl text-sm leading-6 text-ink-500">
           Approve or deny people who asked to join your organization.
         </p>
       </div>
 
-      {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
+      {error ? (
+        <p className="rounded-lg border border-[color:var(--error)]/30 bg-[color:var(--error)]/10 px-4 py-3 text-sm text-[color:var(--error)]">
+          {error}
+        </p>
+      ) : null}
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {applicantsQuery.isLoading ? (
             <p className="p-6 text-sm text-ink-500">Loading applicants…</p>
@@ -105,7 +108,7 @@ function ApplicantRow({
   onDeny: () => void;
 }) {
   return (
-    <li className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <li className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium text-ink-100">{applicant.name}</p>
@@ -117,13 +120,7 @@ function ApplicantRow({
         <Button type="button" size="sm" disabled={busy} onClick={onApprove}>
           Approve
         </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="destructive"
-          disabled={busy}
-          onClick={onDeny}
-        >
+        <Button type="button" size="sm" variant="destructive" disabled={busy} onClick={onDeny}>
           Deny
         </Button>
       </div>

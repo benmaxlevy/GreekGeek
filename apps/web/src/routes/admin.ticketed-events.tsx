@@ -34,14 +34,15 @@ function AdminTicketedEventsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-[28px] font-medium tracking-tight">Ticketed events</h1>
-        <p className="mt-1 text-sm text-ink-500">
+      <div className="space-y-2">
+        <p className="rl-eyebrow">Admin / ticketing</p>
+        <h1 className="display-sm">Ticketed events</h1>
+        <p className="max-w-2xl text-sm leading-6 text-ink-500">
           Browse events with ticketing and manage their tickets.
         </p>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 rounded-lg border border-border-subtle bg-white/[0.02] p-4">
         <Label htmlFor="ticketed-org-filter">Filter by organization</Label>
         <select
           id="ticketed-org-filter"
@@ -58,7 +59,7 @@ function AdminTicketedEventsPage() {
         </select>
       </div>
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {listQuery.isLoading ? (
             <p className="p-6 text-sm text-ink-500">Loading…</p>
@@ -69,7 +70,7 @@ function AdminTicketedEventsPage() {
               {events.map((event) => (
                 <li
                   key={event.id}
-                  className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -79,18 +80,13 @@ function AdminTicketedEventsPage() {
                         <Badge variant="secondary">{event.ticketSaleStatus}</Badge>
                       ) : null}
                     </div>
-                    <p className="text-sm text-ink-500">
+                    <p className="num text-sm text-ink-500">
                       {orgName.get(event.organizationId) ?? event.organizationId}
-                      {event.ticketCapacity != null
-                        ? ` · Capacity ${event.ticketCapacity}`
-                        : ''}
+                      {event.ticketCapacity != null ? ` · Capacity ${event.ticketCapacity}` : ''}
                     </p>
                   </div>
                   <Button type="button" size="sm" variant="outline" asChild>
-                    <Link
-                      to="/admin/events/$eventId/tickets"
-                      params={{ eventId: event.id }}
-                    >
+                    <Link to="/admin/events/$eventId/tickets" params={{ eventId: event.id }}>
                       Manage tickets
                     </Link>
                   </Button>

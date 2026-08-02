@@ -15,9 +15,12 @@ export function EventPayoutSummaryCard({
   const latestAudit = summary.audits.at(-1);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
-        <CardTitle className="text-lg">{title}</CardTitle>
+    <Card className="overflow-hidden">
+      <CardHeader className="flex flex-row flex-wrap items-end justify-between gap-3 space-y-0 border-b border-border-subtle pb-5">
+        <div>
+          <p className="rl-eyebrow">Event finance</p>
+          <CardTitle className="display-sm font-display mt-2">{title}</CardTitle>
+        </div>
         <div className="flex flex-wrap gap-2">
           {summary.heldAt ? <Badge variant="destructive">On hold</Badge> : null}
           {summary.postReleaseExposure ? (
@@ -28,41 +31,41 @@ export function EventPayoutSummaryCard({
           ) : null}
         </div>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-5 pt-5">
         <dl className="grid gap-4 text-sm sm:grid-cols-3">
-          <div>
+          <div className="rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025] p-4">
             <dt className="text-ink-500">Gross sales</dt>
-            <dd className="mt-1 text-lg font-medium text-ink-100">
+            <dd className="num mt-1 text-lg font-medium text-ink-100">
               {formatCents(summary.grossAmountCents)}
             </dd>
           </div>
-          <div>
+          <div className="rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025] p-4">
             <dt className="text-ink-500">Rally fee</dt>
-            <dd className="mt-1 text-lg font-medium text-ink-100">
+            <dd className="num mt-1 text-lg font-medium text-ink-100">
               {formatCents(summary.feeCents)}
             </dd>
           </div>
-          <div>
+          <div className="rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025] p-4">
             <dt className="text-ink-500">Net proceeds</dt>
-            <dd className="mt-1 text-lg font-medium text-ink-100">
+            <dd className="num mt-1 text-lg font-medium text-ink-100">
               {formatCents(summary.netCents)}
             </dd>
           </div>
-          <div>
+          <div className="rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025] p-4">
             <dt className="text-ink-500">Released</dt>
-            <dd className="mt-1 text-ink-100">{formatCents(summary.releasedCents)}</dd>
+            <dd className="num mt-1 text-ink-100">{formatCents(summary.releasedCents)}</dd>
           </div>
-          <div>
+          <div className="rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025] p-4">
             <dt className="text-ink-500">Pending</dt>
-            <dd className="mt-1 text-ink-100">{formatCents(summary.pendingCents)}</dd>
+            <dd className="num mt-1 text-ink-100">{formatCents(summary.pendingCents)}</dd>
           </div>
-          <div>
+          <div className="rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025] p-4">
             <dt className="text-ink-500">Excluded</dt>
-            <dd className="mt-1 text-ink-100">
+            <dd className="num mt-1 text-ink-100">
               {formatCents(summary.excludedCents)} ({summary.excludedCount})
             </dd>
           </div>
-          <div className="sm:col-span-3">
+          <div className="rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025] p-4 sm:col-span-3">
             <dt className="text-ink-500">Expected payout date</dt>
             <dd className="mt-1 text-ink-100">{formatDateTime(summary.expectedPayoutDate)}</dd>
           </div>
@@ -97,7 +100,9 @@ export function EventPayoutSummaryCard({
                   className="flex flex-col gap-1 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
                 >
                   <span className="text-ink-300">
-                    Batch {payout.batchSeq} · {formatCents(payout.amountCents)}
+                    <span className="num">
+                      Batch {payout.batchSeq} · {formatCents(payout.amountCents)}
+                    </span>
                   </span>
                   <span className="text-ink-500">
                     {payout.status} · {formatDateTime(payout.releasedAt)}

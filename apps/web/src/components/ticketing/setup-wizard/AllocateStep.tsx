@@ -69,12 +69,7 @@ export function AllocateStep({ organizations, state, onChange }: Props) {
 
   function updateSelection(nextOrgIds: Set<string>, nextPublic: boolean) {
     onChange({
-      pools: buildPoolsFromSelection(
-        nextOrgIds,
-        nextPublic,
-        organizations,
-        state.pools,
-      ),
+      pools: buildPoolsFromSelection(nextOrgIds, nextPublic, organizations, state.pools),
     });
   }
 
@@ -93,7 +88,7 @@ export function AllocateStep({ organizations, state, onChange }: Props) {
     <div className="space-y-6">
       <div className="space-y-3">
         <Label>Participating organizations</Label>
-        <div className="max-h-48 space-y-2 overflow-y-auto rounded-md border border-border-subtle p-3">
+        <div className="max-h-48 space-y-2 overflow-y-auto rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025] p-3">
           {sortedOrgs(organizations).map((org) => (
             <ToggleSwitch
               key={org.id}
@@ -131,7 +126,7 @@ export function AllocateStep({ organizations, state, onChange }: Props) {
               Even split capacity
             </Button>
           </div>
-          <ul className="divide-y divide-border-subtle rounded-md border border-border-subtle">
+          <ul className="divide-y divide-border-subtle rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025]">
             {state.pools.map((pool) => (
               <li
                 key={poolRowKey(pool)}
@@ -139,10 +134,7 @@ export function AllocateStep({ organizations, state, onChange }: Props) {
               >
                 <span className="text-sm font-medium text-ink-100">{pool.orgName}</span>
                 <div className="space-y-1">
-                  <Label
-                    htmlFor={`wizard-qty-${poolRowKey(pool)}`}
-                    className="text-xs"
-                  >
+                  <Label htmlFor={`wizard-qty-${poolRowKey(pool)}`} className="text-xs">
                     Quantity
                   </Label>
                   <Input
@@ -155,9 +147,7 @@ export function AllocateStep({ organizations, state, onChange }: Props) {
                       const quantity = Number.isFinite(parsed) ? parsed : 0;
                       onChange({
                         pools: state.pools.map((row) =>
-                          poolRowKey(row) === poolRowKey(pool)
-                            ? { ...row, quantity }
-                            : row,
+                          poolRowKey(row) === poolRowKey(pool) ? { ...row, quantity } : row,
                         ),
                       });
                     }}
@@ -174,17 +164,19 @@ export function AllocateStep({ organizations, state, onChange }: Props) {
         </p>
       )}
 
-      <div className="rounded-md border border-border-subtle bg-surface-raised p-4 text-sm text-ink-300">
+      <div className="rounded-[var(--radius-md)] border border-border-subtle bg-surface-raised p-4 text-sm text-ink-300">
         <p>
-          Allocated: <span className="font-medium text-ink-100">{sum}</span> /{' '}
-          {state.capacity}
+          Allocated:{' '}
+          <span className="num font-medium text-ink-100">
+            {sum} / {state.capacity}
+          </span>
         </p>
         <p>
           Remainder:{' '}
           <span
-            className={
+            className={`num ${
               remainder < 0 ? 'font-medium text-[color:var(--error)]' : 'font-medium text-ink-100'
-            }
+            }`}
           >
             {remainder}
           </span>

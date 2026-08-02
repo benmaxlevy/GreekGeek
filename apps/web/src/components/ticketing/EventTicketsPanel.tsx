@@ -16,10 +16,7 @@ import { Label } from '@/components/ui/label';
 import { StripeConnectBanner } from '@/components/ticketing/StripeConnectBanner';
 import { TicketSetupWizard } from '@/components/ticketing/setup-wizard/TicketSetupWizard';
 import { ToggleSwitch } from '@/components/ticketing/setup-wizard/ToggleSwitch';
-import {
-  fromLocalDatetime,
-  toLocalDatetime,
-} from '@/components/ticketing/setup-wizard/types';
+import { fromLocalDatetime, toLocalDatetime } from '@/components/ticketing/setup-wizard/types';
 import { TicketScanner } from '@/components/ticketing/TicketScanner';
 import { listOrganizations } from '@/lib/admin-api';
 import { canManageOrgPayments, isAdminUser } from '@/lib/auth-routing';
@@ -53,9 +50,7 @@ function formatCents(cents: number | null): string {
   return `$${(cents / 100).toFixed(2)}`;
 }
 
-function statusBadgeVariant(
-  status: string,
-): 'default' | 'secondary' | 'destructive' | 'outline' {
+function statusBadgeVariant(status: string): 'default' | 'secondary' | 'destructive' | 'outline' {
   if (status === 'paid' || status === 'on_sale' || status === 'active') {
     return 'default';
   }
@@ -80,8 +75,7 @@ export function EventTicketsPanel({
 }: Props) {
   const queryClient = useQueryClient();
   const isHost = mode === 'host' || mode === 'admin';
-  const canManage =
-    canManageProp ?? (mode === 'invited' || mode === 'admin' || mode === 'host');
+  const canManage = canManageProp ?? (mode === 'invited' || mode === 'admin' || mode === 'host');
   const canScan = canScanProp ?? mode === 'admin';
   const canMarkPaid = Boolean(user && isAdminUser(user)) || mode === 'admin';
   const scanOnly = canScan && !canManage;
@@ -90,18 +84,14 @@ export function EventTicketsPanel({
   );
   const [error, setError] = useState<string | null>(null);
 
-  const [ticketingEnabled, setTicketingEnabled] = useState(
-    event?.ticketingEnabled ?? false,
-  );
+  const [ticketingEnabled, setTicketingEnabled] = useState(event?.ticketingEnabled ?? false);
   const [ticketCapacity, setTicketCapacity] = useState(
     event?.ticketCapacity != null ? String(event.ticketCapacity) : '',
   );
   const [ticketSaleStatus, setTicketSaleStatus] = useState<TicketSaleStatus | ''>(
     event?.ticketSaleStatus ?? 'draft',
   );
-  const [salesOpenAt, setSalesOpenAt] = useState(
-    toLocalDatetime(event?.ticketSalesOpenAt ?? null),
-  );
+  const [salesOpenAt, setSalesOpenAt] = useState(toLocalDatetime(event?.ticketSalesOpenAt ?? null));
   const [salesCloseAt, setSalesCloseAt] = useState(
     toLocalDatetime(event?.ticketSalesCloseAt ?? null),
   );
@@ -121,10 +111,7 @@ export function EventTicketsPanel({
   const ticketsQuery = useQuery({
     queryKey: ['ticketing', 'tickets', eventId, invitedAllocationId],
     queryFn: () =>
-      listTickets(
-        eventId,
-        invitedAllocationId ? { allocationId: invitedAllocationId } : {},
-      ),
+      listTickets(eventId, invitedAllocationId ? { allocationId: invitedAllocationId } : {}),
   });
 
   const guestsQuery = useQuery({
@@ -142,10 +129,7 @@ export function EventTicketsPanel({
 
   const allocations = allocationsQuery.data ?? [];
   const showSetupWizard =
-    isHost &&
-    canManage &&
-    !allocationsQuery.isLoading &&
-    allocations.length === 0;
+    isHost && canManage && !allocationsQuery.isLoading && allocations.length === 0;
   const tickets = ticketsQuery.data ?? [];
   const resolvedInvitedAllocId =
     invitedAllocationId ?? tickets.find((t) => t.allocationId)?.allocationId;
@@ -157,8 +141,7 @@ export function EventTicketsPanel({
   const hostOrg = (orgsQuery.data ?? []).find((o) => o.id === hostOrgId);
   const chargesEnabled = hostOrg?.stripeChargesEnabled === true;
   const hasPaidAllocation = allocations.some((a) => (a.priceCents ?? 0) > 0);
-  const enteringPaidPrice =
-    allocPrice.trim() !== '' && Number(allocPrice) > 0;
+  const enteringPaidPrice = allocPrice.trim() !== '' && Number(allocPrice) > 0;
   const hostNotChargeReady = hostOrg != null && !chargesEnabled;
   const showPaidAllocBanner =
     isHost &&
@@ -174,9 +157,7 @@ export function EventTicketsPanel({
     hasPaidAllocation &&
     (ticketSaleStatus === 'on_sale' || tab === 'config');
   const canManageHostPayments =
-    user != null && hostOrgId != null
-      ? canManageOrgPayments(user, hostOrgId)
-      : false;
+    user != null && hostOrgId != null ? canManageOrgPayments(user, hostOrgId) : false;
 
   function invalidateTicketing() {
     return Promise.all([
@@ -191,9 +172,7 @@ export function EventTicketsPanel({
     mutationFn: () =>
       patchEventTicketing(eventId, {
         ticketingEnabled,
-        ticketCapacity: ticketingEnabled
-          ? Number(ticketCapacity)
-          : null,
+        ticketCapacity: ticketingEnabled ? Number(ticketCapacity) : null,
         ticketSaleStatus: ticketingEnabled ? ticketSaleStatus || 'draft' : null,
         ticketSalesOpenAt: ticketingEnabled ? fromLocalDatetime(salesOpenAt) : null,
         ticketSalesCloseAt: ticketingEnabled ? fromLocalDatetime(salesCloseAt) : null,
@@ -208,9 +187,7 @@ export function EventTicketsPanel({
   const createAllocMutation = useMutation({
     mutationFn: () => {
       const quantity = Number(allocQty);
-      const priceCents = allocPrice.trim()
-        ? Math.round(Number(allocPrice) * 100)
-        : undefined;
+      const priceCents = allocPrice.trim() ? Math.round(Number(allocPrice) * 100) : undefined;
       if (allocAllOrgs) {
         return createAllocation(eventId, { allOrgs: true, quantity, priceCents });
       }
@@ -294,9 +271,13 @@ export function EventTicketsPanel({
 
   return (
     <div className="space-y-6">
-      {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
+      {error ? (
+        <div className="rounded-[var(--radius-md)] border border-[color:var(--error)]/40 bg-[color:var(--status-overdue-bg)] px-4 py-3">
+          <p className="text-sm text-[color:var(--error)]">{error}</p>
+        </div>
+      ) : null}
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 border-b border-border-subtle pb-4">
         {tabs.map((t) => (
           <Button
             key={t.id}
@@ -329,98 +310,95 @@ export function EventTicketsPanel({
             }}
           />
         ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Ticketing settings</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form
-              className="grid gap-4 sm:grid-cols-2"
-              onSubmit={(e: FormEvent) => {
-                e.preventDefault();
-                configMutation.mutate();
-              }}
-            >
-              <ToggleSwitch
-                id="ticketing-enabled"
-                label="Enable ticketing"
-                checked={ticketingEnabled}
-                onCheckedChange={setTicketingEnabled}
-                className="sm:col-span-2"
-              />
-              {ticketingEnabled ? (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="ticket-capacity">
-                      Ticket capacity
-                      {event?.maxHeadcount
-                        ? ` (event max ${event.maxHeadcount})`
-                        : ''}
-                    </Label>
-                    <Input
-                      id="ticket-capacity"
-                      type="number"
-                      min={1}
-                      max={event?.maxHeadcount}
-                      required
-                      value={ticketCapacity}
-                      onChange={(e) => setTicketCapacity(e.target.value)}
-                      className="min-h-11"
-                    />
-                  </div>
-                  <div className="space-y-2 sm:col-span-2">
-                    <Label htmlFor="sale-status">Sale status</Label>
-                    {showOnSaleBanner && hostOrgId ? (
-                      <div className="mb-3">
-                        <StripeConnectBanner
-                          organizationId={hostOrgId}
-                          canManagePayments={canManageHostPayments}
-                        />
-                      </div>
-                    ) : null}
-                    <select
-                      id="sale-status"
-                      value={ticketSaleStatus}
-                      onChange={(e) =>
-                        setTicketSaleStatus(e.target.value as TicketSaleStatus)
-                      }
-                      className="min-h-11 w-full rounded-md border border-border-strong bg-surface-input px-3 text-sm text-ink-100"
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="on_sale">On sale</option>
-                      <option value="closed">Closed</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="sales-open">Sales open (optional)</Label>
-                    <Input
-                      id="sales-open"
-                      type="datetime-local"
-                      value={salesOpenAt}
-                      onChange={(e) => setSalesOpenAt(e.target.value)}
-                      className="min-h-11"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="sales-close">Sales close (optional)</Label>
-                    <Input
-                      id="sales-close"
-                      type="datetime-local"
-                      value={salesCloseAt}
-                      onChange={(e) => setSalesCloseAt(e.target.value)}
-                      className="min-h-11"
-                    />
-                  </div>
-                </>
-              ) : null}
-              <div className="sm:col-span-2">
-                <Button type="submit" isLoading={configMutation.isPending}>
-                  Save
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+          <Card className="overflow-hidden">
+            <CardHeader className="border-b border-border-subtle pb-5">
+              <p className="rl-eyebrow">Configuration</p>
+              <CardTitle className="display-sm font-display mt-2">Ticketing settings</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-5">
+              <form
+                className="grid gap-4 sm:grid-cols-2"
+                onSubmit={(e: FormEvent) => {
+                  e.preventDefault();
+                  configMutation.mutate();
+                }}
+              >
+                <ToggleSwitch
+                  id="ticketing-enabled"
+                  label="Enable ticketing"
+                  checked={ticketingEnabled}
+                  onCheckedChange={setTicketingEnabled}
+                  className="sm:col-span-2"
+                />
+                {ticketingEnabled ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="ticket-capacity">
+                        Ticket capacity
+                        {event?.maxHeadcount ? ` (event max ${event.maxHeadcount})` : ''}
+                      </Label>
+                      <Input
+                        id="ticket-capacity"
+                        type="number"
+                        min={1}
+                        max={event?.maxHeadcount}
+                        required
+                        value={ticketCapacity}
+                        onChange={(e) => setTicketCapacity(e.target.value)}
+                        className="min-h-11"
+                      />
+                    </div>
+                    <div className="space-y-2 sm:col-span-2">
+                      <Label htmlFor="sale-status">Sale status</Label>
+                      {showOnSaleBanner && hostOrgId ? (
+                        <div className="mb-3">
+                          <StripeConnectBanner
+                            organizationId={hostOrgId}
+                            canManagePayments={canManageHostPayments}
+                          />
+                        </div>
+                      ) : null}
+                      <select
+                        id="sale-status"
+                        value={ticketSaleStatus}
+                        onChange={(e) => setTicketSaleStatus(e.target.value as TicketSaleStatus)}
+                        className="min-h-11 w-full rounded-md border border-border-strong bg-surface-input px-3 text-sm text-ink-100"
+                      >
+                        <option value="draft">Draft</option>
+                        <option value="on_sale">On sale</option>
+                        <option value="closed">Closed</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="sales-open">Sales open (optional)</Label>
+                      <Input
+                        id="sales-open"
+                        type="datetime-local"
+                        value={salesOpenAt}
+                        onChange={(e) => setSalesOpenAt(e.target.value)}
+                        className="min-h-11"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="sales-close">Sales close (optional)</Label>
+                      <Input
+                        id="sales-close"
+                        type="datetime-local"
+                        value={salesCloseAt}
+                        onChange={(e) => setSalesCloseAt(e.target.value)}
+                        className="min-h-11"
+                      />
+                    </div>
+                  </>
+                ) : null}
+                <div className="sm:col-span-2">
+                  <Button type="submit" isLoading={configMutation.isPending}>
+                    Save
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         )
       ) : null}
 
@@ -432,11 +410,12 @@ export function EventTicketsPanel({
               canManagePayments={canManageHostPayments}
             />
           ) : null}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Create ticket pool</CardTitle>
+          <Card className="overflow-hidden">
+            <CardHeader className="border-b border-border-subtle pb-5">
+              <p className="rl-eyebrow">Inventory</p>
+              <CardTitle className="display-sm font-display mt-2">Create ticket pool</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-5">
               <form
                 className="grid gap-3 sm:grid-cols-2"
                 onSubmit={(e: FormEvent) => {
@@ -516,12 +495,15 @@ export function EventTicketsPanel({
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="overflow-hidden">
             <CardContent className="p-0">
               {allocationsQuery.isLoading ? (
                 <p className="p-6 text-sm text-ink-500">Loading…</p>
               ) : allocations.length === 0 ? (
-                <p className="p-6 text-sm text-ink-500">No ticket pools yet.</p>
+                <div className="space-y-2 p-6">
+                  <p className="display-sm font-display">No ticket pools yet.</p>
+                  <p className="text-sm text-ink-500">Create a pool to start issuing tickets.</p>
+                </div>
               ) : (
                 <ul className="divide-y divide-border-subtle">
                   {allocations.map((alloc) => (
@@ -544,64 +526,67 @@ export function EventTicketsPanel({
       {tab === 'tickets' && canManage ? (
         <div className="space-y-6">
           <p className="text-sm text-ink-500">
-            Members buy and pay for their own tickets from My tickets. Here you can
-            void purchased tickets
+            Members buy and pay for their own tickets from My tickets. Here you can void purchased
+            tickets
             {canMarkPaid ? ' or mark them paid (admin escape hatch)' : ''}.
           </p>
 
-          {isHost
-            ? visibleAllocations.map((alloc) => (
-                <AllocationTicketsSection
-                  key={alloc.id}
-                  alloc={alloc}
-                  tickets={tickets.filter((t) => t.allocationId === alloc.id)}
-                  loading={ticketsQuery.isLoading}
-                  canMarkPaid={canMarkPaid}
-                  onMarkPaid={(id) => markPaidMutation.mutate(id)}
-                  onVoid={(id) => voidMutation.mutate(id)}
-                  actionPending={markPaidMutation.isPending || voidMutation.isPending}
-                />
-              ))
-            : resolvedInvitedAllocId
-              ? (
-                  <AllocationTicketsSection
-                    alloc={
-                      visibleAllocations[0] ?? {
-                        id: resolvedInvitedAllocId,
-                        eventId,
-                        organizationId: user?.membership?.organizationId ?? null,
-                        organizationName: user?.membership?.organizationName ?? null,
-                        quantity: 0,
-                        priceCents: null,
-                        status: 'active',
-                        issuedCount: tickets.filter((t) => t.status !== 'void').length,
-                        createdAt: '',
-                        updatedAt: '',
-                      }
-                    }
-                    tickets={tickets}
-                    loading={ticketsQuery.isLoading}
-                    canMarkPaid={canMarkPaid}
-                    onMarkPaid={(id) => markPaidMutation.mutate(id)}
-                    onVoid={(id) => voidMutation.mutate(id)}
-                    actionPending={markPaidMutation.isPending || voidMutation.isPending}
-                  />
-                )
-              : (
-                  <p className="text-sm text-ink-500">
-                    No ticket pool for your organization on this event yet.
-                  </p>
-                )}
+          {isHost ? (
+            visibleAllocations.map((alloc) => (
+              <AllocationTicketsSection
+                key={alloc.id}
+                alloc={alloc}
+                tickets={tickets.filter((t) => t.allocationId === alloc.id)}
+                loading={ticketsQuery.isLoading}
+                canMarkPaid={canMarkPaid}
+                onMarkPaid={(id) => markPaidMutation.mutate(id)}
+                onVoid={(id) => voidMutation.mutate(id)}
+                actionPending={markPaidMutation.isPending || voidMutation.isPending}
+              />
+            ))
+          ) : resolvedInvitedAllocId ? (
+            <AllocationTicketsSection
+              alloc={
+                visibleAllocations[0] ?? {
+                  id: resolvedInvitedAllocId,
+                  eventId,
+                  organizationId: user?.membership?.organizationId ?? null,
+                  organizationName: user?.membership?.organizationName ?? null,
+                  quantity: 0,
+                  priceCents: null,
+                  status: 'active',
+                  issuedCount: tickets.filter((t) => t.status !== 'void').length,
+                  createdAt: '',
+                  updatedAt: '',
+                }
+              }
+              tickets={tickets}
+              loading={ticketsQuery.isLoading}
+              canMarkPaid={canMarkPaid}
+              onMarkPaid={(id) => markPaidMutation.mutate(id)}
+              onVoid={(id) => voidMutation.mutate(id)}
+              actionPending={markPaidMutation.isPending || voidMutation.isPending}
+            />
+          ) : (
+            <div className="rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.03] p-4 text-sm text-ink-500">
+              <p>No ticket pool for your organization on this event yet.</p>
+            </div>
+          )}
         </div>
       ) : null}
 
       {tab === 'guests' && isHost && canManage ? (
-        <Card>
+        <Card className="overflow-hidden">
           <CardContent className="p-0">
             {guestsQuery.isLoading ? (
               <p className="p-6 text-sm text-ink-500">Loading…</p>
             ) : (guestsQuery.data ?? []).length === 0 ? (
-              <p className="p-6 text-sm text-ink-500">No paid guests yet.</p>
+              <div className="space-y-2 p-6">
+                <p className="display-sm font-display">No paid guests yet.</p>
+                <p className="text-sm text-ink-500">
+                  Guest entries will appear after tickets are purchased.
+                </p>
+              </div>
             ) : (
               <div className="divide-y divide-border-subtle">
                 {groupGuestList(guestsQuery.data ?? []).map((group) => (
@@ -629,9 +614,7 @@ type GuestGroup = {
 function groupGuestList(guests: GuestListEntry[]): GuestGroup[] {
   const groups = new Map<string, GuestGroup>();
   for (const guest of guests) {
-    const key =
-      guest.purchaseId ??
-      `holder:${guest.holderUserId ?? 'unassigned'}`;
+    const key = guest.purchaseId ?? `holder:${guest.holderUserId ?? 'unassigned'}`;
     const existing = groups.get(key);
     if (existing) {
       existing.entries.push(guest);
@@ -716,7 +699,10 @@ function AllocationRow({
         <div>
           <p className="font-medium text-ink-100">{allocationLabel(alloc)}</p>
           <p className="text-sm text-ink-500">
-            {alloc.issuedCount} / {alloc.quantity} sold · {formatCents(alloc.priceCents)}
+            <span className="num">
+              {alloc.issuedCount} / {alloc.quantity}
+            </span>{' '}
+            sold · <span className="num">{formatCents(alloc.priceCents)}</span>
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -790,18 +776,24 @@ function AllocationTicketsSection({
   actionPending: boolean;
 }) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-2">
-        <CardTitle className="text-lg">{allocationLabel(alloc)}</CardTitle>
+    <Card className="overflow-hidden">
+      <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-border-subtle pb-5">
+        <CardTitle className="display-sm font-display">{allocationLabel(alloc)}</CardTitle>
         <p className="text-sm text-ink-500">
-          {alloc.issuedCount} / {alloc.quantity} sold
+          <span className="num">
+            {alloc.issuedCount} / {alloc.quantity}
+          </span>{' '}
+          sold
         </p>
       </CardHeader>
       <CardContent className="p-0">
         {loading ? (
           <p className="p-6 text-sm text-ink-500">Loading…</p>
         ) : tickets.length === 0 ? (
-          <p className="p-6 text-sm text-ink-500">No tickets purchased yet.</p>
+          <div className="space-y-2 p-6">
+            <p className="display-sm font-display">No tickets purchased yet.</p>
+            <p className="text-sm text-ink-500">Issued tickets will appear here.</p>
+          </div>
         ) : (
           <ul className="divide-y divide-border-subtle">
             {tickets.map((ticket) => (
@@ -818,9 +810,7 @@ function AllocationTicketsSection({
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant={statusBadgeVariant(ticket.status)}>
-                    {ticket.status}
-                  </Badge>
+                  <Badge variant={statusBadgeVariant(ticket.status)}>{ticket.status}</Badge>
                   {canMarkPaid && ticket.status === 'unpaid' ? (
                     <Button
                       type="button"

@@ -48,8 +48,12 @@ function TicketPayRedirectPage() {
 
   if (ticketQuery.isError) {
     return (
-      <div className="mx-auto max-w-lg space-y-6">
-        <Card>
+      <div className="w-full space-y-6">
+        <Card className="overflow-hidden">
+          <div className="border-b border-border-subtle px-6 py-4">
+            <p className="rl-eyebrow">Checkout</p>
+            <p className="display-sm font-display mt-1">Payment unavailable</p>
+          </div>
           <CardContent className="space-y-4 p-6">
             <p className="text-sm text-[color:var(--error)]">
               {ticketQuery.error instanceof Error
@@ -67,10 +71,13 @@ function TicketPayRedirectPage() {
 
   if (ticketQuery.isSuccess && !ticket) {
     return (
-      <div className="mx-auto max-w-lg space-y-6">
-        <Card>
+      <div className="w-full space-y-6">
+        <Card className="overflow-hidden">
+          <div className="border-b border-border-subtle px-6 py-4">
+            <p className="rl-eyebrow">Checkout</p>
+            <p className="display-sm font-display mt-1">Ticket not found</p>
+          </div>
           <CardContent className="space-y-4 p-6">
-            <p className="text-sm text-ink-500">Ticket not found.</p>
             <Button asChild variant="outline">
               <Link to="/app/tickets">Back to My tickets</Link>
             </Button>
@@ -81,8 +88,12 @@ function TicketPayRedirectPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6">
-      <Card>
+    <div className="w-full space-y-6">
+      <Card className="overflow-hidden">
+        <div className="border-b border-border-subtle px-6 py-4">
+          <p className="rl-eyebrow">Checkout</p>
+          <p className="display-sm font-display mt-1">Redirecting</p>
+        </div>
         <CardContent className="p-6">
           <p className="text-sm text-ink-500">Redirecting to checkout…</p>
         </CardContent>

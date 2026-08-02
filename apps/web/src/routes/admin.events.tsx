@@ -114,14 +114,21 @@ function AdminEventsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-[28px] font-medium tracking-tight">Events</h1>
-        <p className="mt-1 text-sm text-ink-500">Create and manage events across organizations.</p>
+      <div className="space-y-2">
+        <p className="rl-eyebrow">Admin / operations</p>
+        <h1 className="display-sm">Events</h1>
+        <p className="max-w-2xl text-sm leading-6 text-ink-500">
+          Create and manage events across organizations.
+        </p>
       </div>
 
-      {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
+      {error ? (
+        <p className="rounded-lg border border-[color:var(--error)]/30 bg-[color:var(--error)]/10 px-4 py-3 text-sm text-[color:var(--error)]">
+          {error}
+        </p>
+      ) : null}
 
-      <div className="space-y-2">
+      <div className="space-y-2 rounded-lg border border-border-subtle bg-white/[0.02] p-4">
         <Label htmlFor="event-org-filter">Filter by organization</Label>
         <select
           id="event-org-filter"
@@ -138,9 +145,10 @@ function AdminEventsPage() {
         </select>
       </div>
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-lg">Create event</CardTitle>
+          <p className="rl-eyebrow">Event setup</p>
+          <CardTitle className="display-sm">Create event</CardTitle>
         </CardHeader>
         <CardContent>
           <form
@@ -241,9 +249,10 @@ function AdminEventsPage() {
       </Card>
 
       {editing ? (
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-lg">Edit event</CardTitle>
+            <p className="rl-eyebrow">Event setup</p>
+            <CardTitle className="display-sm">Edit event</CardTitle>
           </CardHeader>
           <CardContent>
             <form
@@ -329,7 +338,7 @@ function AdminEventsPage() {
         </Card>
       ) : null}
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {listQuery.isLoading ? (
             <p className="p-6 text-sm text-ink-500">Loading…</p>
@@ -340,7 +349,7 @@ function AdminEventsPage() {
               {events.map((event) => (
                 <li
                   key={event.id}
-                  className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">

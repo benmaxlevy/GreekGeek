@@ -55,6 +55,7 @@ export function setOrgStripeReady(orgId, { accountId = 'acct_demo_ready' } = {})
         stripeAccountId: ${JSON.stringify(accountId)},
         stripeChargesEnabled: true,
         stripePayoutsEnabled: true,
+        stripeTransfersEnabled: true,
         stripeDetailsSubmitted: true,
         stripeRequirementsDue: null,
         stripeAccountUpdatedAt: new Date(),

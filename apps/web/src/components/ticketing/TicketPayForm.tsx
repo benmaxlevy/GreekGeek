@@ -1,9 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import {
-  PaymentElement,
-  useElements,
-  useStripe,
-} from '@stripe/react-stripe-js';
+import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
 
 type Props = {
@@ -39,24 +35,29 @@ export function TicketPayForm({ amountCents, onSuccess }: Props) {
   }
 
   return (
-    <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+    <form
+      onSubmit={(e) => void handleSubmit(e)}
+      className="space-y-5 rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025] p-4"
+    >
       <PaymentElement
         options={{
           layout: 'tabs',
         }}
       />
-      {error ? (
-        <p className="text-sm text-[color:var(--error)]">{error}</p>
-      ) : null}
+      {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
       <Button
         type="submit"
         className="w-full"
         disabled={!stripe || !elements || processing}
         isLoading={processing}
       >
-        {processing
-          ? 'Processing…'
-          : `Pay $${(amountCents / 100).toFixed(2)}`}
+        {processing ? (
+          'Processing…'
+        ) : (
+          <>
+            Pay <span className="num">${(amountCents / 100).toFixed(2)}</span>
+          </>
+        )}
       </Button>
     </form>
   );

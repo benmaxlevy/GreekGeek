@@ -138,22 +138,21 @@ export function TicketScanner({ eventId }: Props) {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Scan ticket</CardTitle>
+      <Card className="overflow-hidden">
+        <CardHeader className="border-b border-border-subtle pb-5">
+          <p className="rl-eyebrow">Door operations</p>
+          <CardTitle className="display-sm font-display mt-2">Scan ticket</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5 pt-5">
           <p className="text-sm text-ink-500">
             Point the camera at a paid ticket QR, or paste the credential token.
           </p>
 
-          {cameraError ? (
-            <p className="text-sm text-[color:var(--error)]">{cameraError}</p>
-          ) : null}
+          {cameraError ? <p className="text-sm text-[color:var(--error)]">{cameraError}</p> : null}
 
           <div
             id={regionId}
-            className={`overflow-hidden rounded-md border border-border-subtle bg-black/20 ${cameraOn || cameraStarting ? 'min-h-[280px]' : 'hidden'} [&_video]:h-full [&_video]:w-full [&_video]:object-cover`}
+            className={`overflow-hidden rounded-[var(--radius-lg)] border border-white/[0.16] bg-black/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] ${cameraOn || cameraStarting ? 'min-h-[280px]' : 'hidden'} [&_video]:h-full [&_video]:w-full [&_video]:object-cover`}
           />
 
           <div className="flex flex-wrap gap-2">
@@ -199,13 +198,11 @@ export function TicketScanner({ eventId }: Props) {
       </Card>
 
       {showResult && resultCopy ? (
-        <Card>
-          <CardContent className="flex flex-col gap-2 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <Card className="overflow-hidden">
+          <CardContent className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
               <Badge variant={resultCopy.variant}>{resultCopy.label}</Badge>
-              {resultDetail ? (
-                <p className="text-sm text-ink-500">{resultDetail}</p>
-              ) : null}
+              {resultDetail ? <p className="text-sm text-ink-500">{resultDetail}</p> : null}
             </div>
             <Button
               type="button"

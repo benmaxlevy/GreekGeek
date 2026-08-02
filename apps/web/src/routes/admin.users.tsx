@@ -49,8 +49,7 @@ function AdminUsersPage() {
 
   const usersQuery = useQuery({
     queryKey: ['admin', 'users', statusFilter],
-    queryFn: () =>
-      listAdminUsers(statusFilter === 'ALL' ? {} : { status: statusFilter }),
+    queryFn: () => listAdminUsers(statusFilter === 'ALL' ? {} : { status: statusFilter }),
   });
 
   const universitiesQuery = useQuery({
@@ -94,11 +93,7 @@ function AdminUsersPage() {
     [usersQuery.data, approveUserId],
   );
 
-  const requestedLabel = orgLabel(
-    selectedApproveUser?.requestedOrganizationId,
-    orgById,
-    uniById,
-  );
+  const requestedLabel = orgLabel(selectedApproveUser?.requestedOrganizationId, orgById, uniById);
 
   function invalidateUsers() {
     return queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
@@ -156,14 +151,15 @@ function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-[28px] font-medium tracking-tight">Users</h1>
-        <p className="mt-1 text-sm text-ink-500">
+      <div className="space-y-2">
+        <p className="rl-eyebrow">Admin / directory</p>
+        <h1 className="display-sm">Users</h1>
+        <p className="max-w-2xl text-sm leading-6 text-ink-500">
           Approve or deny applicants, and manage user accounts.
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {STATUS_FILTERS.map((status) => (
           <Button
             key={status}
@@ -177,12 +173,17 @@ function AdminUsersPage() {
         ))}
       </div>
 
-      {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
+      {error ? (
+        <p className="rounded-lg border border-[color:var(--error)]/30 bg-[color:var(--error)]/10 px-4 py-3 text-sm text-[color:var(--error)]">
+          {error}
+        </p>
+      ) : null}
 
       {approveUserId && selectedApproveUser ? (
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-lg">Approve &amp; activate</CardTitle>
+            <p className="rl-eyebrow">Review request</p>
+            <CardTitle className="display-sm">Approve &amp; activate</CardTitle>
           </CardHeader>
           <CardContent>
             <form className="flex flex-col gap-4" onSubmit={onApproveSubmit}>
@@ -191,9 +192,7 @@ function AdminUsersPage() {
                 <p className="text-ink-500">{selectedApproveUser.email}</p>
                 <p className="text-ink-300">
                   Requested:{' '}
-                  {requestedLabel ?? (
-                    <span className="text-ink-500">none on record</span>
-                  )}
+                  {requestedLabel ?? <span className="text-ink-500">none on record</span>}
                 </p>
               </div>
               <div className="space-y-2">
@@ -240,7 +239,7 @@ function AdminUsersPage() {
         </Card>
       ) : null}
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {usersQuery.isLoading ? (
             <p className="p-6 text-sm text-ink-500">Loading users…</p>
@@ -301,7 +300,7 @@ function UserRow({
   onReactivate: () => void;
 }) {
   return (
-    <li className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <li className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium text-ink-100">{user.name}</p>
@@ -310,9 +309,7 @@ function UserRow({
         </div>
         <p className="truncate text-sm text-ink-500">{user.email}</p>
         {user.status === 'PENDING' ? (
-          <p className="truncate text-sm text-ink-300">
-            Requested: {requestedLabel ?? '—'}
-          </p>
+          <p className="truncate text-sm text-ink-300">Requested: {requestedLabel ?? '—'}</p>
         ) : null}
         {user.status === 'ACTIVE' ? (
           <p className="truncate text-sm text-ink-300">
@@ -329,13 +326,7 @@ function UserRow({
             <Button type="button" size="sm" disabled={busy} onClick={onApprove}>
               Approve
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="destructive"
-              disabled={busy}
-              onClick={onDeny}
-            >
+            <Button type="button" size="sm" variant="destructive" disabled={busy} onClick={onDeny}>
               Deny
             </Button>
           </>

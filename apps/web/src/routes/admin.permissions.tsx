@@ -90,8 +90,7 @@ function AdminPermissionsPage() {
   });
 
   const revokeMutation = useMutation({
-    mutationFn: (permissionKey: string) =>
-      revokeMemberPermission(membershipId, permissionKey),
+    mutationFn: (permissionKey: string) => revokeMemberPermission(membershipId, permissionKey),
     onSuccess: async () => {
       setError(null);
       await queryClient.invalidateQueries({
@@ -102,24 +101,28 @@ function AdminPermissionsPage() {
   });
 
   const grantedKeys = new Set((grantsQuery.data ?? []).map((g) => g.permissionKey));
-  const catalog = [...(catalogQuery.data ?? [])].sort((a, b) =>
-    a.key.localeCompare(b.key),
-  );
+  const catalog = [...(catalogQuery.data ?? [])].sort((a, b) => a.key.localeCompare(b.key));
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-[28px] font-medium tracking-tight">Permissions</h1>
-        <p className="mt-1 text-sm text-ink-500">
+      <div className="space-y-2">
+        <p className="rl-eyebrow">Admin / access</p>
+        <h1 className="display-sm">Permissions</h1>
+        <p className="max-w-2xl text-sm leading-6 text-ink-500">
           See available permissions and grant them to active members.
         </p>
       </div>
 
-      {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
+      {error ? (
+        <p className="rounded-lg border border-[color:var(--error)]/30 bg-[color:var(--error)]/10 px-4 py-3 text-sm text-[color:var(--error)]">
+          {error}
+        </p>
+      ) : null}
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-lg">Available permissions</CardTitle>
+          <p className="rl-eyebrow">Permission catalog</p>
+          <CardTitle className="display-sm">Available permissions</CardTitle>
         </CardHeader>
         <CardContent>
           {catalogQuery.isLoading ? (
@@ -139,9 +142,10 @@ function AdminPermissionsPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-lg">Grants for membership</CardTitle>
+          <p className="rl-eyebrow">Access control</p>
+          <CardTitle className="display-sm">Grants for membership</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -202,10 +206,7 @@ function AdminPermissionsPage() {
               ) : (
                 <ul className="divide-y divide-border-subtle rounded-md border border-border-subtle">
                   {(grantsQuery.data ?? []).map((g) => (
-                    <li
-                      key={g.id}
-                      className="flex items-center justify-between gap-3 px-4 py-3"
-                    >
+                    <li key={g.id} className="flex items-center justify-between gap-3 px-4 py-3">
                       <Badge>{g.permissionKey}</Badge>
                       <Button
                         type="button"

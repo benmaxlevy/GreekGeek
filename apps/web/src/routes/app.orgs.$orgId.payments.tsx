@@ -5,11 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { meQueryOptions } from '@/lib/auth';
-import {
-  canManageOrgPayments,
-  destinationForUser,
-  isAdminUser,
-} from '@/lib/auth-routing';
+import { canManageOrgPayments, destinationForUser, isAdminUser } from '@/lib/auth-routing';
 import { startConnect, getConnectStatus } from '@/lib/stripe-connect-api';
 import {
   deriveConnectUiState,
@@ -35,10 +31,7 @@ export const Route = createFileRoute('/app/orgs/$orgId/payments')({
   component: OrgPaymentsSettingsPage,
 });
 
-const STATE_COPY: Record<
-  StripeConnectUiState,
-  { title: string; body: string; badge: string }
-> = {
+const STATE_COPY: Record<StripeConnectUiState, { title: string; body: string; badge: string }> = {
   not_started: {
     title: 'Payout account not connected',
     body: 'Connect a payout account before selling paid tickets for this chapter.',
@@ -87,14 +80,14 @@ function OrgPaymentsSettingsPage() {
   const status = statusQuery.data;
   const uiState = status ? deriveConnectUiState(status) : null;
   const copy = uiState ? STATE_COPY[uiState] : null;
-  const showConnectCta =
-    canManage && uiState != null && uiState !== 'ready';
+  const showConnectCta = canManage && uiState != null && uiState !== 'ready';
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-[28px] font-medium tracking-tight">Payments</h1>
-        <p className="mt-1 text-sm text-ink-500">
+      <div className="space-y-2">
+        <p className="rl-eyebrow">Chapter finance</p>
+        <h1 className="display-md font-display">Payments</h1>
+        <p className="max-w-2xl text-sm text-ink-500">
           Connect a payout account so your chapter can sell paid tickets.
         </p>
       </div>
@@ -102,44 +95,40 @@ function OrgPaymentsSettingsPage() {
       {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
 
       {!canManage ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Ask an officer</CardTitle>
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b border-border-subtle pb-5">
+            <p className="rl-eyebrow">Access</p>
+            <CardTitle className="display-sm font-display mt-2">Ask an officer</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-5">
             <p className="text-sm text-ink-300">
-              You need an officer with payments access to connect or update the
-              payout account for this chapter.
+              You need an officer with payments access to connect or update the payout account for
+              this chapter.
             </p>
           </CardContent>
         </Card>
       ) : statusQuery.isLoading ? (
         <p className="text-sm text-ink-500">Loading payment status…</p>
       ) : statusQuery.isError ? (
-        <p className="text-sm text-[color:var(--error)]">
-          {(statusQuery.error as Error).message}
-        </p>
+        <p className="text-sm text-[color:var(--error)]">{(statusQuery.error as Error).message}</p>
       ) : status && copy ? (
-        <Card>
-          <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0">
-            <CardTitle className="text-lg">{copy.title}</CardTitle>
-            <Badge
-              variant={uiState === 'ready' ? 'default' : 'secondary'}
-            >
-              {copy.badge}
-            </Badge>
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row flex-wrap items-end justify-between gap-3 space-y-0 border-b border-border-subtle pb-5">
+            <div>
+              <p className="rl-eyebrow">Payout account</p>
+              <CardTitle className="display-sm font-display mt-2">{copy.title}</CardTitle>
+            </div>
+            <Badge variant={uiState === 'ready' ? 'default' : 'secondary'}>{copy.badge}</Badge>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5 pt-5">
             <p className="text-sm text-ink-300">{copy.body}</p>
 
-            <dl className="grid gap-3 text-sm sm:grid-cols-2">
-              <div>
+            <dl className="grid gap-0 divide-y divide-border-subtle text-sm sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+              <div className="border-border-subtle py-3 sm:pr-4">
                 <dt className="text-ink-500">Account</dt>
-                <dd className="mt-1 font-mono text-ink-100">
-                  {status.stripeAccountId ?? '—'}
-                </dd>
+                <dd className="mt-1 font-mono text-ink-100">{status.stripeAccountId ?? '—'}</dd>
               </div>
-              <div>
+              <div className="border-border-subtle py-3 sm:pl-4">
                 <dt className="text-ink-500">Last updated</dt>
                 <dd className="mt-1 text-ink-100">
                   {status.stripeAccountUpdatedAt
@@ -147,30 +136,28 @@ function OrgPaymentsSettingsPage() {
                     : '—'}
                 </dd>
               </div>
-              <div>
+              <div className="border-border-subtle border-t py-3 sm:border-t-0 sm:pr-4">
                 <dt className="text-ink-500">Charges</dt>
                 <dd className="mt-1 text-ink-100">
                   {status.stripeChargesEnabled ? 'Enabled' : 'Disabled'}
                 </dd>
               </div>
-              <div>
+              <div className="border-border-subtle border-t py-3 sm:border-t-0 sm:pl-4">
                 <dt className="text-ink-500">Payouts</dt>
                 <dd className="mt-1 text-ink-100">
                   {status.stripePayoutsEnabled ? 'Enabled' : 'Disabled'}
                 </dd>
               </div>
-              <div>
+              <div className="border-border-subtle border-t py-3 sm:pr-4">
                 <dt className="text-ink-500">Profile complete</dt>
                 <dd className="mt-1 text-ink-100">
                   {status.stripeDetailsSubmitted ? 'Yes' : 'No'}
                 </dd>
               </div>
-              <div>
+              <div className="border-border-subtle border-t py-3 sm:pl-4">
                 <dt className="text-ink-500">Action needed</dt>
                 <dd className="mt-1 text-ink-100">
-                  {hasOutstandingRequirements(status.stripeRequirementsDue)
-                    ? 'Yes'
-                    : 'None'}
+                  {hasOutstandingRequirements(status.stripeRequirementsDue) ? 'Yes' : 'None'}
                 </dd>
               </div>
             </dl>

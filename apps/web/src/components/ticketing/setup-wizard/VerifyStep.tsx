@@ -1,11 +1,6 @@
 import { StripeConnectBanner } from '@/components/ticketing/StripeConnectBanner';
 import { Button } from '@/components/ui/button';
-import {
-  allocatedSum,
-  formatUsdPrice,
-  fromLocalDatetime,
-  type WizardState,
-} from './types';
+import { allocatedSum, formatUsdPrice, fromLocalDatetime, type WizardState } from './types';
 
 type Props = {
   state: WizardState;
@@ -36,22 +31,20 @@ export function VerifyStep({
   const hasPaidPrice = state.pools.some(
     (pool) => pool.priceUsd.trim() !== '' && Number(pool.priceUsd) > 0,
   );
-  const showStripeBanner =
-    Boolean(hostOrgId) && !chargesEnabled && hasPaidPrice;
+  const showStripeBanner = Boolean(hostOrgId) && !chargesEnabled && hasPaidPrice;
 
   return (
     <div className="space-y-6">
       {showStripeBanner && hostOrgId ? (
-        <StripeConnectBanner
-          organizationId={hostOrgId}
-          canManagePayments={canManageHostPayments}
-        />
+        <StripeConnectBanner organizationId={hostOrgId} canManagePayments={canManageHostPayments} />
       ) : null}
 
-      <div className="space-y-4 rounded-md border border-border-subtle p-4 text-sm">
+      <div className="space-y-4 rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025] p-4 text-sm">
         <div>
           <p className="font-medium text-ink-100">Capacity</p>
-          <p className="text-ink-300">{state.capacity} tickets</p>
+          <p className="text-ink-300">
+            <span className="num">{state.capacity}</span> tickets
+          </p>
         </div>
         <div>
           <p className="font-medium text-ink-100">Sales window</p>
@@ -68,7 +61,8 @@ export function VerifyStep({
               >
                 <span>{pool.orgName}</span>
                 <span>
-                  {pool.quantity} × {formatUsdPrice(pool.priceUsd)}
+                  <span className="num">{pool.quantity}</span> ×{' '}
+                  <span className="num">{formatUsdPrice(pool.priceUsd)}</span>
                 </span>
               </li>
             ))}
@@ -77,7 +71,8 @@ export function VerifyStep({
         <div>
           <p className="font-medium text-ink-100">Allocation</p>
           <p className="text-ink-300">
-            {sum} allocated · {remainder} remainder of {state.capacity}
+            <span className="num">{sum}</span> allocated · <span className="num">{remainder}</span>{' '}
+            remainder of <span className="num">{state.capacity}</span>
           </p>
         </div>
       </div>
@@ -91,11 +86,7 @@ export function VerifyStep({
         >
           Save as draft
         </Button>
-        <Button
-          type="button"
-          isLoading={isSubmitting}
-          onClick={() => onFinalize('on_sale')}
-        >
+        <Button type="button" isLoading={isSubmitting} onClick={() => onFinalize('on_sale')}>
           Enable sales
         </Button>
       </div>

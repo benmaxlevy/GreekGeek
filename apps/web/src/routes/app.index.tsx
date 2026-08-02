@@ -15,12 +15,13 @@ function AppHomePage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <h1 className="text-[28px] font-medium tracking-tight">Hello, {user.name}</h1>
+    <Card className="overflow-hidden">
+      <CardHeader className="border-b border-border-subtle pb-5">
+        <p className="rl-eyebrow">Rally home</p>
+        <h1 className="display-sm font-display mt-2">Hello, {user.name}</h1>
       </CardHeader>
-      <CardContent className="space-y-2 text-sm text-ink-300">
-        <p>Welcome to Rally. Use the sidebar to manage events and tickets.</p>
+      <CardContent className="space-y-2 pt-5 text-sm text-ink-300">
+        <p>Manage events, ticketing, guests, and payouts from one place.</p>
       </CardContent>
     </Card>
   );

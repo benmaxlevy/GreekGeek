@@ -55,13 +55,16 @@ function OrgPaymentsReturnBridge() {
   }, [orgId, navigate]);
 
   return (
-    <div className="space-y-3">
-      <h1 className="text-[28px] font-medium tracking-tight">Finishing setup</h1>
-      {error ? (
-        <p className="text-sm text-[color:var(--error)]">{error}</p>
-      ) : (
-        <p className="text-sm text-ink-500">Updating account…</p>
-      )}
+    <div className="w-full">
+      <div className="surface-glass-panel space-y-3 rounded-[var(--radius-lg)] p-6">
+        <p className="rl-eyebrow">Chapter finance</p>
+        <h1 className="display-sm font-display">Finishing setup</h1>
+        {error ? (
+          <p className="text-sm text-[color:var(--error)]">{error}</p>
+        ) : (
+          <p className="text-sm text-ink-500">Updating account…</p>
+        )}
+      </div>
     </div>
   );
 }
