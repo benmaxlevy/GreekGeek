@@ -49,9 +49,9 @@
 
 ## 8. Verification + demo
 
-- [ ] 8.1 Demo: host scanner checks in paid QR once → columns set on guest list
-- [ ] 8.2 Demo: second scan same QR fails (already in)
-- [ ] 8.3 Demo: invited-org scanner → forbidden
-- [ ] 8.4 Demo: at-capacity reject works
-- [ ] 8.5 Demo: manage-only member cannot access scanner
-- [ ] 8.6 Mark all tasks complete; archive when shipped
+- [x] 8.1 Demo: host scanner checks in paid QR once → columns set on guest list
+- [x] 8.2 Demo: second scan same QR fails (already in)
+- [x] 8.3 Demo: invited-org scanner → forbidden
+- [x] 8.4 Demo: at-capacity reject works
+- [x] 8.5 Demo: manage-only member cannot access scanner
+- [x] 8.6 Mark all tasks complete; archive when shipped
