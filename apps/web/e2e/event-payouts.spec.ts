@@ -86,9 +86,9 @@ test('admin payout queue shows financial state and requires audited reason', asy
   await page.goto('/admin/event-payouts');
   await expect(page.getByRole('heading', { name: 'Event payouts' })).toBeVisible();
   await expect(page.getByText('Eligible now')).toBeVisible();
-  await expect(page.getByText('$100.00')).toBeVisible();
-  await expect(page.getByText('$10.00')).toBeVisible();
-  await expect(page.getByText('$90.00')).toBeVisible();
+  await expect(page.getByText('$100.00', { exact: true })).toBeVisible();
+  await expect(page.getByText('$10.00', { exact: true })).toBeVisible();
+  await expect(page.getByText('$90.00', { exact: true }).first()).toBeVisible();
 
   const reason = page.getByLabel('Reason required for every admin action');
   const release = page.getByRole('button', { name: 'Release' });
