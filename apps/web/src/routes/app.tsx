@@ -42,7 +42,8 @@ function AuthenticatedLayout() {
   const navItems = [
     { label: 'Home', to: '/app' },
     { label: 'My tickets', to: '/app/tickets' },
-    ...(canAccessOrgEvents(user) || canAccessEventTicketing(user)
+    ...(user.membership &&
+    (canAccessOrgEvents(user) || canAccessEventTicketing(user))
       ? [{ label: 'Events', to: '/app/events' }]
       : []),
     ...(orgId

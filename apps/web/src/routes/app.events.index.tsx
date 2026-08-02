@@ -34,7 +34,7 @@ export const Route = createFileRoute('/app/events/')({
 function AppEventsPage() {
   const { user } = appEventsRouteApi.useRouteContext();
   const queryClient = useQueryClient();
-  const organizationId = user.membership!.organizationId;
+  const organizationId = user.membership?.organizationId ?? '';
   const canCreate = canCreateOrgEvents(user);
   const canManage = canManageOrgEvents(user);
   const canTickets = canManageTickets(user);
@@ -59,6 +59,7 @@ function AppEventsPage() {
   const listQuery = useQuery({
     queryKey: ['events', organizationId],
     queryFn: () => listEvents({ organizationId }),
+    enabled: Boolean(organizationId),
   });
 
   function invalidate() {
@@ -117,6 +118,16 @@ function AppEventsPage() {
     },
     onError: (err: unknown) => setError(formatEventError(err)),
   });
+
+  if (!organizationId) {
+    return (
+      <div className="space-y-2">
+        <p className="rl-eyebrow">Chapter calendar</p>
+        <h1 className="display-md font-display">Events</h1>
+        <p className="text-sm text-ink-500">Join an organization to see chapter events.</p>
+      </div>
+    );
+  }
 
   const events = listQuery.data ?? [];
 

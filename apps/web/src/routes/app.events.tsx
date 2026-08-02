@@ -4,6 +4,7 @@ import {
   canAccessEventTicketing,
   canAccessOrgEvents,
   destinationForUser,
+  isAdminUser,
 } from '@/lib/auth-routing';
 
 export const Route = createFileRoute('/app/events')({
@@ -14,6 +15,14 @@ export const Route = createFileRoute('/app/events')({
     }
     if (user.status !== 'ACTIVE') {
       throw redirect({ to: destinationForUser(user) });
+    }
+    // Chapter events list needs an org membership. Platform admins without one
+    // use /admin/events; ticketing access alone is not enough to list org events.
+    if (!user.membership) {
+      if (isAdminUser(user)) {
+        throw redirect({ to: '/admin/events' });
+      }
+      throw redirect({ to: '/app' });
     }
     if (!canAccessOrgEvents(user) && !canAccessEventTicketing(user)) {
       throw redirect({ to: '/app' });
