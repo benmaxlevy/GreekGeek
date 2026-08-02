@@ -7,6 +7,8 @@
     "dev": "nest start --watch",
     "start": "node dist/main.js",
     "start:prod": "node dist/main.js",
+    "start:worker": "node dist/worker.main.js",
+    "dev:worker": "nest start --entryFile worker.main --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src",
     "prisma:generate": "prisma generate",
@@ -19,6 +21,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.1.5",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.5",
@@ -28,7 +31,9 @@
     "@prisma/client": "^6.13.0",
     "@rally/contracts": "workspace:*",
     "argon2": "^0.45.1",
+    "bullmq": "^6.0.3",
     "cookie-parser": "^1.4.7",
+    "ioredis": "^6.0.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",

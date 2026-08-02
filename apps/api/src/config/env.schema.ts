@@ -6,6 +6,7 @@ export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   JWT_SECRET: z.string().min(16),
   WEB_ORIGIN: z.string().url(),
+  REDIS_URL: z.string().url(),
 });
 
 export type Env = z.infer<typeof envSchema>;
