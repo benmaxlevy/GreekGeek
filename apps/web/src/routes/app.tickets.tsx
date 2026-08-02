@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { TicketQrCode } from '@/components/ticketing/TicketQrCode';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -120,14 +121,23 @@ function MyTicketsPage() {
               {myTickets.map((ticket) => (
                 <li
                   key={ticket.id}
-                  className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-start sm:justify-between"
                 >
                   <div className="space-y-1">
                     <p className="font-medium text-ink-100">{ticket.eventName}</p>
                     <p className="text-sm text-ink-500">{ticket.allocationLabel}</p>
-                    <p className="font-mono text-xs text-ink-500">
-                      {ticket.credentialToken.slice(0, 16)}…
-                    </p>
+                    {ticket.status === 'paid' ? (
+                      <div className="pt-2">
+                        <p className="mb-2 text-xs text-ink-500">Show this QR at the door</p>
+                        <TicketQrCode credentialToken={ticket.credentialToken} />
+                      </div>
+                    ) : (
+                      <p className="text-sm text-ink-500">
+                        {ticket.status === 'unpaid'
+                          ? 'QR available after payment.'
+                          : 'Ticket void — no entry QR.'}
+                      </p>
+                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge
