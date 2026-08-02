@@ -11,6 +11,7 @@ import { MembershipsService } from '../memberships/memberships.service';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { PermissionsService } from '../permissions/permissions.service';
 import { UniversitiesService } from '../universities/universities.service';
+import { PurchasesService } from './purchases.service';
 import { TicketsService } from './tickets.service';
 import type { PublicUser } from '../auth/types/auth.dto';
 
@@ -26,7 +27,24 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
   const stripe = {
     cancelPaymentIntent: jest.fn().mockResolvedValue({ id: 'pi_test' }),
   };
-  const tickets = new TicketsService(prisma as never, stripe as never);
+  const config = {
+    get: jest.fn((key: string) => {
+      if (key === 'RALLY_FEE_PERCENT') return 10;
+      if (key === 'MAX_TICKETS_PER_USER_PER_EVENT') return 2;
+      if (key === 'PURCHASE_TTL_MINUTES') return 5;
+      return 10;
+    }),
+  };
+  const purchases = new PurchasesService(
+    prisma as never,
+    stripe as never,
+    config as never,
+  );
+  const tickets = new TicketsService(
+    prisma as never,
+    config as never,
+    purchases,
+  );
 
   const suffix = Date.now();
   let universityId = '';
@@ -241,9 +259,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
   });
 
   afterAll(async () => {
-    await prisma.ticketPayment.deleteMany({
-      where: { ticket: { allocation: { eventId } } },
-    });
+    await prisma.purchase.deleteMany({ where: { eventId } });
     await prisma.ticket.deleteMany({
       where: { allocation: { eventId } },
     });
@@ -529,9 +545,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
   });
 
   it('free issue is paid immediately; non-admin mark-paid 403; void cancels open PI', async () => {
-    await prisma.ticketPayment.deleteMany({
-      where: { ticket: { allocation: { eventId } } },
-    });
+    await prisma.purchase.deleteMany({ where: { eventId } });
     await prisma.ticket.deleteMany({
       where: { allocation: { eventId } },
     });
@@ -569,37 +583,43 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     );
     expect(adminPaid.status).toBe('paid');
 
+    const openPurchase = await prisma.purchase.create({
+      data: {
+        buyerUserId: guestUserId,
+        eventId,
+        allocationId: hostAllocId,
+        quantity: 1,
+        subtotalCents: 1000,
+        feeCents: 100,
+        amountCents: 1100,
+        netCents: 1000,
+        currency: 'usd',
+        status: 'requires_payment',
+        stripePaymentIntentId: `pi_void_${suffix}`,
+      },
+    });
     const withPi = await prisma.ticket.create({
       data: {
         allocationId: hostAllocId,
         credentialToken: `void-pi-${suffix}`,
         holderUserId: guestUserId,
         status: 'unpaid',
-      },
-    });
-    await prisma.ticketPayment.create({
-      data: {
-        ticketId: withPi.id,
-        stripePaymentIntentId: `pi_void_${suffix}`,
-        amountCents: 1100,
-        feeCents: 100,
-        netCents: 1000,
-        currency: 'usd',
-        status: 'requires_payment',
+        purchaseId: openPurchase.id,
       },
     });
     stripe.cancelPaymentIntent.mockClear();
 
     await tickets.voidTicket(withPi.id, asUser(hostManagerId));
     expect(stripe.cancelPaymentIntent).toHaveBeenCalledWith(`pi_void_${suffix}`);
-    const payment = await prisma.ticketPayment.findUnique({
-      where: { ticketId: withPi.id },
+    const payment = await prisma.purchase.findUnique({
+      where: { id: openPurchase.id },
     });
     expect(payment?.status).toBe('canceled');
+    expect(
+      await prisma.ticket.count({ where: { purchaseId: openPurchase.id } }),
+    ).toBe(0);
 
-    await prisma.ticketPayment.deleteMany({
-      where: { ticket: { allocation: { eventId } } },
-    });
+    await prisma.purchase.deleteMany({ where: { eventId } });
     await prisma.ticket.deleteMany({
       where: { allocation: { eventId } },
     });

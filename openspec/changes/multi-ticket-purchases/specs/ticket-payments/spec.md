@@ -48,6 +48,11 @@ The system MUST expose an authenticated checkout endpoint that accepts `allocati
 - **WHEN** two concurrent checkout requests would exceed allocation remaining or event capacity if both succeeded
 - **THEN** at most one reserves its full quantity and the other receives a client error with remaining count
 
+#### Scenario: Open unpaid holds block other buyers
+
+- **WHEN** buyer A has an open `requires_payment` Purchase whose unpaid reserved tickets consume all remaining allocation or event capacity
+- **THEN** buyer B's checkout for that allocation receives a client error with remaining count 0 (or equivalent) and creates no tickets; unpaid holds count against remaining until paid, failed/canceled, or TTL release
+
 #### Scenario: Checkout rejected when not on sale
 
 - **WHEN** the buyer calls checkout while `ticketSaleStatus` is not `on_sale`
