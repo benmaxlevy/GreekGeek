@@ -18,6 +18,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminEventPayoutsRouteImport } from './routes/admin.event-payouts'
 import { Route as AdminEventsRouteImport } from './routes/admin.events'
 import { Route as AdminMembershipsRouteImport } from './routes/admin.memberships'
 import { Route as AdminOrganizationsRouteImport } from './routes/admin.organizations'
@@ -82,6 +83,11 @@ const UsersRoute = UsersRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEventPayoutsRoute = AdminEventPayoutsRouteImport.update({
+  id: '/event-payouts',
+  path: '/event-payouts',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminEventsRoute = AdminEventsRouteImport.update({
@@ -198,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/users': typeof UsersRouteWithChildren
+  '/admin/event-payouts': typeof AdminEventPayoutsRoute
   '/admin/events': typeof AdminEventsRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/organizations': typeof AdminOrganizationsRoute
@@ -226,6 +233,7 @@ export interface FileRoutesByTo {
   '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/admin/event-payouts': typeof AdminEventPayoutsRoute
   '/admin/events': typeof AdminEventsRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/organizations': typeof AdminOrganizationsRoute
@@ -257,6 +265,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/users': typeof UsersRouteWithChildren
+  '/admin/event-payouts': typeof AdminEventPayoutsRoute
   '/admin/events': typeof AdminEventsRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/organizations': typeof AdminOrganizationsRoute
@@ -290,6 +299,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/users'
+    | '/admin/event-payouts'
     | '/admin/events'
     | '/admin/memberships'
     | '/admin/organizations'
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/blocked'
     | '/login'
     | '/signup'
+    | '/admin/event-payouts'
     | '/admin/events'
     | '/admin/memberships'
     | '/admin/organizations'
@@ -348,6 +359,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/users'
+    | '/admin/event-payouts'
     | '/admin/events'
     | '/admin/memberships'
     | '/admin/organizations'
@@ -445,6 +457,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/event-payouts': {
+      id: '/admin/event-payouts'
+      path: '/event-payouts'
+      fullPath: '/admin/event-payouts'
+      preLoaderRoute: typeof AdminEventPayoutsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/events': {
@@ -603,6 +622,7 @@ const AdminEventsRouteWithChildren = AdminEventsRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminEventPayoutsRoute: typeof AdminEventPayoutsRoute
   AdminEventsRoute: typeof AdminEventsRouteWithChildren
   AdminMembershipsRoute: typeof AdminMembershipsRoute
   AdminOrganizationsRoute: typeof AdminOrganizationsRoute
@@ -615,6 +635,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminEventPayoutsRoute: AdminEventPayoutsRoute,
   AdminEventsRoute: AdminEventsRouteWithChildren,
   AdminMembershipsRoute: AdminMembershipsRoute,
   AdminOrganizationsRoute: AdminOrganizationsRoute,

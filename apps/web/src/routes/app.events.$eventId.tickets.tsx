@@ -1,10 +1,12 @@
 import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
+import { HostEventPayoutSummary } from '@/components/event-payouts/HostEventPayoutSummary';
 import { EventTicketsPanel } from '@/components/ticketing/EventTicketsPanel';
 import { meQueryOptions } from '@/lib/auth';
 import {
   canAccessEventTicketing,
   canManageTickets,
+  canManageOrgPayments,
   canScanTickets,
   destinationForUser,
   isAdminUser,
@@ -108,6 +110,9 @@ function MemberEventTicketsPage() {
         canManage={canManage}
         canScan={canScan}
       />
+      {event && canManageOrgPayments(user, event.organizationId) ? (
+        <HostEventPayoutSummary eventId={eventId} />
+      ) : null}
     </div>
   );
 }
