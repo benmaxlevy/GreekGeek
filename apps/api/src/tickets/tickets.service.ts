@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import type {
   AllocationStatus,
@@ -15,11 +16,14 @@ import type {
 import type { PublicUser } from '../auth/types/auth.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import {
+  toCheckInTicketResponseDto,
   toEventTicketingDto,
   toGuestListEntryDto,
   toMyTicketDto,
   toTicketAllocationDto,
   toTicketDto,
+  type CheckInTicket,
+  type CheckInTicketResponse,
   type CreateTicketAllocation,
   type EventTicketing,
   type GuestListEntry,
@@ -340,8 +344,116 @@ export class TicketsService {
           ? (row.allocation.organization?.name ?? 'Organization')
           : 'Public',
         paidAt: row.paidAt!,
+        checkedIn: row.checkedIn,
+        checkedInAt: row.checkedInAt,
       }),
     );
+  }
+
+  async checkIn(
+    input: CheckInTicket,
+    caller: PublicUser,
+  ): Promise<CheckInTicketResponse> {
+    const ticket = await this.prisma.ticket.findUnique({
+      where: { credentialToken: input.credentialToken },
+      include: { allocation: { include: { event: true } } },
+    });
+    if (!ticket) {
+      throw new NotFoundException({
+        code: 'TICKET_NOT_FOUND',
+        message: 'Ticket not found',
+      });
+    }
+
+    const event = ticket.allocation.event;
+    await this.assertHostTicketScan(event, caller);
+
+    if (ticket.status === 'unpaid') {
+      throw new UnprocessableEntityException({
+        code: 'TICKET_UNPAID',
+        message: 'Ticket is unpaid',
+      });
+    }
+    if (ticket.status === 'void') {
+      throw new UnprocessableEntityException({
+        code: 'TICKET_VOID',
+        message: 'Ticket is void',
+      });
+    }
+    if (ticket.checkedIn) {
+      throw new ConflictException({
+        code: 'TICKET_ALREADY_CHECKED_IN',
+        message: 'Ticket already checked in',
+      });
+    }
+
+    const checkedInAt = await this.prisma.$transaction(async (tx) => {
+      const current = await tx.ticket.findUnique({
+        where: { credentialToken: input.credentialToken },
+        include: { allocation: { include: { event: true } } },
+      });
+      if (!current) {
+        throw new NotFoundException({
+          code: 'TICKET_NOT_FOUND',
+          message: 'Ticket not found',
+        });
+      }
+      if (current.status === 'unpaid') {
+        throw new UnprocessableEntityException({
+          code: 'TICKET_UNPAID',
+          message: 'Ticket is unpaid',
+        });
+      }
+      if (current.status === 'void') {
+        throw new UnprocessableEntityException({
+          code: 'TICKET_VOID',
+          message: 'Ticket is void',
+        });
+      }
+      if (current.checkedIn) {
+        throw new ConflictException({
+          code: 'TICKET_ALREADY_CHECKED_IN',
+          message: 'Ticket already checked in',
+        });
+      }
+
+      const txEvent = current.allocation.event;
+      if (txEvent.ticketingEnabled && txEvent.ticketCapacity != null) {
+        const checkedInCount = await tx.ticket.count({
+          where: {
+            checkedIn: true,
+            allocation: { eventId: txEvent.id },
+          },
+        });
+        if (checkedInCount >= txEvent.ticketCapacity) {
+          throw new ConflictException({
+            code: 'EVENT_AT_CAPACITY',
+            message: 'Event is at capacity',
+          });
+        }
+      }
+
+      const now = new Date();
+      const updated = await tx.ticket.updateMany({
+        where: { id: current.id, checkedIn: false },
+        data: { checkedIn: true, checkedInAt: now },
+      });
+      if (updated.count === 0) {
+        throw new ConflictException({
+          code: 'TICKET_ALREADY_CHECKED_IN',
+          message: 'Ticket already checked in',
+        });
+      }
+      return now;
+    });
+
+    return toCheckInTicketResponseDto({
+      ticketId: ticket.id,
+      eventId: event.id,
+      organizationId: ticket.allocation.organizationId,
+      holderUserId: ticket.holderUserId,
+      checkedInAt,
+    });
   }
 
   async voidTicket(ticketId: string, caller: PublicUser): Promise<Ticket> {
@@ -685,6 +797,32 @@ export class TicketsService {
       return;
     }
     throw new ForbiddenException('Missing organization permission');
+  }
+
+  private async assertHostTicketScan(
+    event: Event,
+    caller: PublicUser,
+  ): Promise<void> {
+    if (caller.role === 'ADMIN') {
+      return;
+    }
+    if (caller.status !== 'ACTIVE') {
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'Missing organization permission',
+      });
+    }
+    const membership = await this.loadMembership(caller);
+    if (
+      !membership ||
+      membership.organizationId !== event.organizationId ||
+      !this.hasPermission(membership, 'tickets.scan')
+    ) {
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'Missing organization permission',
+      });
+    }
   }
 
   private async getInvitedOrgAllocation(

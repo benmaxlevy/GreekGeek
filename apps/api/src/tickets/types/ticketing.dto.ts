@@ -1,4 +1,5 @@
 import {
+  CheckInTicketResponseSchema,
   EventTicketingSchema,
   GuestListEntrySchema,
   MyTicketSchema,
@@ -7,6 +8,7 @@ import {
   TicketAllocationSchema,
   TicketListSchema,
   TicketSchema,
+  type CheckInTicketResponse,
   type EventTicketing,
   type GuestListEntry,
   type MyTicket,
@@ -42,9 +44,6 @@ export {
   CheckInTicketSchema,
   CheckInTicketResponseSchema,
   TicketCheckInErrorCodeSchema,
-  type CheckInTicket,
-  type CheckInTicketResponse,
-  type TicketCheckInErrorCode,
 } from '@rally/contracts';
 
 export type {
