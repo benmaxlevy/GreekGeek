@@ -2,6 +2,8 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { EventsService } from '../events/events.service';
@@ -29,6 +31,8 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
   let invitedOrgId = '';
   let hostManagerId = '';
   let invitedManagerId = '';
+  let hostScannerId = '';
+  let invitedScannerId = '';
   let noPermUserId = '';
   let guestUserId = '';
   let eventId = '';
@@ -92,6 +96,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       'events.create',
       'events.manage',
       'tickets.manage',
+      'tickets.scan',
     ] as const) {
       await prisma.permission.upsert({
         where: { key },
@@ -140,6 +145,24 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       permissionKey: 'tickets.manage',
     });
 
+    const hostScanner = await prisma.user.create({
+      data: {
+        email: `tkt-scanner-${suffix}@example.com`,
+        name: 'Host Scanner',
+        passwordHash: 'x',
+        role: 'USER',
+        status: 'ACTIVE',
+      },
+    });
+    hostScannerId = hostScanner.id;
+    const hostScannerMembership = await memberships.assign({
+      userId: hostScannerId,
+      organizationId: hostOrgId,
+    });
+    await permissions.grant(hostScannerMembership.id, {
+      permissionKey: 'tickets.scan',
+    });
+
     const invitedManager = await prisma.user.create({
       data: {
         email: `tkt-invited-${suffix}@example.com`,
@@ -156,6 +179,24 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     });
     await permissions.grant(invitedMembership.id, {
       permissionKey: 'tickets.manage',
+    });
+
+    const invitedScanner = await prisma.user.create({
+      data: {
+        email: `tkt-inv-scanner-${suffix}@example.com`,
+        name: 'Invited Scanner',
+        passwordHash: 'x',
+        role: 'USER',
+        status: 'ACTIVE',
+      },
+    });
+    invitedScannerId = invitedScanner.id;
+    const invitedScannerMembership = await memberships.assign({
+      userId: invitedScannerId,
+      organizationId: invitedOrgId,
+    });
+    await permissions.grant(invitedScannerMembership.id, {
+      permissionKey: 'tickets.scan',
     });
 
     const noPerm = await prisma.user.create({
@@ -215,7 +256,14 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     await prisma.user.deleteMany({
       where: {
         id: {
-          in: [hostManagerId, invitedManagerId, noPermUserId, guestUserId],
+          in: [
+            hostManagerId,
+            invitedManagerId,
+            hostScannerId,
+            invitedScannerId,
+            noPermUserId,
+            guestUserId,
+          ],
         },
       },
     });
@@ -533,5 +581,213 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       where: { allocation: { eventId } },
     });
     await prisma.ticketAllocation.deleteMany({ where: { eventId } });
+  });
+
+  async function issuePaidTicket(allocationId: string, holderUserId?: string) {
+    const issued = await tickets.issueTicket(
+      eventId,
+      allocationId,
+      holderUserId ? { holderUserId } : {},
+      asUser(hostManagerId),
+    );
+    return tickets.markPaid(issued.id, asUser(hostManagerId));
+  }
+
+  describe('ticket check-in', () => {
+    let paidCredential = '';
+
+    beforeEach(async () => {
+      await prisma.ticket.deleteMany({
+        where: { allocation: { eventId } },
+      });
+      await prisma.ticketAllocation.deleteMany({ where: { eventId } });
+      await enableTicketingOnSale(3);
+      const paid = await issuePaidTicket(hostAllocId, guestUserId);
+      paidCredential = paid.credentialToken;
+    });
+
+    it('first scan succeeds and sets checkedIn + checkedInAt', async () => {
+      const result = await tickets.checkIn(
+        { credentialToken: paidCredential },
+        asUser(hostScannerId),
+      );
+      expect(result.ticketId).toBeDefined();
+      expect(result.eventId).toBe(eventId);
+      expect(result.organizationId).toBe(hostOrgId);
+      expect(result.holderUserId).toBe(guestUserId);
+      expect(result.checkedInAt).toBeDefined();
+
+      const row = await prisma.ticket.findFirst({
+        where: { credentialToken: paidCredential },
+      });
+      expect(row?.checkedIn).toBe(true);
+      expect(row?.checkedInAt).not.toBeNull();
+
+      const guestList = await tickets.guestList(eventId, asUser(hostManagerId));
+      expect(guestList[0]?.checkedIn).toBe(true);
+      expect(guestList[0]?.checkedInAt).toBe(result.checkedInAt);
+    });
+
+    it('second scan of same token fails as already checked in', async () => {
+      await tickets.checkIn(
+        { credentialToken: paidCredential },
+        asUser(hostScannerId),
+      );
+      await expect(
+        tickets.checkIn(
+          { credentialToken: paidCredential },
+          asUser(hostScannerId),
+        ),
+      ).rejects.toMatchObject({
+        constructor: ConflictException,
+        response: {
+          code: 'TICKET_ALREADY_CHECKED_IN',
+        },
+      });
+    });
+
+    it('rejects unpaid, void, and unknown credentials', async () => {
+      const unpaid = await tickets.issueTicket(
+        eventId,
+        hostAllocId,
+        { holderUserId: guestUserId },
+        asUser(hostManagerId),
+      );
+
+      await expect(
+        tickets.checkIn(
+          { credentialToken: unpaid.credentialToken },
+          asUser(hostScannerId),
+        ),
+      ).rejects.toMatchObject({
+        constructor: UnprocessableEntityException,
+        response: { code: 'TICKET_UNPAID' },
+      });
+
+      const voided = await tickets.issueTicket(
+        eventId,
+        hostAllocId,
+        {},
+        asUser(hostManagerId),
+      );
+      await tickets.voidTicket(voided.id, asUser(hostManagerId));
+
+      await expect(
+        tickets.checkIn(
+          { credentialToken: voided.credentialToken },
+          asUser(hostScannerId),
+        ),
+      ).rejects.toMatchObject({
+        constructor: UnprocessableEntityException,
+        response: { code: 'TICKET_VOID' },
+      });
+
+      await expect(
+        tickets.checkIn(
+          { credentialToken: 'nonexistent-credential-token' },
+          asUser(hostScannerId),
+        ),
+      ).rejects.toMatchObject({
+        constructor: NotFoundException,
+        response: { code: 'TICKET_NOT_FOUND' },
+      });
+    });
+
+    it('forbids invited-org scanner and manage-only host member', async () => {
+      await expect(
+        tickets.checkIn(
+          { credentialToken: paidCredential },
+          asUser(invitedScannerId),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+
+      await expect(
+        tickets.checkIn(
+          { credentialToken: paidCredential },
+          asUser(hostManagerId),
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('rejects check-in when event is at capacity', async () => {
+      await prisma.ticket.deleteMany({
+        where: { allocation: { eventId } },
+      });
+      await prisma.ticketAllocation.deleteMany({ where: { eventId } });
+
+      await tickets.patchTicketing(
+        eventId,
+        {
+          ticketingEnabled: true,
+          ticketCapacity: 1,
+          ticketSaleStatus: 'draft',
+        },
+        asUser(hostManagerId),
+      );
+      const capAlloc = await tickets.createAllocation(
+        eventId,
+        { organizationId: hostOrgId, quantity: 1 },
+        asUser(hostManagerId),
+      );
+      const capAllocId = (capAlloc as { id: string }).id;
+      await tickets.patchTicketing(
+        eventId,
+        { ticketSaleStatus: 'on_sale' },
+        asUser(hostManagerId),
+      );
+
+      const first = await issuePaidTicket(capAllocId);
+      await tickets.checkIn(
+        { credentialToken: first.credentialToken },
+        asUser(hostScannerId),
+      );
+
+      const driftToken = `drift-${suffix}`;
+      await prisma.ticket.create({
+        data: {
+          allocationId: capAllocId,
+          status: 'paid',
+          credentialToken: driftToken,
+          paidAt: new Date(),
+          holderUserId: guestUserId,
+        },
+      });
+
+      await expect(
+        tickets.checkIn(
+          { credentialToken: driftToken },
+          asUser(hostScannerId),
+        ),
+      ).rejects.toMatchObject({
+        constructor: ConflictException,
+        response: { code: 'EVENT_AT_CAPACITY' },
+      });
+    });
+
+    it('concurrent scans allow at most one success', async () => {
+      const results = await Promise.allSettled([
+        tickets.checkIn(
+          { credentialToken: paidCredential },
+          asUser(hostScannerId),
+        ),
+        tickets.checkIn(
+          { credentialToken: paidCredential },
+          asUser(hostScannerId),
+        ),
+      ]);
+
+      const fulfilled = results.filter((r) => r.status === 'fulfilled');
+      const rejected = results.filter((r) => r.status === 'rejected');
+      expect(fulfilled).toHaveLength(1);
+      expect(rejected).toHaveLength(1);
+      expect(
+        (rejected[0] as PromiseRejectedResult).reason,
+      ).toBeInstanceOf(ConflictException);
+
+      const row = await prisma.ticket.findFirst({
+        where: { credentialToken: paidCredential },
+      });
+      expect(row?.checkedIn).toBe(true);
+    });
   });
 });
