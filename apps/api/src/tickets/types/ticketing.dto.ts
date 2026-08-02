@@ -39,6 +39,12 @@ export {
   MyTicketSchema,
   MyTicketListSchema,
   PublicClaimResponseSchema,
+  CheckInTicketSchema,
+  CheckInTicketResponseSchema,
+  TicketCheckInErrorCodeSchema,
+  type CheckInTicket,
+  type CheckInTicketResponse,
+  type TicketCheckInErrorCode,
 } from '@rally/contracts';
 
 export type {
@@ -57,6 +63,9 @@ export type {
   MyTicket,
   MyTicketList,
   PublicClaimResponse,
+  CheckInTicket,
+  CheckInTicketResponse,
+  TicketCheckInErrorCode,
 } from '@rally/contracts';
 
 export function toEventTicketingDto(
@@ -116,6 +125,8 @@ export function toTicketDto(
     holderUserId: row.holderUserId,
     paidAt: row.paidAt?.toISOString() ?? null,
     voidedAt: row.voidedAt?.toISOString() ?? null,
+    checkedIn: row.checkedIn,
+    checkedInAt: row.checkedInAt?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   });
@@ -127,6 +138,8 @@ export function toGuestListEntryDto(input: {
   holderName: string | null;
   allocationLabel: string;
   paidAt: Date;
+  checkedIn: boolean;
+  checkedInAt: Date | null;
 }): GuestListEntry {
   return GuestListEntrySchema.parse({
     id: input.id,
@@ -135,6 +148,8 @@ export function toGuestListEntryDto(input: {
     allocationLabel: input.allocationLabel,
     status: 'paid',
     paidAt: input.paidAt.toISOString(),
+    checkedIn: input.checkedIn,
+    checkedInAt: input.checkedInAt?.toISOString() ?? null,
   });
 }
 
@@ -156,6 +171,22 @@ export function toMyTicketDto(input: {
     credentialToken: input.ticket.credentialToken,
     paidAt: input.ticket.paidAt?.toISOString() ?? null,
     createdAt: input.ticket.createdAt.toISOString(),
+  });
+}
+
+export function toCheckInTicketResponseDto(input: {
+  ticketId: string;
+  eventId: string;
+  organizationId: string | null;
+  holderUserId: string | null;
+  checkedInAt: Date;
+}): CheckInTicketResponse {
+  return CheckInTicketResponseSchema.parse({
+    ticketId: input.ticketId,
+    eventId: input.eventId,
+    organizationId: input.organizationId,
+    holderUserId: input.holderUserId,
+    checkedInAt: input.checkedInAt.toISOString(),
   });
 }
 

@@ -120,6 +120,9 @@ export {
   MyTicketSchema,
   MyTicketListSchema,
   PublicClaimResponseSchema,
+  CheckInTicketSchema,
+  CheckInTicketResponseSchema,
+  TicketCheckInErrorCodeSchema,
   type TicketSaleStatus,
   type AllocationStatus,
   type TicketStatus,
@@ -138,4 +141,7 @@ export {
   type MyTicket,
   type MyTicketList,
   type PublicClaimResponse,
+  type CheckInTicket,
+  type CheckInTicketResponse,
+  type TicketCheckInErrorCode,
 } from './ticketing';

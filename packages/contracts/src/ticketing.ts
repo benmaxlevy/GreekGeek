@@ -102,6 +102,8 @@ export const TicketSchema = z.object({
   holderUserId: z.string().nullable(),
   paidAt: z.string().datetime().nullable(),
   voidedAt: z.string().datetime().nullable(),
+  checkedIn: z.boolean(),
+  checkedInAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -129,6 +131,8 @@ export const GuestListEntrySchema = z.object({
   allocationLabel: z.string(),
   status: z.literal('paid'),
   paidAt: z.string().datetime(),
+  checkedIn: z.boolean(),
+  checkedInAt: z.string().datetime().nullable(),
 });
 export type GuestListEntry = z.infer<typeof GuestListEntrySchema>;
 
@@ -154,3 +158,27 @@ export type MyTicketList = z.infer<typeof MyTicketListSchema>;
 
 export const PublicClaimResponseSchema = TicketSchema;
 export type PublicClaimResponse = z.infer<typeof PublicClaimResponseSchema>;
+
+export const CheckInTicketSchema = z.object({
+  credentialToken: z.string().min(1),
+});
+export type CheckInTicket = z.infer<typeof CheckInTicketSchema>;
+
+export const CheckInTicketResponseSchema = z.object({
+  ticketId: z.string(),
+  eventId: z.string(),
+  organizationId: z.string().nullable(),
+  holderUserId: z.string().nullable(),
+  checkedInAt: z.string().datetime(),
+});
+export type CheckInTicketResponse = z.infer<typeof CheckInTicketResponseSchema>;
+
+export const TicketCheckInErrorCodeSchema = z.enum([
+  'TICKET_NOT_FOUND',
+  'TICKET_UNPAID',
+  'TICKET_VOID',
+  'TICKET_ALREADY_CHECKED_IN',
+  'EVENT_AT_CAPACITY',
+  'FORBIDDEN',
+]);
+export type TicketCheckInErrorCode = z.infer<typeof TicketCheckInErrorCodeSchema>;
