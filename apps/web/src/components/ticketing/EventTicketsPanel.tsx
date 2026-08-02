@@ -13,6 +13,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { StripeConnectBanner } from '@/components/ticketing/StripeConnectBanner';
+import { TicketSetupWizard } from '@/components/ticketing/setup-wizard/TicketSetupWizard';
+import {
+  fromLocalDatetime,
+  toLocalDatetime,
+} from '@/components/ticketing/setup-wizard/types';
 import { TicketScanner } from '@/components/ticketing/TicketScanner';
 import { listOrganizations } from '@/lib/admin-api';
 import { canManageOrgPayments, isAdminUser } from '@/lib/auth-routing';
@@ -56,18 +61,6 @@ function statusBadgeVariant(
     return 'destructive';
   }
   return 'secondary';
-}
-
-function toLocalDatetime(iso: string | null): string {
-  if (!iso) return '';
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function fromLocalDatetime(value: string): string | null {
-  if (!value.trim()) return null;
-  return new Date(value).toISOString();
 }
 
 function allocationLabel(alloc: TicketAllocation): string {
@@ -146,6 +139,11 @@ export function EventTicketsPanel({
   });
 
   const allocations = allocationsQuery.data ?? [];
+  const showSetupWizard =
+    isHost &&
+    canManage &&
+    !allocationsQuery.isLoading &&
+    allocations.length === 0;
   const tickets = ticketsQuery.data ?? [];
   const resolvedInvitedAllocId =
     invitedAllocationId ?? tickets.find((t) => t.allocationId)?.allocationId;
@@ -275,12 +273,18 @@ export function EventTicketsPanel({
     : isHost
       ? [
           ...(canManage
-            ? ([
-                { id: 'config' as const, label: 'Settings' },
-                { id: 'allocations' as const, label: 'Ticket pools' },
-                { id: 'tickets' as const, label: 'Tickets' },
-                { id: 'guests' as const, label: 'Guest list' },
-              ] as const)
+            ? showSetupWizard
+              ? ([
+                  { id: 'config' as const, label: 'Setup' },
+                  { id: 'tickets' as const, label: 'Tickets' },
+                  { id: 'guests' as const, label: 'Guest list' },
+                ] as const)
+              : ([
+                  { id: 'config' as const, label: 'Settings' },
+                  { id: 'allocations' as const, label: 'Ticket pools' },
+                  { id: 'tickets' as const, label: 'Tickets' },
+                  { id: 'guests' as const, label: 'Guest list' },
+                ] as const)
             : []),
           ...(canScan ? [{ id: 'scan' as const, label: 'Scanner' }] : []),
         ]
@@ -305,6 +309,24 @@ export function EventTicketsPanel({
       </div>
 
       {tab === 'config' && isHost && canManage ? (
+        showSetupWizard ? (
+          <TicketSetupWizard
+            eventId={eventId}
+            event={event}
+            organizations={orgsQuery.data ?? []}
+            hostOrgId={hostOrgId}
+            chargesEnabled={chargesEnabled}
+            canManageHostPayments={canManageHostPayments}
+            onComplete={async () => {
+              setError(null);
+              await invalidateTicketing();
+              await queryClient.refetchQueries({
+                queryKey: ['ticketing', 'allocations', eventId],
+              });
+              setTab('allocations');
+            }}
+          />
+        ) : (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Ticketing settings</CardTitle>
@@ -400,6 +422,7 @@ export function EventTicketsPanel({
             </form>
           </CardContent>
         </Card>
+        )
       ) : null}
 
       {tab === 'allocations' && isHost && canManage ? (
