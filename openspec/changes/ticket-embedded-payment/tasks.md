@@ -18,11 +18,11 @@
 
 ## 3. Checkout API (holder-only PaymentIntent)
 
-- [ ] 3.1 `TicketPaymentsService`: `assertCheckoutEligible` (ticketing on, on_sale, unpaid, not void, allocation active, priceCents > 0, stripeChargesEnabled)
-- [ ] 3.2 `POST /tickets/:ticketId/checkout`: holder-only (403 for non-holder including ADMIN); create or reuse PI on platform account; no `transfer_data`; metadata ticketId/eventId/organizationId; idempotency key
-- [ ] 3.3 Upsert TicketPayment row; reuse `requires_payment` PI when present
-- [ ] 3.4 Integration tests: happy path client_secret; non-holder 403; unready org 4xx; closed sale 4xx; void 4xx; free allocation 4xx
-- [ ] 3.5 Commit: `add holder only ticket checkout api`
+- [x] 3.1 `TicketPaymentsService`: `assertCheckoutEligible` (ticketing on, on_sale, unpaid, not void, allocation active, priceCents > 0, stripeChargesEnabled)
+- [x] 3.2 `POST /tickets/:ticketId/checkout`: holder-only (403 for non-holder including ADMIN); create or reuse PI on platform account; no `transfer_data`; metadata ticketId/eventId/organizationId; idempotency key
+- [x] 3.3 Upsert TicketPayment row; reuse `requires_payment` PI when present
+- [x] 3.4 Integration tests: happy path client_secret; non-holder 403; unready org 4xx; closed sale 4xx; void 4xx; free allocation 4xx
+- [x] 3.5 Commit: `add holder only ticket checkout api`
 
 ## 4. Webhook PI handlers
 

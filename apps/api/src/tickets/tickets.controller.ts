@@ -4,6 +4,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { PublicUser } from '../auth/types/auth.dto';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { toEventDto } from '../events/types/events.dto';
+import { TicketPaymentsService } from './ticket-payments.service';
 import { TicketsService } from './tickets.service';
 import {
   CheckInTicketSchema,
@@ -15,10 +16,19 @@ import {
   type MyTicketList,
   type Ticket,
 } from './types/ticketing.dto';
+import {
+  TicketCheckoutParamsSchema,
+  TicketCheckoutResponseSchema,
+  type TicketCheckoutParams,
+  type TicketCheckoutResponse,
+} from './types/ticket-payments.dto';
 
 @Controller('tickets')
 export class TicketsController {
-  constructor(private readonly ticketsService: TicketsService) {}
+  constructor(
+    private readonly ticketsService: TicketsService,
+    private readonly ticketPaymentsService: TicketPaymentsService,
+  ) {}
 
   @Get('mine')
   async listMine(@CurrentUser() caller: PublicUser): Promise<MyTicketList> {
@@ -40,6 +50,17 @@ export class TicketsController {
   ): Promise<CheckInTicketResponse> {
     return CheckInTicketResponseSchema.parse(
       await this.ticketsService.checkIn(body, caller),
+    );
+  }
+
+  @Post(':ticketId/checkout')
+  async checkout(
+    @Param(new ZodValidationPipe(TicketCheckoutParamsSchema))
+    params: TicketCheckoutParams,
+    @CurrentUser() caller: PublicUser,
+  ): Promise<TicketCheckoutResponse> {
+    return TicketCheckoutResponseSchema.parse(
+      await this.ticketPaymentsService.checkout(params.ticketId, caller),
     );
   }
 

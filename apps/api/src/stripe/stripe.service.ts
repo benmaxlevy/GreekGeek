@@ -75,6 +75,42 @@ export class StripeService {
     return this.client.paymentIntents.cancel(paymentIntentId);
   }
 
+  createPaymentIntent(input: {
+    amountCents: number;
+    currency: string;
+    metadata: {
+      ticketId: string;
+      eventId: string;
+      organizationId: string;
+    };
+    idempotencyKey: string;
+  }): Promise<Stripe.PaymentIntent> {
+    return this.client.paymentIntents.create(
+      {
+        amount: input.amountCents,
+        currency: input.currency,
+        automatic_payment_methods: { enabled: true },
+        metadata: input.metadata,
+      },
+      { idempotencyKey: input.idempotencyKey },
+    );
+  }
+
+  retrievePaymentIntent(
+    paymentIntentId: string,
+  ): Promise<Stripe.PaymentIntent> {
+    return this.client.paymentIntents.retrieve(paymentIntentId);
+  }
+
+  updatePaymentIntentAmount(
+    paymentIntentId: string,
+    amountCents: number,
+  ): Promise<Stripe.PaymentIntent> {
+    return this.client.paymentIntents.update(paymentIntentId, {
+      amount: amountCents,
+    });
+  }
+
   createAccountLink(input: {
     accountId: string;
     useCaseType: 'account_onboarding' | 'account_update';
