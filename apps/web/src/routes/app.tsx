@@ -1,6 +1,6 @@
 import { Outlet, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { CalendarDays, CircleUser, Compass, Ticket } from 'lucide-react';
+import { CalendarDays, CircleUser, Compass, Shield, Ticket } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/button';
 import { logoutRequest } from '@/lib/api';
@@ -9,6 +9,7 @@ import {
   canAccessEventTicketing,
   canAccessOrgEvents,
   destinationForUser,
+  isAdminUser,
 } from '@/lib/auth-routing';
 
 export const Route = createFileRoute('/app')({
@@ -46,6 +47,7 @@ function AuthenticatedLayout() {
     { label: 'Tickets', to: '/app/tickets', icon: Ticket },
     ...(showEvents ? [{ label: 'Events', to: '/app/events', icon: CalendarDays }] : []),
     { label: 'You', to: '/app/you', icon: CircleUser },
+    ...(isAdminUser(user) ? [{ label: 'Admin', to: '/admin', icon: Shield }] : []),
   ];
 
   return (

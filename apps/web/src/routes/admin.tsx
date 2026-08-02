@@ -1,22 +1,34 @@
 import { Outlet, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+  AppWindow,
+  Building2,
+  CalendarDays,
+  CreditCard,
+  KeyRound,
+  Landmark,
+  Link2,
+  Users,
+  Webhook,
+  type LucideIcon,
+} from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/button';
 import { logoutRequest } from '@/lib/api';
 import { meQueryKey, meQueryOptions } from '@/lib/auth';
 import { destinationForUser, isAdminUser } from '@/lib/auth-routing';
 
-const ADMIN_NAV = [
-  { label: 'Users', to: '/admin/users' },
-  { label: 'Universities', to: '/admin/universities' },
-  { label: 'Organizations', to: '/admin/organizations' },
-  { label: 'Events', to: '/admin/events' },
-  { label: 'Event payouts', to: '/admin/event-payouts' },
-  { label: 'Ticketed events', to: '/admin/ticketed-events' },
-  { label: 'Memberships', to: '/admin/memberships' },
-  { label: 'Permissions', to: '/admin/permissions' },
-  { label: 'Payment events', to: '/admin/webhook-events' },
-  { label: 'App home', to: '/app' },
+const ADMIN_NAV: { label: string; to: string; icon: LucideIcon }[] = [
+  { label: 'Users', to: '/admin/users', icon: Users },
+  { label: 'Schools', to: '/admin/universities', icon: Landmark },
+  { label: 'Orgs', to: '/admin/organizations', icon: Building2 },
+  { label: 'Events', to: '/admin/events', icon: CalendarDays },
+  { label: 'Payouts', to: '/admin/event-payouts', icon: CreditCard },
+  { label: 'Ticketing', to: '/admin/ticketed-events', icon: Link2 },
+  { label: 'Members', to: '/admin/memberships', icon: Users },
+  { label: 'Permissions', to: '/admin/permissions', icon: KeyRound },
+  { label: 'Webhooks', to: '/admin/webhook-events', icon: Webhook },
+  { label: 'App', to: '/app', icon: AppWindow },
 ];
 
 export const Route = createFileRoute('/admin')({
@@ -51,15 +63,18 @@ function AdminLayout() {
   return (
     <AppShell
       portal="exec"
+      navigation="bottom"
+      navigationLabel="Admin navigation"
       navItems={ADMIN_NAV}
       footer={
-        <div className="space-y-2">
-          <p className="truncate px-1 text-xs text-ink-500">{user.email}</p>
-          <p className="px-1 text-xs text-ink-500">Admin</p>
+        <div className="flex items-center gap-2">
+          <span className="hidden max-w-[180px] truncate text-xs text-ink-500 sm:inline">
+            Admin · {user.email}
+          </span>
           <Button
             type="button"
-            variant="outline"
-            className="min-h-11 w-full"
+            variant="quiet"
+            size="sm"
             onClick={() => void onLogout()}
           >
             Log out
