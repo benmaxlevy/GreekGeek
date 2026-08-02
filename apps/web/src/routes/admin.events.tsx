@@ -11,7 +11,10 @@ import { listOrganizations } from '@/lib/admin-api';
 import {
   createEvent,
   deleteEvent,
+  formatEventError,
   listEvents,
+  toDateTimeLocal,
+  toIsoDateTime,
   updateEvent,
 } from '@/lib/events-api';
 
@@ -26,11 +29,15 @@ function AdminEventsPage() {
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [maxHeadcount, setMaxHeadcount] = useState('50');
+  const [startsAt, setStartsAt] = useState('');
+  const [endsAt, setEndsAt] = useState('');
   const [location, setLocation] = useState('');
   const [editing, setEditing] = useState<Event | null>(null);
   const [editName, setEditName] = useState('');
   const [editType, setEditType] = useState('');
   const [editMaxHeadcount, setEditMaxHeadcount] = useState('');
+  const [editStartsAt, setEditStartsAt] = useState('');
+  const [editEndsAt, setEditEndsAt] = useState('');
   const [editLocation, setEditLocation] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -41,8 +48,7 @@ function AdminEventsPage() {
 
   const listQuery = useQuery({
     queryKey: ['admin', 'events', orgFilter],
-    queryFn: () =>
-      listEvents(orgFilter ? { organizationId: orgFilter } : {}),
+    queryFn: () => listEvents(orgFilter ? { organizationId: orgFilter } : {}),
   });
 
   function invalidate() {
@@ -58,17 +64,21 @@ function AdminEventsPage() {
         name,
         type,
         maxHeadcount: Number(maxHeadcount),
+        startsAt: toIsoDateTime(startsAt),
+        endsAt: endsAt ? toIsoDateTime(endsAt) : null,
         location: location.trim() ? location.trim() : null,
       }),
     onSuccess: async () => {
       setName('');
       setType('');
       setMaxHeadcount('50');
+      setStartsAt('');
+      setEndsAt('');
       setLocation('');
       setError(null);
       await invalidate();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: unknown) => setError(formatEventError(err)),
   });
 
   const updateMutation = useMutation({
@@ -78,6 +88,8 @@ function AdminEventsPage() {
         name: editName,
         type: editType,
         maxHeadcount: Number(editMaxHeadcount),
+        startsAt: toIsoDateTime(editStartsAt),
+        endsAt: editEndsAt ? toIsoDateTime(editEndsAt) : null,
         location: editLocation.trim() ? editLocation.trim() : null,
       });
     },
@@ -86,7 +98,7 @@ function AdminEventsPage() {
       setError(null);
       await invalidate();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: unknown) => setError(formatEventError(err)),
   });
 
   const deleteMutation = useMutation({
@@ -95,7 +107,7 @@ function AdminEventsPage() {
       setError(null);
       await invalidate();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: unknown) => setError(formatEventError(err)),
   });
 
   const events = listQuery.data ?? [];
@@ -104,9 +116,7 @@ function AdminEventsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Events</h1>
-        <p className="mt-1 text-sm text-ink-500">
-          Create and manage events across organizations.
-        </p>
+        <p className="mt-1 text-sm text-ink-500">Create and manage events across organizations.</p>
       </div>
 
       {error ? <p className="text-sm text-[color:var(--error)]">{error}</p> : null}
@@ -190,6 +200,28 @@ function AdminEventsPage() {
                 className="min-h-11"
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="admin-event-starts-at">Starts</Label>
+              <Input
+                id="admin-event-starts-at"
+                type="datetime-local"
+                required
+                value={startsAt}
+                onChange={(e) => setStartsAt(e.target.value)}
+                className="min-h-11"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="admin-event-ends-at">Ends (optional)</Label>
+              <Input
+                id="admin-event-ends-at"
+                type="datetime-local"
+                min={startsAt}
+                value={endsAt}
+                onChange={(e) => setEndsAt(e.target.value)}
+                className="min-h-11"
+              />
+            </div>
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="admin-event-location">Location (optional)</Label>
               <Input
@@ -253,6 +285,28 @@ function AdminEventsPage() {
                   className="min-h-11"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="admin-edit-event-starts-at">Starts</Label>
+                <Input
+                  id="admin-edit-event-starts-at"
+                  type="datetime-local"
+                  required
+                  value={editStartsAt}
+                  onChange={(e) => setEditStartsAt(e.target.value)}
+                  className="min-h-11"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="admin-edit-event-ends-at">Ends (optional)</Label>
+                <Input
+                  id="admin-edit-event-ends-at"
+                  type="datetime-local"
+                  min={editStartsAt}
+                  value={editEndsAt}
+                  onChange={(e) => setEditEndsAt(e.target.value)}
+                  className="min-h-11"
+                />
+              </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="admin-edit-event-location">Location (optional)</Label>
                 <Input
@@ -292,9 +346,13 @@ function AdminEventsPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-medium text-ink-100">{event.name}</p>
                       <Badge variant="outline">{event.type}</Badge>
+                      {event.heldAt ? <Badge variant="destructive">On hold</Badge> : null}
                     </div>
                     <p className="text-sm text-ink-500">
                       {orgName.get(event.organizationId) ?? event.organizationId}
+                      {' · '}
+                      {new Date(event.startsAt).toLocaleString()}
+                      {event.endsAt ? ` – ${new Date(event.endsAt).toLocaleString()}` : ''}
                       {' · '}Max {event.maxHeadcount}
                       {event.location ? ` · ${event.location}` : ''}
                     </p>
@@ -309,6 +367,8 @@ function AdminEventsPage() {
                         setEditName(event.name);
                         setEditType(event.type);
                         setEditMaxHeadcount(String(event.maxHeadcount));
+                        setEditStartsAt(toDateTimeLocal(event.startsAt));
+                        setEditEndsAt(event.endsAt ? toDateTimeLocal(event.endsAt) : '');
                         setEditLocation(event.location ?? '');
                         setError(null);
                       }}

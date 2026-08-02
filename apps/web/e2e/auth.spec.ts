@@ -661,6 +661,7 @@ test.describe('events crud', () => {
     await page.locator('#admin-event-name').fill(`Admin ${eventName}`);
     await page.locator('#admin-event-type').fill('Fraternity Formal');
     await page.locator('#admin-event-headcount').fill('100');
+    await page.locator('#admin-event-starts-at').fill('2030-06-01T18:00');
     await page.locator('#admin-event-location').fill('Nashville');
     await page.getByRole('button', { name: 'Create' }).click();
     await expect(page.getByText(`Admin ${eventName}`)).toBeVisible();
@@ -695,6 +696,7 @@ test.describe('events crud', () => {
     await page.locator('#event-name').fill(eventName);
     await page.locator('#event-type').fill('Date Party');
     await page.locator('#event-headcount').fill('40');
+    await page.locator('#event-starts-at').fill('2030-06-02T18:00');
     await page.getByRole('button', { name: 'Create' }).click();
     await expect(page.getByText(eventName)).toBeVisible();
     const row = page.locator('li').filter({ hasText: eventName });

@@ -10,7 +10,7 @@
 ## 2. Event date and hold contracts
 
 - [x] 2.1 Update event create/edit DTOs and Zod request/response schemas to require startsAt, accept nullable endsAt, and reject endsAt earlier than startsAt.
-- [ ] 2.2 Update member and ADMIN event create/edit forms to collect dates, display validation errors, and show hold state where authorized.
+- [x] 2.2 Update member and ADMIN event create/edit forms to collect dates, display validation errors, and show hold state where authorized.
 - [x] 2.3 Add event hold and clear-hold API contracts with Zod validation, ADMIN authorization, and audited reasons.
 - [x] 2.4 Add date migration and event API/UI tests covering required startsAt, nullable endsAt, endsAt >= startsAt, and dependent-row wipe.
 
@@ -56,12 +56,12 @@
 
 ## 8. Host and admin UI
 
-- [ ] 8.1 Add host event payout summary showing gross amountCents, Rally fee feeCents, net netCents, released, pending, excluded totals, computed expected date, and released history.
-- [ ] 8.2 Add excluded purchase count, amount, and disputed/refunded/voided reason display plus post-release exposure flag.
-- [ ] 8.3 Add ADMIN payout queue for eligible now, pending, held, blocked, failed, and post-release dispute states with visible reasons.
-- [ ] 8.4 Add ADMIN release, hold, clear hold, and retry actions requiring reason and showing audit result.
-- [ ] 8.5 Ensure invited-org views expose sales visibility only, with no payout line; hide all payout controls/data from unauthorized users.
-- [ ] 8.6 Add UI tests for host summary, admin queue states/actions, expected-date recomputation, excluded reasons, historical released amount, permissions, and non-admin blocking.
+- [x] 8.1 Add host event payout summary showing gross amountCents, Rally fee feeCents, net netCents, released, pending, excluded totals, computed expected date, and released history.
+- [x] 8.2 Add excluded purchase count, amount, and disputed/refunded/voided reason display plus post-release exposure flag.
+- [x] 8.3 Add ADMIN payout queue for eligible now, pending, held, blocked, failed, and post-release dispute states with visible reasons.
+- [x] 8.4 Add ADMIN release, hold, clear hold, and retry actions requiring reason and showing audit result.
+- [x] 8.5 Ensure invited-org views expose sales visibility only, with no payout line; hide all payout controls/data from unauthorized users.
+- [x] 8.6 Add UI tests for host summary, admin queue states/actions, expected-date recomputation, excluded reasons, historical released amount, permissions, and non-admin blocking.
 
 ## 9. End-to-end verification and demo
 

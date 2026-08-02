@@ -7,16 +7,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { HostEventPayoutSummary } from '@/components/event-payouts/HostEventPayoutSummary';
 import {
   canCreateOrgEvents,
   canManageOrgEvents,
+  canManageOrgPayments,
   canManageTickets,
   canScanTickets,
 } from '@/lib/auth-routing';
 import {
   createEvent,
   deleteEvent,
+  formatEventError,
   listEvents,
+  toDateTimeLocal,
+  toIsoDateTime,
   updateEvent,
 } from '@/lib/events-api';
 
@@ -39,11 +44,15 @@ function AppEventsPage() {
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [maxHeadcount, setMaxHeadcount] = useState('50');
+  const [startsAt, setStartsAt] = useState('');
+  const [endsAt, setEndsAt] = useState('');
   const [location, setLocation] = useState('');
   const [editing, setEditing] = useState<Event | null>(null);
   const [editName, setEditName] = useState('');
   const [editType, setEditType] = useState('');
   const [editMaxHeadcount, setEditMaxHeadcount] = useState('');
+  const [editStartsAt, setEditStartsAt] = useState('');
+  const [editEndsAt, setEditEndsAt] = useState('');
   const [editLocation, setEditLocation] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -63,17 +72,21 @@ function AppEventsPage() {
         name,
         type,
         maxHeadcount: Number(maxHeadcount),
+        startsAt: toIsoDateTime(startsAt),
+        endsAt: endsAt ? toIsoDateTime(endsAt) : null,
         location: location.trim() ? location.trim() : null,
       }),
     onSuccess: async () => {
       setName('');
       setType('');
       setMaxHeadcount('50');
+      setStartsAt('');
+      setEndsAt('');
       setLocation('');
       setError(null);
       await invalidate();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: unknown) => setError(formatEventError(err)),
   });
 
   const updateMutation = useMutation({
@@ -83,6 +96,8 @@ function AppEventsPage() {
         name: editName,
         type: editType,
         maxHeadcount: Number(editMaxHeadcount),
+        startsAt: toIsoDateTime(editStartsAt),
+        endsAt: editEndsAt ? toIsoDateTime(editEndsAt) : null,
         location: editLocation.trim() ? editLocation.trim() : null,
       });
     },
@@ -91,7 +106,7 @@ function AppEventsPage() {
       setError(null);
       await invalidate();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: unknown) => setError(formatEventError(err)),
   });
 
   const deleteMutation = useMutation({
@@ -100,7 +115,7 @@ function AppEventsPage() {
       setError(null);
       await invalidate();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: unknown) => setError(formatEventError(err)),
   });
 
   const events = listQuery.data ?? [];
@@ -161,6 +176,28 @@ function AppEventsPage() {
                   required
                   value={maxHeadcount}
                   onChange={(e) => setMaxHeadcount(e.target.value)}
+                  className="min-h-11"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="event-starts-at">Starts</Label>
+                <Input
+                  id="event-starts-at"
+                  type="datetime-local"
+                  required
+                  value={startsAt}
+                  onChange={(e) => setStartsAt(e.target.value)}
+                  className="min-h-11"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="event-ends-at">Ends (optional)</Label>
+                <Input
+                  id="event-ends-at"
+                  type="datetime-local"
+                  min={startsAt}
+                  value={endsAt}
+                  onChange={(e) => setEndsAt(e.target.value)}
                   className="min-h-11"
                 />
               </div>
@@ -228,6 +265,28 @@ function AppEventsPage() {
                   className="min-h-11"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-event-starts-at">Starts</Label>
+                <Input
+                  id="edit-event-starts-at"
+                  type="datetime-local"
+                  required
+                  value={editStartsAt}
+                  onChange={(e) => setEditStartsAt(e.target.value)}
+                  className="min-h-11"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-event-ends-at">Ends (optional)</Label>
+                <Input
+                  id="edit-event-ends-at"
+                  type="datetime-local"
+                  min={editStartsAt}
+                  value={editEndsAt}
+                  onChange={(e) => setEditEndsAt(e.target.value)}
+                  className="min-h-11"
+                />
+              </div>
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="edit-event-location">Location (optional)</Label>
                 <Input
@@ -259,61 +318,66 @@ function AppEventsPage() {
           ) : (
             <ul className="divide-y divide-border-subtle">
               {events.map((event) => (
-                <li
-                  key={event.id}
-                  className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium text-ink-100">{event.name}</p>
-                      <Badge variant="outline">{event.type}</Badge>
+                <li key={event.id} className="flex flex-col gap-4 px-6 py-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-medium text-ink-100">{event.name}</p>
+                        <Badge variant="outline">{event.type}</Badge>
+                        {event.heldAt ? <Badge variant="destructive">On hold</Badge> : null}
+                      </div>
+                      <p className="text-sm text-ink-500">
+                        {new Date(event.startsAt).toLocaleString()}
+                        {event.endsAt ? ` – ${new Date(event.endsAt).toLocaleString()}` : ''}
+                        {' · '}
+                        Max {event.maxHeadcount}
+                        {event.location ? ` · ${event.location}` : ''}
+                      </p>
                     </div>
-                    <p className="text-sm text-ink-500">
-                      Max {event.maxHeadcount}
-                      {event.location ? ` · ${event.location}` : ''}
-                    </p>
+                    {canManage || canEventTickets ? (
+                      <div className="flex flex-wrap gap-2">
+                        {canEventTickets ? (
+                          <Button type="button" size="sm" variant="outline" asChild>
+                            <Link to="/app/events/$eventId/tickets" params={{ eventId: event.id }}>
+                              {canTickets ? 'Tickets' : 'Scan'}
+                            </Link>
+                          </Button>
+                        ) : null}
+                        {canManage ? (
+                          <>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditing(event);
+                                setEditName(event.name);
+                                setEditType(event.type);
+                                setEditMaxHeadcount(String(event.maxHeadcount));
+                                setEditStartsAt(toDateTimeLocal(event.startsAt));
+                                setEditEndsAt(event.endsAt ? toDateTimeLocal(event.endsAt) : '');
+                                setEditLocation(event.location ?? '');
+                                setError(null);
+                              }}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              disabled={deleteMutation.isPending}
+                              onClick={() => deleteMutation.mutate(event.id)}
+                            >
+                              Delete
+                            </Button>
+                          </>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
-                  {canManage || canEventTickets ? (
-                    <div className="flex flex-wrap gap-2">
-                      {canEventTickets ? (
-                        <Button type="button" size="sm" variant="outline" asChild>
-                          <Link
-                            to="/app/events/$eventId/tickets"
-                            params={{ eventId: event.id }}
-                          >
-                            {canTickets ? 'Tickets' : 'Scan'}
-                          </Link>
-                        </Button>
-                      ) : null}
-                      {canManage ? (
-                        <>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setEditing(event);
-                              setEditName(event.name);
-                              setEditType(event.type);
-                              setEditMaxHeadcount(String(event.maxHeadcount));
-                              setEditLocation(event.location ?? '');
-                              setError(null);
-                            }}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="destructive"
-                            disabled={deleteMutation.isPending}
-                            onClick={() => deleteMutation.mutate(event.id)}
-                          >
-                            Delete
-                          </Button>
-                        </>
-                      ) : null}
-                    </div>
+                  {canManageOrgPayments(user, event.organizationId) ? (
+                    <HostEventPayoutSummary eventId={event.id} />
                   ) : null}
                 </li>
               ))}
