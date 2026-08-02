@@ -69,6 +69,12 @@ export class StripeService {
     });
   }
 
+  cancelPaymentIntent(
+    paymentIntentId: string,
+  ): Promise<Stripe.PaymentIntent> {
+    return this.client.paymentIntents.cancel(paymentIntentId);
+  }
+
   createAccountLink(input: {
     accountId: string;
     useCaseType: 'account_onboarding' | 'account_update';

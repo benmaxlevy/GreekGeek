@@ -23,7 +23,10 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
   const memberships = new MembershipsService(prisma as never);
   const permissions = new PermissionsService(prisma as never);
   const events = new EventsService(prisma as never);
-  const tickets = new TicketsService(prisma as never);
+  const stripe = {
+    cancelPaymentIntent: jest.fn().mockResolvedValue({ id: 'pi_test' }),
+  };
+  const tickets = new TicketsService(prisma as never, stripe as never);
 
   const suffix = Date.now();
   let universityId = '';
@@ -238,6 +241,9 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
   });
 
   afterAll(async () => {
+    await prisma.ticketPayment.deleteMany({
+      where: { ticket: { allocation: { eventId } } },
+    });
     await prisma.ticket.deleteMany({
       where: { allocation: { eventId } },
     });
@@ -321,7 +327,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       {},
       asUser('admin', 'ADMIN'),
     );
-    expect(adminTicket.status).toBe('unpaid');
+    expect(adminTicket.status).toBe('paid');
   });
 
   it('capacity, over-allocate, on_sale qty floor', async () => {
@@ -465,7 +471,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     await prisma.event.delete({ where: { id: raceEvent.id } });
   });
 
-  it('guest self-claim, holder mark-paid, guest list paid-only', async () => {
+  it('guest self-claim free ticket is paid immediately; guest list paid-only', async () => {
     const claimEvent = await events.create(
       {
         organizationId: hostOrgId,
@@ -486,7 +492,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     );
     const publicAlloc = await tickets.createAllocation(
       claimEvent.id,
-      { organizationId: null, quantity: 5 },
+      { organizationId: null, quantity: 5, priceCents: 0 },
       asUser(hostManagerId),
     );
     const publicId = (publicAlloc as { id: string }).id;
@@ -498,16 +504,9 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
 
     const claimed = await tickets.publicClaim(claimEvent.id, asUser(guestUserId));
     expect(claimed.holderUserId).toBe(guestUserId);
-    expect(claimed.status).toBe('unpaid');
-
-    const unpaidGuestList = await tickets.guestList(
-      claimEvent.id,
-      asUser(hostManagerId),
-    );
-    expect(unpaidGuestList).toHaveLength(0);
-
-    const paid = await tickets.markPaid(claimed.id, asUser(guestUserId));
-    expect(paid.status).toBe('paid');
+    expect(claimed.status).toBe('paid');
+    expect(claimed.paidAt).toBeTruthy();
+    expect(claimed.allocationId).toBe(publicId);
 
     const guestList = await tickets.guestList(
       claimEvent.id,
@@ -527,6 +526,84 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       where: { eventId: claimEvent.id },
     });
     await prisma.event.delete({ where: { id: claimEvent.id } });
+  });
+
+  it('free issue is paid immediately; non-admin mark-paid 403; void cancels open PI', async () => {
+    await prisma.ticketPayment.deleteMany({
+      where: { ticket: { allocation: { eventId } } },
+    });
+    await prisma.ticket.deleteMany({
+      where: { allocation: { eventId } },
+    });
+    await prisma.ticketAllocation.deleteMany({ where: { eventId } });
+    await enableTicketingOnSale(3);
+
+    const freeIssued = await tickets.issueTicket(
+      eventId,
+      hostAllocId,
+      { holderUserId: guestUserId },
+      asUser(hostManagerId),
+    );
+    expect(freeIssued.status).toBe('paid');
+    expect(freeIssued.paidAt).toBeTruthy();
+
+    const unpaidRow = await prisma.ticket.create({
+      data: {
+        allocationId: hostAllocId,
+        credentialToken: `unpaid-${suffix}`,
+        holderUserId: guestUserId,
+        status: 'unpaid',
+      },
+    });
+
+    await expect(
+      tickets.markPaid(unpaidRow.id, asUser(guestUserId)),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(
+      tickets.markPaid(unpaidRow.id, asUser(hostManagerId)),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    const adminPaid = await tickets.markPaid(
+      unpaidRow.id,
+      asUser('admin-mark-paid', 'ADMIN'),
+    );
+    expect(adminPaid.status).toBe('paid');
+
+    const withPi = await prisma.ticket.create({
+      data: {
+        allocationId: hostAllocId,
+        credentialToken: `void-pi-${suffix}`,
+        holderUserId: guestUserId,
+        status: 'unpaid',
+      },
+    });
+    await prisma.ticketPayment.create({
+      data: {
+        ticketId: withPi.id,
+        stripePaymentIntentId: `pi_void_${suffix}`,
+        amountCents: 1100,
+        feeCents: 100,
+        netCents: 1000,
+        currency: 'usd',
+        status: 'requires_payment',
+      },
+    });
+    stripe.cancelPaymentIntent.mockClear();
+
+    await tickets.voidTicket(withPi.id, asUser(hostManagerId));
+    expect(stripe.cancelPaymentIntent).toHaveBeenCalledWith(`pi_void_${suffix}`);
+    const payment = await prisma.ticketPayment.findUnique({
+      where: { ticketId: withPi.id },
+    });
+    expect(payment?.status).toBe('canceled');
+
+    await prisma.ticketPayment.deleteMany({
+      where: { ticket: { allocation: { eventId } } },
+    });
+    await prisma.ticket.deleteMany({
+      where: { allocation: { eventId } },
+    });
+    await prisma.ticketAllocation.deleteMany({ where: { eventId } });
   });
 
   it('host tickets.scan can get and list host event; invited tickets.scan cannot get host event', async () => {
@@ -577,7 +654,7 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
 
     const bought = await tickets.publicClaim(eventId, asUser(noPermUserId));
     expect(bought.holderUserId).toBe(noPermUserId);
-    expect(bought.status).toBe('unpaid');
+    expect(bought.status).toBe('paid');
     expect(bought.allocationId).toBe(hostAllocId);
     expect(bought.organizationId).toBe(hostOrgId);
 
@@ -596,13 +673,12 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
   });
 
   async function issuePaidTicket(allocationId: string, holderUserId?: string) {
-    const issued = await tickets.issueTicket(
+    return tickets.issueTicket(
       eventId,
       allocationId,
       holderUserId ? { holderUserId } : {},
       asUser(hostManagerId),
     );
-    return tickets.markPaid(issued.id, asUser(hostManagerId));
   }
 
   describe('ticket check-in', () => {
@@ -659,12 +735,14 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     });
 
     it('rejects unpaid, void, and unknown credentials', async () => {
-      const unpaid = await tickets.issueTicket(
-        eventId,
-        hostAllocId,
-        { holderUserId: guestUserId },
-        asUser(hostManagerId),
-      );
+      const unpaid = await prisma.ticket.create({
+        data: {
+          allocationId: hostAllocId,
+          credentialToken: `checkin-unpaid-${suffix}`,
+          holderUserId: guestUserId,
+          status: 'unpaid',
+        },
+      });
 
       await expect(
         tickets.checkIn(

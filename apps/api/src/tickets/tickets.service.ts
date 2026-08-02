@@ -4,6 +4,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -15,6 +16,7 @@ import type {
 } from '@prisma/client';
 import type { PublicUser } from '../auth/types/auth.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { StripeService } from '../stripe/stripe.service';
 import {
   toCheckInTicketResponseDto,
   toEventTicketingDto,
@@ -44,7 +46,12 @@ type MembershipWithPermissions = {
 
 @Injectable()
 export class TicketsService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(TicketsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly stripe: StripeService,
+  ) {}
 
   async patchTicketing(
     eventId: string,
@@ -479,6 +486,25 @@ export class TicketsService {
       'void',
     );
 
+    const openPayment = await this.prisma.ticketPayment.findFirst({
+      where: { ticketId, status: 'requires_payment' },
+    });
+    if (openPayment) {
+      try {
+        await this.stripe.cancelPaymentIntent(openPayment.stripePaymentIntentId);
+        await this.prisma.ticketPayment.update({
+          where: { id: openPayment.id },
+          data: { status: 'canceled' },
+        });
+      } catch (err) {
+        this.logger.warn(
+          `Failed to cancel PaymentIntent ${openPayment.stripePaymentIntentId} on void: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
+      }
+    }
+
     const updated = await this.prisma.ticket.update({
       where: { id: ticketId },
       data: { status: 'void', voidedAt: new Date() },
@@ -488,6 +514,12 @@ export class TicketsService {
   }
 
   async markPaid(ticketId: string, caller: PublicUser): Promise<Ticket> {
+    if (caller.role !== 'ADMIN') {
+      throw new ForbiddenException(
+        'Only platform admins can mark tickets paid',
+      );
+    }
+
     const ticket = await this.prisma.ticket.findUnique({
       where: { id: ticketId },
       include: { allocation: { include: { event: true } } },
@@ -497,16 +529,6 @@ export class TicketsService {
     }
     if (ticket.status !== 'unpaid') {
       throw new BadRequestException('Only unpaid tickets can be marked paid');
-    }
-
-    const isHolder = ticket.holderUserId === caller.id;
-    if (!isHolder) {
-      await this.assertTicketAccess(
-        ticket.allocation.event,
-        ticket.allocation,
-        caller,
-        'mark_paid',
-      );
     }
 
     const updated = await this.prisma.ticket.update({
@@ -600,11 +622,16 @@ export class TicketsService {
       if (issuedCount >= current.quantity) {
         throw new ConflictException('Allocation is sold out');
       }
+      const isFree = (current.priceCents ?? 0) === 0;
+      const now = new Date();
       return tx.ticket.create({
         data: {
           allocationId,
           credentialToken: randomBytes(32).toString('hex'),
           holderUserId,
+          ...(isFree
+            ? { status: 'paid' as const, paidAt: now }
+            : { status: 'unpaid' as const }),
         },
         include: { allocation: true },
       });

@@ -9,12 +9,12 @@
 
 ## 2. Free auto-pay + ADMIN-only mark-paid + void cancel PI
 
-- [ ] 2.1 Issue path: when allocation `priceCents` is 0, create ticket `paid` with `paidAt`
-- [ ] 2.2 Self-claim path: when public allocation `priceCents` is 0, create ticket `paid` with `paidAt`
-- [ ] 2.3 Restrict mark-paid endpoint to platform ADMIN only; remove holder self mark-paid branch
-- [ ] 2.4 Void path: cancel open Stripe PaymentIntent via TicketPayment; set TicketPayment `canceled`
-- [ ] 2.5 Integration tests: free issue/claim paid immediately; non-admin mark-paid 403; void cancels open PI
-- [ ] 2.6 Commit: `free tickets auto paid admin only mark paid void cancels pi`
+- [x] 2.1 Issue path: when allocation `priceCents` is 0, create ticket `paid` with `paidAt`
+- [x] 2.2 Self-claim path: when public allocation `priceCents` is 0, create ticket `paid` with `paidAt`
+- [x] 2.3 Restrict mark-paid endpoint to platform ADMIN only; remove holder self mark-paid branch
+- [x] 2.4 Void path: cancel open Stripe PaymentIntent via TicketPayment; set TicketPayment `canceled`
+- [x] 2.5 Integration tests: free issue/claim paid immediately; non-admin mark-paid 403; void cancels open PI
+- [x] 2.6 Commit: `free tickets auto paid admin only mark paid void cancels pi`
 
 ## 3. Checkout API (holder-only PaymentIntent)
 
