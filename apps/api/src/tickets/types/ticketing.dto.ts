@@ -44,6 +44,7 @@ export {
   CheckInTicketSchema,
   CheckInTicketResponseSchema,
   TicketCheckInErrorCodeSchema,
+  TicketSaleGateErrorCodeSchema,
 } from '@rally/contracts';
 
 export type {
@@ -65,6 +66,7 @@ export type {
   CheckInTicket,
   CheckInTicketResponse,
   TicketCheckInErrorCode,
+  TicketSaleGateErrorCode,
 } from '@rally/contracts';
 
 export function toEventTicketingDto(

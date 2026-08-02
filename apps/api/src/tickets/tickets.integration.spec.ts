@@ -802,4 +802,255 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
       expect(row?.checkedIn).toBe(true);
     });
   });
+
+  describe('Stripe Connect sale gates', () => {
+    const connectRequired = {
+      constructor: UnprocessableEntityException,
+      response: { code: 'CONNECT_REQUIRED' },
+    };
+
+    async function makeDraftEvent(name: string) {
+      const ev = await events.create(
+        {
+          organizationId: hostOrgId,
+          name,
+          type: 'Party',
+          maxHeadcount: 50,
+        },
+        asUser(hostManagerId),
+      );
+      await tickets.patchTicketing(
+        ev.id,
+        {
+          ticketingEnabled: true,
+          ticketCapacity: 20,
+          ticketSaleStatus: 'draft',
+        },
+        asUser(hostManagerId),
+      );
+      return ev.id;
+    }
+
+    async function setHostChargesEnabled(enabled: boolean) {
+      await prisma.organization.update({
+        where: { id: hostOrgId },
+        data: { stripeChargesEnabled: enabled },
+      });
+    }
+
+    afterEach(async () => {
+      await setHostChargesEnabled(false);
+    });
+
+    afterAll(async () => {
+      const connectEvents = await prisma.event.findMany({
+        where: {
+          organizationId: hostOrgId,
+          name: { startsWith: 'Connect Gate' },
+        },
+        select: { id: true },
+      });
+      const ids = connectEvents.map((e) => e.id);
+      if (ids.length) {
+        await prisma.ticket.deleteMany({
+          where: { allocation: { eventId: { in: ids } } },
+        });
+        await prisma.ticketAllocation.deleteMany({
+          where: { eventId: { in: ids } },
+        });
+        await prisma.event.deleteMany({ where: { id: { in: ids } } });
+      }
+      await prisma.organization.update({
+        where: { id: invitedOrgId },
+        data: { stripeChargesEnabled: false },
+      });
+    });
+
+    it('blocks paid allocation create when host charges disabled', async () => {
+      await setHostChargesEnabled(false);
+      const id = await makeDraftEvent(`Connect Gate Paid Create ${suffix}`);
+
+      await expect(
+        tickets.createAllocation(
+          id,
+          { organizationId: hostOrgId, quantity: 5, priceCents: 1500 },
+          asUser(hostManagerId),
+        ),
+      ).rejects.toMatchObject(connectRequired);
+
+      const count = await prisma.ticketAllocation.count({
+        where: { eventId: id, priceCents: { gt: 0 } },
+      });
+      expect(count).toBe(0);
+    });
+
+    it('allows free allocation when host charges disabled', async () => {
+      await setHostChargesEnabled(false);
+      const id = await makeDraftEvent(`Connect Gate Free Create ${suffix}`);
+
+      const alloc = await tickets.createAllocation(
+        id,
+        { organizationId: hostOrgId, quantity: 5, priceCents: 0 },
+        asUser(hostManagerId),
+      );
+      expect((alloc as { priceCents: number | null }).priceCents).toBe(0);
+
+      const nullPrice = await tickets.createAllocation(
+        id,
+        { organizationId: invitedOrgId, quantity: 5 },
+        asUser(hostManagerId),
+      );
+      expect((nullPrice as { priceCents: number | null }).priceCents).toBeNull();
+    });
+
+    it('allows paid allocation when host charges enabled', async () => {
+      await setHostChargesEnabled(true);
+      const id = await makeDraftEvent(`Connect Gate Paid Ok ${suffix}`);
+
+      const alloc = await tickets.createAllocation(
+        id,
+        { organizationId: hostOrgId, quantity: 5, priceCents: 2500 },
+        asUser(hostManagerId),
+      );
+      expect((alloc as { priceCents: number | null }).priceCents).toBe(2500);
+    });
+
+    it('blocks paid allocation update when host charges disabled', async () => {
+      await setHostChargesEnabled(false);
+      const id = await makeDraftEvent(`Connect Gate Paid Update ${suffix}`);
+      const free = await tickets.createAllocation(
+        id,
+        { organizationId: hostOrgId, quantity: 5, priceCents: 0 },
+        asUser(hostManagerId),
+      );
+      const allocId = (free as { id: string }).id;
+
+      await expect(
+        tickets.updateAllocation(
+          id,
+          allocId,
+          { priceCents: 2000 },
+          asUser(hostManagerId),
+        ),
+      ).rejects.toMatchObject(connectRequired);
+
+      const row = await prisma.ticketAllocation.findUnique({
+        where: { id: allocId },
+      });
+      expect(row?.priceCents).toBe(0);
+    });
+
+    it('gates on host org not invited allocation org', async () => {
+      await setHostChargesEnabled(false);
+      await prisma.organization.update({
+        where: { id: invitedOrgId },
+        data: { stripeChargesEnabled: true },
+      });
+      const id = await makeDraftEvent(`Connect Gate Host Not Invited ${suffix}`);
+
+      await expect(
+        tickets.createAllocation(
+          id,
+          { organizationId: invitedOrgId, quantity: 5, priceCents: 1000 },
+          asUser(hostManagerId),
+        ),
+      ).rejects.toMatchObject(connectRequired);
+
+      await prisma.organization.update({
+        where: { id: invitedOrgId },
+        data: { stripeChargesEnabled: false },
+      });
+    });
+
+    it('ADMIN cannot bypass paid allocation gate', async () => {
+      await setHostChargesEnabled(false);
+      const id = await makeDraftEvent(`Connect Gate Admin Alloc ${suffix}`);
+
+      await expect(
+        tickets.createAllocation(
+          id,
+          { organizationId: hostOrgId, quantity: 5, priceCents: 999 },
+          asUser('admin-connect', 'ADMIN'),
+        ),
+      ).rejects.toMatchObject(connectRequired);
+    });
+
+    it('blocks on_sale when paid allocation and charges disabled', async () => {
+      await setHostChargesEnabled(true);
+      const id = await makeDraftEvent(`Connect Gate OnSale Block ${suffix}`);
+      await tickets.createAllocation(
+        id,
+        { organizationId: hostOrgId, quantity: 5, priceCents: 1500 },
+        asUser(hostManagerId),
+      );
+      await setHostChargesEnabled(false);
+
+      await expect(
+        tickets.patchTicketing(
+          id,
+          { ticketSaleStatus: 'on_sale' },
+          asUser(hostManagerId),
+        ),
+      ).rejects.toMatchObject(connectRequired);
+
+      const ev = await prisma.event.findUnique({ where: { id } });
+      expect(ev?.ticketSaleStatus).toBe('draft');
+    });
+
+    it('allows on_sale with only free allocations when charges disabled', async () => {
+      await setHostChargesEnabled(false);
+      const id = await makeDraftEvent(`Connect Gate OnSale Free ${suffix}`);
+      await tickets.createAllocation(
+        id,
+        { organizationId: hostOrgId, quantity: 5, priceCents: 0 },
+        asUser(hostManagerId),
+      );
+
+      const updated = await tickets.patchTicketing(
+        id,
+        { ticketSaleStatus: 'on_sale' },
+        asUser(hostManagerId),
+      );
+      expect(updated.ticketSaleStatus).toBe('on_sale');
+    });
+
+    it('allows on_sale with paid allocation when charges enabled', async () => {
+      await setHostChargesEnabled(true);
+      const id = await makeDraftEvent(`Connect Gate OnSale Paid Ok ${suffix}`);
+      await tickets.createAllocation(
+        id,
+        { organizationId: hostOrgId, quantity: 5, priceCents: 1500 },
+        asUser(hostManagerId),
+      );
+
+      const updated = await tickets.patchTicketing(
+        id,
+        { ticketSaleStatus: 'on_sale' },
+        asUser(hostManagerId),
+      );
+      expect(updated.ticketSaleStatus).toBe('on_sale');
+    });
+
+    it('ADMIN cannot bypass on_sale gate', async () => {
+      await setHostChargesEnabled(true);
+      const id = await makeDraftEvent(`Connect Gate Admin OnSale ${suffix}`);
+      await tickets.createAllocation(
+        id,
+        { organizationId: hostOrgId, quantity: 5, priceCents: 1500 },
+        asUser(hostManagerId),
+      );
+      await setHostChargesEnabled(false);
+
+      await expect(
+        tickets.patchTicketing(
+          id,
+          { ticketSaleStatus: 'on_sale' },
+          asUser('admin-connect-onsale', 'ADMIN'),
+        ),
+      ).rejects.toMatchObject(connectRequired);
+
+      const ev = await prisma.event.findUnique({ where: { id } });
+      expect(ev?.ticketSaleStatus).toBe('draft');
+    });
+  });
 });

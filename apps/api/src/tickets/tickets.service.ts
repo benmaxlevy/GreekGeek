@@ -77,6 +77,7 @@ export class TicketsService {
           'At least one allocation is required before going on sale',
         );
       }
+      await this.assertHostOrgChargeReadyForOnSale(event);
     }
 
     const updated = await this.prisma.event.update({
@@ -227,6 +228,10 @@ export class TicketsService {
         input.quantity,
       );
     }
+
+    const nextPriceCents =
+      input.priceCents !== undefined ? input.priceCents : allocation.priceCents;
+    await this.assertHostOrgChargeReady(event.organizationId, nextPriceCents);
 
     const updated = await this.prisma.ticketAllocation.update({
       where: { id: allocationId },
@@ -624,6 +629,11 @@ export class TicketsService {
       }
     }
 
+    await this.assertHostOrgChargeReady(
+      event.organizationId,
+      input.priceCents ?? null,
+    );
+
     const currentSum = await this.sumAllocationQuantities(event.id);
     if (currentSum + input.quantity > (event.ticketCapacity ?? 0)) {
       throw new BadRequestException(
@@ -647,6 +657,53 @@ export class TicketsService {
       });
     } catch {
       throw new ConflictException('Allocation already exists for organization');
+    }
+  }
+
+  /**
+   * Paid prices require host org Connect charges enabled.
+   * Uses event.organizationId — not allocation org. ADMIN does not bypass.
+   */
+  private async assertHostOrgChargeReady(
+    hostOrganizationId: string,
+    priceCents: number | null | undefined,
+  ): Promise<void> {
+    if ((priceCents ?? 0) <= 0) {
+      return;
+    }
+    const hostOrg = await this.prisma.organization.findUnique({
+      where: { id: hostOrganizationId },
+      select: { stripeChargesEnabled: true },
+    });
+    if (!hostOrg?.stripeChargesEnabled) {
+      throw new UnprocessableEntityException({
+        code: 'CONNECT_REQUIRED',
+        message:
+          'Stripe Connect onboarding is required before setting paid ticket prices',
+      });
+    }
+  }
+
+  private async assertHostOrgChargeReadyForOnSale(event: Event): Promise<void> {
+    const paidCount = await this.prisma.ticketAllocation.count({
+      where: {
+        eventId: event.id,
+        priceCents: { gt: 0 },
+      },
+    });
+    if (paidCount < 1) {
+      return;
+    }
+    const hostOrg = await this.prisma.organization.findUnique({
+      where: { id: event.organizationId },
+      select: { stripeChargesEnabled: true },
+    });
+    if (!hostOrg?.stripeChargesEnabled) {
+      throw new UnprocessableEntityException({
+        code: 'CONNECT_REQUIRED',
+        message:
+          'Stripe Connect onboarding is required before putting paid tickets on sale',
+      });
     }
   }
 

@@ -133,6 +133,7 @@ export {
   CheckInTicketSchema,
   CheckInTicketResponseSchema,
   TicketCheckInErrorCodeSchema,
+  TicketSaleGateErrorCodeSchema,
   type TicketSaleStatus,
   type AllocationStatus,
   type TicketStatus,
@@ -154,6 +155,7 @@ export {
   type CheckInTicket,
   type CheckInTicketResponse,
   type TicketCheckInErrorCode,
+  type TicketSaleGateErrorCode,
 } from './ticketing';
 export {
   WebhookEventStatusFilterSchema,

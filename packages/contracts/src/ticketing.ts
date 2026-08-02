@@ -182,3 +182,7 @@ export const TicketCheckInErrorCodeSchema = z.enum([
   'FORBIDDEN',
 ]);
 export type TicketCheckInErrorCode = z.infer<typeof TicketCheckInErrorCodeSchema>;
+
+/** Paid allocation / on_sale blocked until host org Stripe Connect charges enabled. */
+export const TicketSaleGateErrorCodeSchema = z.enum(['CONNECT_REQUIRED']);
+export type TicketSaleGateErrorCode = z.infer<typeof TicketSaleGateErrorCodeSchema>;

@@ -26,11 +26,11 @@
 
 ## 4. Sale gates (allocation + on_sale)
 
-- [ ] 4.1 Gate allocation create/update: `priceCents > 0` requires host org `stripeChargesEnabled`; 4xx with clear error code/message
-- [ ] 4.2 Gate `ticketSaleStatus` → `on_sale` when any allocation has `priceCents > 0`
-- [ ] 4.3 ADMIN does not bypass gates
-- [ ] 4.4 Integration tests: paid blocked / free allowed / on_sale matrix
-- [ ] 4.5 Commit: `gate paid ticketing on stripe charges enabled`
+- [x] 4.1 Gate allocation create/update: `priceCents > 0` requires host org `stripeChargesEnabled`; 4xx with clear error code/message
+- [x] 4.2 Gate `ticketSaleStatus` → `on_sale` when any allocation has `priceCents > 0`
+- [x] 4.3 ADMIN does not bypass gates
+- [x] 4.4 Integration tests: paid blocked / free allowed / on_sale matrix
+- [x] 4.5 Commit: `gate paid ticketing on stripe charges enabled`
 
 ## 5. FE org settings + banners + admin
 
