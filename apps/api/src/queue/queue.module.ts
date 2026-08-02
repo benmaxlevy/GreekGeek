@@ -19,6 +19,10 @@ import { QUEUE_NAMES } from './queue.constants';
       name: QUEUE_NAMES.prove,
       defaultJobOptions: DEFAULT_JOB_OPTIONS,
     }),
+    BullModule.registerQueue({
+      name: QUEUE_NAMES.webhookProcess,
+      defaultJobOptions: DEFAULT_JOB_OPTIONS,
+    }),
   ],
   exports: [BullModule],
 })

@@ -186,3 +186,18 @@ model MemberPermission {
   @@unique([membershipId, permissionId])
   @@index([permissionId])
 }
+
+model WebhookEvent {
+  id          String    @id @default(cuid())
+  service     String
+  externalId  String
+  type        String
+  payload     Json
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+  attempts    Int       @default(0)
+  lastError   String?
+
+  @@unique([service, externalId])
+  @@index([processedAt])
+}

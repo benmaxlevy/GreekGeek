@@ -8,18 +8,18 @@
 - [x] 1.6 Extend `@rally/contracts` `HealthResponseSchema` with `redis: 'up'|'down'`; update `HealthService` to ping Redis; `status: degraded` when database or redis down
 - [x] 1.7 ADMIN-only `POST /api/admin/queue/prove` enqueue endpoint + prove processor (log job id; failures log id + payload keys only)
 - [x] 1.8 Integration test: enqueue prove job → worker processes; health reports redis up/down
-- [ ] 1.9 Commit: `add redis bullmq queue module and worker entrypoint`
+- [x] 1.9 Commit: `add redis bullmq queue module and worker entrypoint`
 
 ## 2. Slice A — Webhook schema, contracts, API, worker
 
-- [ ] 2.1 Add Prisma `WebhookEvent` model (`service`, `externalId`, `type`, `payload`, `receivedAt`, `processedAt?`, `attempts`, `lastError?`); unique `(service, externalId)`; index on `processedAt`; generate migration
-- [ ] 2.2 Add `STRIPE_WEBHOOK_SECRET` to env schema + `.env.example`; install `stripe` package
-- [ ] 2.3 Add `@rally/contracts` schemas: webhook event DTOs, admin list query/response, re-enqueue request/response
-- [ ] 2.4 Stripe webhook route `POST /api/webhooks/stripe`: raw body middleware, signature verify (400 on bad sig), insert + enqueue on new event, 200 short-circuit on duplicate
-- [ ] 2.5 Webhook process worker: load by id, skip if `processedAt` set, increment attempts + `lastError` on failure, set `processedAt` on success; unknown types → mark processed
-- [ ] 2.6 ADMIN API: `GET /api/admin/webhook-events` (unprocessed/failed/all filters), `POST /api/admin/webhook-events/:id/requeue`
-- [ ] 2.7 Integration tests: replay Stripe event → single processing, 200 both times; failing handler retries then appears in failed list; signature failure → 400 no row
-- [ ] 2.8 Commit: `add webhook inbox schema stripe ingest and processing worker`
+- [x] 2.1 Add Prisma `WebhookEvent` model (`service`, `externalId`, `type`, `payload`, `receivedAt`, `processedAt?`, `attempts`, `lastError?`); unique `(service, externalId)`; index on `processedAt`; generate migration
+- [x] 2.2 Add `STRIPE_WEBHOOK_SECRET` to env schema + `.env.example`; install `stripe` package
+- [x] 2.3 Add `@rally/contracts` schemas: webhook event DTOs, admin list query/response, re-enqueue request/response
+- [x] 2.4 Stripe webhook route `POST /api/webhooks/stripe`: raw body middleware, signature verify (400 on bad sig), insert + enqueue on new event, 200 short-circuit on duplicate
+- [x] 2.5 Webhook process worker: load by id, skip if `processedAt` set, increment attempts + `lastError` on failure, set `processedAt` on success; unknown types → mark processed
+- [x] 2.6 ADMIN API: `GET /api/admin/webhook-events` (unprocessed/failed/all filters), `POST /api/admin/webhook-events/:id/requeue`
+- [x] 2.7 Integration tests: replay Stripe event → single processing, 200 both times; failing handler retries then appears in failed list; signature failure → 400 no row
+- [x] 2.8 Commit: `add webhook inbox schema stripe ingest and processing worker`
 
 ## 3. Slice A — Admin FE
 

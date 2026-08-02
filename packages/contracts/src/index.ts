@@ -145,3 +145,15 @@ export {
   type CheckInTicketResponse,
   type TicketCheckInErrorCode,
 } from './ticketing';
+export {
+  WebhookEventStatusFilterSchema,
+  WebhookEventSchema,
+  ListWebhookEventsQuerySchema,
+  WebhookEventListSchema,
+  RequeueWebhookEventResponseSchema,
+  type WebhookEventStatusFilter,
+  type WebhookEvent,
+  type ListWebhookEventsQuery,
+  type WebhookEventList,
+  type RequeueWebhookEventResponse,
+} from './webhook-events';

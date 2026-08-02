@@ -11,6 +11,7 @@ import { TicketsModule } from './tickets/tickets.module';
 import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UniversitiesModule } from './universities/universities.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { UniversitiesModule } from './universities/universities.module';
     EventsModule,
     TicketsModule,
     AdminQueueModule,
+    WebhooksModule,
   ],
 })
 export class AppModule {}

@@ -7,6 +7,7 @@ export const envSchema = z.object({
   JWT_SECRET: z.string().min(16),
   WEB_ORIGIN: z.string().url(),
   REDIS_URL: z.string().url(),
+  STRIPE_WEBHOOK_SECRET: z.string().min(1),
 });
 
 export type Env = z.infer<typeof envSchema>;
