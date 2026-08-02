@@ -59,6 +59,26 @@ export async function pause(page, ms = 2000) {
   await page.waitForTimeout(ms);
 }
 
+/** Full-viewport title card between demo flows. Hold ≥1200ms, then remove overlay. */
+export async function showFlowTitle(page, label) {
+  await page.evaluate((text) => {
+    const overlay = document.createElement('div');
+    overlay.id = 'demo-flow-title-overlay';
+    overlay.style.cssText =
+      'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.88);pointer-events:none';
+    const title = document.createElement('div');
+    title.style.cssText =
+      'color:#fff;font-family:system-ui,-apple-system,sans-serif;font-size:68px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;text-align:center;padding:40px;line-height:1.2';
+    title.textContent = text;
+    overlay.appendChild(title);
+    document.body.appendChild(overlay);
+  }, label);
+  await page.waitForTimeout(1800);
+  await page.evaluate(() => {
+    document.getElementById('demo-flow-title-overlay')?.remove();
+  });
+}
+
 export async function login(page, email, password) {
   await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
   await page.getByLabel('Email').fill(email);
@@ -192,6 +212,46 @@ export async function grantTicketPermissionsByEmail(userEmail) {
     'events.manage',
     'tickets.manage',
   ]);
+}
+
+export async function grantTicketAndPaymentsPermissionsByEmail(userEmail) {
+  return grantPermissionsByEmail(userEmail, [
+    'events.create',
+    'events.manage',
+    'tickets.manage',
+    'payments.manage',
+  ]);
+}
+
+export async function setupTicketingEvent({
+  hostEmail,
+  eventName,
+  hostPassword = DEMO_PASSWORD,
+  organizationId: orgIdOverride,
+}) {
+  const token = await loginToken(hostEmail, hostPassword);
+  const organizationId = orgIdOverride ?? (await seedOrgId());
+  const event = await apiJson('/api/events', {
+    method: 'POST',
+    token,
+    body: {
+      organizationId,
+      name: eventName,
+      type: 'Public Party',
+      maxHeadcount: 50,
+      location: 'Campus Lawn',
+    },
+  });
+  await apiJson(`/api/events/${event.id}/ticketing`, {
+    method: 'PATCH',
+    token,
+    body: {
+      ticketingEnabled: true,
+      ticketCapacity: 20,
+      ticketSaleStatus: 'draft',
+    },
+  });
+  return { eventId: event.id, eventName: event.name, organizationId, token };
 }
 
 export async function loginToken(email, password) {

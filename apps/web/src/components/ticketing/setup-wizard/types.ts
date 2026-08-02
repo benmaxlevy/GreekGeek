@@ -17,6 +17,14 @@ export type WizardState = {
   pools: WizardPoolRow[];
 };
 
+export type ToggleSwitchProps = {
+  id: string;
+  label: string;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  className?: string;
+};
+
 export function poolRowKey(row: WizardPoolRow): string {
   return row.organizationId ?? 'public';
 }

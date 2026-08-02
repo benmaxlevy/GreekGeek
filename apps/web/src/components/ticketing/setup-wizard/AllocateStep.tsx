@@ -9,6 +9,7 @@ import {
   type WizardPoolRow,
   type WizardState,
 } from './types';
+import { ToggleSwitch } from './ToggleSwitch';
 
 type Props = {
   organizations: Organization[];
@@ -94,38 +95,32 @@ export function AllocateStep({ organizations, state, onChange }: Props) {
         <Label>Participating organizations</Label>
         <div className="max-h-48 space-y-2 overflow-y-auto rounded-md border border-border-subtle p-3">
           {sortedOrgs(organizations).map((org) => (
-            <label
+            <ToggleSwitch
               key={org.id}
-              className="flex items-center gap-2 text-sm text-ink-300"
-            >
-              <input
-                type="checkbox"
-                checked={selectedOrgIds.has(org.id)}
-                onChange={(e) => {
-                  const next = new Set(selectedOrgIds);
-                  if (e.target.checked) {
-                    next.add(org.id);
-                  } else {
-                    next.delete(org.id);
-                  }
-                  updateSelection(next, includePublic);
-                }}
-              />
-              {org.name}
-            </label>
+              id={`wizard-org-${org.id}`}
+              label={org.name}
+              checked={selectedOrgIds.has(org.id)}
+              onCheckedChange={(checked) => {
+                const next = new Set(selectedOrgIds);
+                if (checked) {
+                  next.add(org.id);
+                } else {
+                  next.delete(org.id);
+                }
+                updateSelection(next, includePublic);
+              }}
+            />
           ))}
           {organizations.length === 0 ? (
             <p className="text-sm text-ink-500">No organizations found.</p>
           ) : null}
         </div>
-        <label className="flex items-center gap-2 text-sm text-ink-300">
-          <input
-            type="checkbox"
-            checked={includePublic}
-            onChange={(e) => updateSelection(selectedOrgIds, e.target.checked)}
-          />
-          Include public pool
-        </label>
+        <ToggleSwitch
+          id="wizard-public-pool"
+          label="Include public pool"
+          checked={includePublic}
+          onCheckedChange={(checked) => updateSelection(selectedOrgIds, checked)}
+        />
       </div>
 
       {state.pools.length > 0 ? (

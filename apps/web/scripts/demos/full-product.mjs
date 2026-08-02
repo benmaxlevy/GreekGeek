@@ -2,7 +2,7 @@
  * Full product walkthrough — one continuous .webm covering all current flows.
  * Pace: DEMO_SLOW_MO (default 900) + long settled pauses.
  *
- * Run: DEMO_SLOW_MO=1200 node scripts/demos/full-product.mjs
+ * Run: DEMO_SLOW_MO=900 node scripts/demos/full-product.mjs
  */
 import {
   ADMIN_EMAIL,
@@ -14,15 +14,23 @@ import {
   adminToken,
   apiJson,
   apiSignup,
+  createOrgViaAdmin,
   finalizeVideo,
   findUserRow,
+  grantPermissionsByEmail,
+  grantTicketPermissionsByEmail,
   launchDemo,
   login,
+  loginToken,
   logout,
   pause,
+  seedOrgId,
   setupActiveMember,
   setupOfficerAndApplicant,
+  setupOnSalePublicEvent,
+  showFlowTitle,
   signupCascade,
+  signupWithoutOrg,
   ts,
 } from './demo-helpers.mjs';
 
@@ -61,23 +69,88 @@ const memberEventUpdated = `${memberEventName} Updated`;
 const noEvtEmail = `demo+full-noevt-${stamp}@rally.local`;
 const noEvtName = `Full No Events ${stamp}`;
 
-async function section(page, label) {
+// Section 14 — optional org signup
+const optOrglessEmail = `demo+full-optless-${stamp}@rally.local`;
+const optOrglessName = `Full Orgless ${stamp}`;
+const optPendingEmail = `demo+full-optpend-${stamp}@rally.local`;
+const optPendingName = `Full Opt Pending ${stamp}`;
+
+// Section 15 — ticketing host
+const ticketHostEmail = `demo+full-thost-${stamp}@rally.local`;
+const ticketHostName = `Full Ticket Host ${stamp}`;
+const ticketOrgBName = `Full Org B ${stamp}`;
+const ticketEventName = `Full Ticketing Formal ${stamp}`;
+
+// Section 16 — guest claim
+const ticketFixtureHostEmail = `demo+full-tfix-${stamp}@rally.local`;
+const ticketGuestEmail = `demo+full-tguest-${stamp}@rally.local`;
+const ticketGuestName = `Full Ticket Guest ${stamp}`;
+const publicEventName = `Full Public Gala ${stamp}`;
+
+// Section 17 — org member buy
+const orgBuyHostEmail = `demo+full-obuy-h-${stamp}@rally.local`;
+const orgBuyBuyerEmail = `demo+full-obuy-m-${stamp}@rally.local`;
+const orgBuyHostName = `Full Org Buy Host ${stamp}`;
+const orgBuyBuyerName = `Full Org Buyer ${stamp}`;
+const orgBuyEventName = `Full Org Gala ${stamp}`;
+
+// Section 18 — QR check-in
+const qrHostManagerEmail = `demo+full-qr-mgr-${stamp}@rally.local`;
+const qrHostScannerEmail = `demo+full-qr-scan-${stamp}@rally.local`;
+const qrHostManagerName = `Full QR Manager ${stamp}`;
+const qrHostScannerName = `Full QR Scanner ${stamp}`;
+const qrEventName = `Full QR Formal ${stamp}`;
+
+async function flowTitle(page, label) {
   console.log(`▶ ${label}`);
-  await pause(page, 2500);
+  await showFlowTitle(page, label);
+  await pause(page, 1500);
+}
+
+async function issuePaidTickets(hostToken, eventId, allocationId, count) {
+  const credentials = [];
+  for (let i = 0; i < count; i += 1) {
+    const issued = await apiJson(
+      `/api/events/${eventId}/allocations/${allocationId}/tickets`,
+      { method: 'POST', token: hostToken, body: {} },
+    );
+    const paid = await apiJson(`/api/tickets/${issued.id}/mark-paid`, {
+      method: 'POST',
+      token: hostToken,
+    });
+    credentials.push(paid.credentialToken);
+  }
+  return credentials;
+}
+
+async function pasteAndCheckIn(page, token) {
+  await page.locator('#credential-paste').fill(token);
+  await pause(page, 800);
+  await page.getByRole('button', { name: 'Check in' }).click();
+}
+
+async function goToEventTickets(page, eventId) {
+  await page.goto(`${BASE_URL}/app/events/${eventId}/tickets`, {
+    waitUntil: 'networkidle',
+  });
+  await page
+    .locator('#credential-paste')
+    .or(page.getByRole('button', { name: 'Config', exact: true }))
+    .first()
+    .waitFor({ timeout: 15000 });
+  await pause(page, 1500);
 }
 
 const { browser, context, page } = await launchDemo();
 try {
   // ── 1. Signup → awaiting approval ─────────────────────────────────────
-  await section(page, '1 signup pending');
+  await flowTitle(page, 'SIGNUP PENDING');
   await signupCascade(page, {
     name: pendingName,
     email: pendingEmail,
     password: DEMO_PASSWORD,
   });
   await pause(page, 2500);
-  await page.getByRole('link', { name: 'Go to log in' }).click();
-  await page.waitForURL(/\/login/);
   await page.getByLabel('Email').fill(pendingEmail);
   await page.getByLabel('Password').fill(DEMO_PASSWORD);
   await page.getByRole('button', { name: 'Continue' }).click();
@@ -86,7 +159,7 @@ try {
   await pause(page, 3000);
 
   // ── 2. Admin universities CRUD + seed delete 409 ──────────────────────
-  await section(page, '2 universities CRUD');
+  await flowTitle(page, 'UNIVERSITIES CRUD');
   await login(page, ADMIN_EMAIL, ADMIN_PASSWORD);
   await page.waitForURL(/\/(admin|app)/, { timeout: 15000 });
   await page.goto(`${BASE_URL}/admin/universities`, { waitUntil: 'networkidle' });
@@ -101,7 +174,7 @@ try {
   await pause(page, 3000);
 
   // ── 3. Admin organizations CRUD + delete 409 ──────────────────────────
-  await section(page, '3 organizations CRUD');
+  await flowTitle(page, 'ORGANIZATIONS CRUD');
   await page.goto(`${BASE_URL}/admin/organizations`, { waitUntil: 'networkidle' });
   await pause(page, 2000);
   await page.getByLabel('Name', { exact: true }).fill(orgName);
@@ -140,7 +213,7 @@ try {
   await pause(page, 3000);
 
   // ── 4. Admin approve → member home ────────────────────────────────────
-  await section(page, '4 admin approve');
+  await flowTitle(page, 'ADMIN APPROVE');
   await signupCascade(page, {
     name: approveName,
     email: approveEmail,
@@ -165,7 +238,7 @@ try {
   await logout(page);
 
   // ── 5. Admin deny → blocked ───────────────────────────────────────────
-  await section(page, '5 admin deny');
+  await flowTitle(page, 'ADMIN DENY');
   await signupCascade(page, {
     name: denyName,
     email: denyEmail,
@@ -190,7 +263,7 @@ try {
   await logout(page);
 
   // ── 6. Approve → deactivate → blocked → reactivate → app ──────────────
-  await section(page, '6 deactivate / reactivate');
+  await flowTitle(page, 'DEACTIVATE / REACTIVATE');
   await signupCascade(page, {
     name: reactivateName,
     email: reactivateEmail,
@@ -229,7 +302,7 @@ try {
   await logout(page);
 
   // ── 7. Memberships + permissions grant/revoke ─────────────────────────
-  await section(page, '7 memberships + permissions');
+  await flowTitle(page, 'MEMBERSHIPS + PERMISSIONS');
   await signupCascade(page, {
     name: permsName,
     email: permsEmail,
@@ -284,7 +357,7 @@ try {
   await pause(page, 3000);
 
   // ── 8. Admin events create + edit ─────────────────────────────────────
-  await section(page, '8 admin events');
+  await flowTitle(page, 'ADMIN EVENTS');
   await page.goto(`${BASE_URL}/admin/events`, { waitUntil: 'networkidle' });
   await page.getByRole('heading', { name: 'Events' }).waitFor();
   await pause(page, 2000);
@@ -309,7 +382,7 @@ try {
   await logout(page);
 
   // ── 9. Officer approve applicant ──────────────────────────────────────
-  await section(page, '9 officer approve');
+  await flowTitle(page, 'OFFICER APPROVE');
   await setupOfficerAndApplicant({
     officerEmail,
     officerName,
@@ -337,7 +410,7 @@ try {
   await logout(page);
 
   // ── 10. Officer deny applicant ────────────────────────────────────────
-  await section(page, '10 officer deny');
+  await flowTitle(page, 'OFFICER DENY');
   await setupOfficerAndApplicant({
     officerEmail: offDenyOfficerEmail,
     officerName: offDenyOfficerName,
@@ -363,7 +436,7 @@ try {
   await logout(page);
 
   // ── 11. Member without manage_permissions → /users forbidden ──────────
-  await section(page, '11 officer users forbidden');
+  await flowTitle(page, 'USERS FORBIDDEN');
   await setupOfficerAndApplicant({
     officerEmail: noPermEmail,
     officerName: noPermName,
@@ -386,7 +459,7 @@ try {
   await logout(page);
 
   // ── 12. Member events CRUD (with perms) ───────────────────────────────
-  await section(page, '12 member events');
+  await flowTitle(page, 'MEMBER EVENTS');
   await setupActiveMember({ name: eventsName, email: eventsEmail, grantEventPerms: true });
   await login(page, eventsEmail, DEMO_PASSWORD);
   await page.waitForURL(/\/app/, { timeout: 15000 });
@@ -421,7 +494,7 @@ try {
   await logout(page);
 
   // ── 13. Member without event perms → /app/events forbidden ────────────
-  await section(page, '13 member events forbidden');
+  await flowTitle(page, 'EVENTS FORBIDDEN');
   await setupActiveMember({ name: noEvtName, email: noEvtEmail, grantEventPerms: false });
   await login(page, noEvtEmail, DEMO_PASSWORD);
   await page.waitForURL(/\/app/, { timeout: 15000 });
@@ -436,7 +509,343 @@ try {
   await page.goto(`${BASE_URL}/app/events`, { waitUntil: 'networkidle' });
   await page.waitForURL(/\/app\/?$/, { timeout: 15000 });
   await page.getByRole('heading', { name: new RegExp(`Hello, ${noEvtName}`) }).waitFor();
-  await pause(page, 3500);
+  await pause(page, 2500);
+  await logout(page);
+
+  // ── 14. Optional org signup ───────────────────────────────────────────
+  await flowTitle(page, 'OPTIONAL ORG SIGNUP');
+  await signupWithoutOrg(page, {
+    name: optOrglessName,
+    email: optOrglessEmail,
+    password: DEMO_PASSWORD,
+  });
+  await pause(page, 2000);
+  await login(page, optOrglessEmail, DEMO_PASSWORD);
+  await page.waitForURL(/\/app/, { timeout: 15000 });
+  await page.getByRole('heading', { name: new RegExp(`Hello, ${optOrglessName}`) }).waitFor();
+  await pause(page, 2500);
+  await logout(page);
+
+  await signupCascade(page, {
+    name: optPendingName,
+    email: optPendingEmail,
+    password: DEMO_PASSWORD,
+  });
+  await pause(page, 2000);
+  await login(page, optPendingEmail, DEMO_PASSWORD);
+  await page.waitForURL(/\/awaiting-approval/, { timeout: 15000 });
+  await page.getByText('Awaiting approval', { exact: true }).waitFor();
+  await pause(page, 2500);
+  await logout(page);
+
+  // ── 15. Ticketing host flow (API fixture + UI) ────────────────────────
+  await setupActiveMember({ name: ticketHostName, email: ticketHostEmail });
+  await grantTicketPermissionsByEmail(ticketHostEmail);
+  const ticketOrgB = await createOrgViaAdmin({ name: ticketOrgBName });
+
+  await flowTitle(page, 'TICKETING HOST');
+  await login(page, ticketHostEmail, DEMO_PASSWORD);
+  await page.waitForURL(/\/app/, { timeout: 15000 });
+  await page.getByRole('heading', { name: new RegExp(`Hello, ${ticketHostName}`) }).waitFor();
+  await pause(page, 2000);
+
+  await page.getByRole('link', { name: 'Events' }).click();
+  await page.waitForURL(/\/app\/events/, { timeout: 15000 });
+  await page.getByRole('heading', { name: 'Events' }).waitFor();
+  await pause(page, 2000);
+
+  await page.getByLabel('Event name').fill(ticketEventName);
+  await page.getByLabel('Event type').fill('Formal');
+  await page.getByLabel('Max headcount').fill('30');
+  await page.getByLabel('Location (optional)').fill('Chapter House');
+  await pause(page, 1500);
+  await page.getByRole('button', { name: 'Create' }).click();
+  await page.getByText(ticketEventName).waitFor({ timeout: 15000 });
+  await pause(page, 2500);
+
+  const ticketRow = page.locator('li').filter({ hasText: ticketEventName });
+  await ticketRow.getByRole('link', { name: 'Tickets' }).click();
+  await page.waitForURL(/\/app\/events\/.*\/tickets/, { timeout: 15000 });
+  await page.getByRole('button', { name: 'Config', exact: true }).waitFor({ timeout: 15000 });
+  await pause(page, 2000);
+
+  await page.getByLabel('Enable ticketing').check();
+  await page.getByLabel(/Ticket capacity/).fill('20');
+  await pause(page, 1000);
+  await page.getByRole('button', { name: 'Save config' }).click();
+  await pause(page, 2000);
+
+  await page.getByRole('button', { name: 'Allocations', exact: true }).click();
+  await pause(page, 1500);
+
+  await page.locator('#alloc-org').selectOption({ label: 'Alpha Demo Fraternity' });
+  await page.locator('#alloc-qty').fill('5');
+  await pause(page, 800);
+  await page.getByRole('button', { name: 'Create allocation' }).click();
+  await page
+    .getByRole('listitem')
+    .filter({ hasText: 'Alpha Demo Fraternity' })
+    .waitFor({ timeout: 15000 });
+  await pause(page, 2000);
+
+  await page.locator('#alloc-org').selectOption({ label: ticketOrgBName });
+  await page.locator('#alloc-qty').fill('1');
+  await pause(page, 800);
+  await page.getByRole('button', { name: 'Create allocation' }).click();
+  await page.getByRole('listitem').filter({ hasText: ticketOrgBName }).waitFor({ timeout: 15000 });
+  await pause(page, 2000);
+
+  await page.getByLabel('Public pool').check();
+  await page.locator('#alloc-qty').fill('3');
+  await pause(page, 800);
+  await page.getByRole('button', { name: 'Create allocation' }).click();
+  await page
+    .getByRole('listitem')
+    .filter({ hasText: 'Public' })
+    .filter({ hasText: '/ 3 sold' })
+    .waitFor({ timeout: 15000 });
+  await pause(page, 2000);
+
+  await page.getByRole('button', { name: 'Config', exact: true }).click();
+  await pause(page, 1000);
+  await page.locator('#sale-status').selectOption('on_sale');
+  await pause(page, 800);
+  await page.getByRole('button', { name: 'Save config' }).click();
+  await pause(page, 2000);
+
+  // Members buy from My tickets — host issues no longer exist in UI
+  await page.getByRole('link', { name: 'My tickets' }).click();
+  await page.waitForURL(/\/app\/tickets/, { timeout: 15000 });
+  await page.getByRole('heading', { name: 'My tickets' }).waitFor();
+  await pause(page, 2000);
+
+  const hostBuyRow = page.locator('li').filter({ hasText: ticketEventName });
+  await hostBuyRow.getByRole('button', { name: 'Buy ticket' }).click();
+  await page.getByText(ticketEventName).waitFor({ timeout: 15000 });
+  await pause(page, 2000);
+  await page.getByRole('button', { name: 'Mark paid' }).click();
+  await page.getByText('paid').waitFor({ timeout: 15000 });
+  await pause(page, 2000);
+
+  await page.getByRole('link', { name: 'Events' }).click();
+  await page.waitForURL(/\/app\/events/, { timeout: 15000 });
+  await pause(page, 1500);
+  const hostEvtRow = page.locator('li').filter({ hasText: ticketEventName });
+  await hostEvtRow.getByRole('link', { name: 'Tickets' }).click();
+  await page.waitForURL(/\/app\/events\/.*\/tickets/, { timeout: 15000 });
+  await pause(page, 1500);
+
+  await page.getByRole('button', { name: 'Tickets', exact: true }).click();
+  await pause(page, 1500);
+  await page.getByText(/Members buy their own tickets/i).waitFor({ timeout: 15000 });
+  await page.getByText('paid').first().waitFor({ timeout: 15000 });
+  if ((await page.getByRole('button', { name: 'Issue ticket' }).count()) > 0) {
+    throw new Error('Issue ticket button should not appear');
+  }
+  await pause(page, 2000);
+
+  await page.getByRole('button', { name: 'Guest list', exact: true }).click();
+  await pause(page, 1500);
+  await page.getByText('paid').first().waitFor({ timeout: 15000 });
+  await pause(page, 2500);
+
+  // Void from host Tickets tab (Issue ticket no longer in UI)
+  await page.getByRole('button', { name: 'Tickets', exact: true }).click();
+  await pause(page, 1500);
+  await page.getByRole('button', { name: 'Void' }).first().click();
+  await page.getByText('void').waitFor({ timeout: 15000 });
+  await pause(page, 2500);
+  await logout(page);
+
+  // ── 16. Guest claim ticket ────────────────────────────────────────────
+  await setupActiveMember({
+    name: `Fixture Host ${stamp}`,
+    email: ticketFixtureHostEmail,
+  });
+  await grantTicketPermissionsByEmail(ticketFixtureHostEmail);
+  await setupOnSalePublicEvent({
+    hostEmail: ticketFixtureHostEmail,
+    eventName: publicEventName,
+    publicQty: 10,
+  });
+
+  await flowTitle(page, 'GUEST CLAIM TICKET');
+  await signupWithoutOrg(page, {
+    name: ticketGuestName,
+    email: ticketGuestEmail,
+    password: DEMO_PASSWORD,
+  });
+  await pause(page, 2000);
+
+  await login(page, ticketGuestEmail, DEMO_PASSWORD);
+  await page.waitForURL(/\/app/, { timeout: 15000 });
+  await page.getByRole('heading', { name: new RegExp(`Hello, ${ticketGuestName}`) }).waitFor();
+  await pause(page, 2000);
+
+  await page.getByRole('link', { name: 'My tickets' }).click();
+  await page.waitForURL(/\/app\/tickets/, { timeout: 15000 });
+  await page.getByRole('heading', { name: 'My tickets' }).waitFor();
+  await pause(page, 2000);
+
+  const claimRow = page.locator('li').filter({ hasText: publicEventName });
+  await claimRow.getByRole('button', { name: 'Buy ticket' }).click();
+  await page.getByText(publicEventName).waitFor({ timeout: 15000 });
+  await pause(page, 2000);
+
+  await page.getByRole('button', { name: 'Mark paid' }).click();
+  await page.getByText('paid').waitFor({ timeout: 15000 });
+  await pause(page, 2500);
+  await logout(page);
+
+  // ── 17. Org member buy ────────────────────────────────────────────────
+  await setupActiveMember({ name: orgBuyHostName, email: orgBuyHostEmail });
+  await grantTicketPermissionsByEmail(orgBuyHostEmail);
+  await setupActiveMember({ name: orgBuyBuyerName, email: orgBuyBuyerEmail });
+
+  const orgBuyHostToken = await loginToken(orgBuyHostEmail, DEMO_PASSWORD);
+  const orgBuyOrgId = await seedOrgId();
+
+  const orgBuyEvent = await apiJson('/api/events', {
+    method: 'POST',
+    token: orgBuyHostToken,
+    body: {
+      organizationId: orgBuyOrgId,
+      name: orgBuyEventName,
+      type: 'Formal',
+      maxHeadcount: 50,
+      location: 'Chapter House',
+    },
+  });
+
+  await apiJson(`/api/events/${orgBuyEvent.id}/ticketing`, {
+    method: 'PATCH',
+    token: orgBuyHostToken,
+    body: {
+      ticketingEnabled: true,
+      ticketCapacity: 20,
+      ticketSaleStatus: 'draft',
+    },
+  });
+
+  await apiJson(`/api/events/${orgBuyEvent.id}/allocations`, {
+    method: 'POST',
+    token: orgBuyHostToken,
+    body: { organizationId: orgBuyOrgId, quantity: 5 },
+  });
+
+  await apiJson(`/api/events/${orgBuyEvent.id}/ticketing`, {
+    method: 'PATCH',
+    token: orgBuyHostToken,
+    body: { ticketSaleStatus: 'on_sale' },
+  });
+
+  await flowTitle(page, 'ORG MEMBER BUY');
+  await login(page, orgBuyBuyerEmail, DEMO_PASSWORD);
+  await page.waitForURL(/\/app/, { timeout: 15000 });
+  await page.getByRole('heading', { name: new RegExp(`Hello, ${orgBuyBuyerName}`) }).waitFor();
+  await pause(page, 2000);
+
+  await page.getByRole('link', { name: 'My tickets' }).click();
+  await page.waitForURL(/\/app\/tickets/, { timeout: 15000 });
+  await page.getByRole('heading', { name: 'My tickets' }).waitFor();
+  await pause(page, 2000);
+
+  const buyRow = page.locator('li').filter({ hasText: orgBuyEventName });
+  await buyRow.getByRole('button', { name: 'Buy ticket' }).click();
+  await page.getByText(orgBuyEventName).waitFor({ timeout: 15000 });
+  await pause(page, 2000);
+
+  await page.getByRole('button', { name: 'Mark paid' }).click();
+  await page.getByText('paid').waitFor({ timeout: 15000 });
+  await pause(page, 2500);
+  await logout(page);
+
+  // ── 18. QR check-in (condensed) ───────────────────────────────────────
+  await setupActiveMember({ name: qrHostManagerName, email: qrHostManagerEmail });
+  await grantTicketPermissionsByEmail(qrHostManagerEmail);
+  await setupActiveMember({ name: qrHostScannerName, email: qrHostScannerEmail });
+  await grantPermissionsByEmail(qrHostScannerEmail, ['tickets.scan', 'events.manage']);
+
+  const qrHostToken = await loginToken(qrHostManagerEmail, DEMO_PASSWORD);
+  const qrOrgId = await seedOrgId();
+
+  const qrEvent = await apiJson('/api/events', {
+    method: 'POST',
+    token: qrHostToken,
+    body: {
+      organizationId: qrOrgId,
+      name: qrEventName,
+      type: 'Formal',
+      maxHeadcount: 50,
+      location: 'Chapter House',
+    },
+  });
+
+  await apiJson(`/api/events/${qrEvent.id}/ticketing`, {
+    method: 'PATCH',
+    token: qrHostToken,
+    body: {
+      ticketingEnabled: true,
+      ticketCapacity: 2,
+      ticketSaleStatus: 'draft',
+    },
+  });
+
+  const qrAlloc = await apiJson(`/api/events/${qrEvent.id}/allocations`, {
+    method: 'POST',
+    token: qrHostToken,
+    body: { organizationId: qrOrgId, quantity: 2 },
+  });
+  const qrAllocId = Array.isArray(qrAlloc) ? qrAlloc[0].id : qrAlloc.id;
+
+  await apiJson(`/api/events/${qrEvent.id}/ticketing`, {
+    method: 'PATCH',
+    token: qrHostToken,
+    body: { ticketSaleStatus: 'on_sale' },
+  });
+
+  const [qrCredential1] = await issuePaidTickets(qrHostToken, qrEvent.id, qrAllocId, 1);
+
+  await flowTitle(page, 'QR CHECK-IN');
+  await login(page, qrHostScannerEmail, DEMO_PASSWORD);
+  await page.waitForURL(/\/app/, { timeout: 15000 });
+  await page
+    .getByRole('heading', { name: new RegExp(`Hello, ${qrHostScannerName}`) })
+    .waitFor();
+  await pause(page, 2000);
+
+  await goToEventTickets(page, qrEvent.id);
+  await page.getByRole('button', { name: 'Scanner', exact: true }).waitFor({
+    timeout: 15000,
+  });
+  await pause(page, 1500);
+
+  await pasteAndCheckIn(page, qrCredential1);
+  await page.getByText('Checked in', { exact: true }).waitFor({ timeout: 15000 });
+  await pause(page, 2500);
+
+  await logout(page);
+  await login(page, qrHostManagerEmail, DEMO_PASSWORD);
+  await page.waitForURL(/\/app/, { timeout: 15000 });
+  await pause(page, 1500);
+
+  await goToEventTickets(page, qrEvent.id);
+  await page.getByRole('button', { name: 'Guest list', exact: true }).click();
+  await pause(page, 1500);
+  await page.getByText('Checked in', { exact: true }).waitFor({ timeout: 15000 });
+  await pause(page, 2500);
+
+  await logout(page);
+  await login(page, qrHostScannerEmail, DEMO_PASSWORD);
+  await page.waitForURL(/\/app/, { timeout: 15000 });
+  await pause(page, 1500);
+
+  await goToEventTickets(page, qrEvent.id);
+  await pasteAndCheckIn(page, qrCredential1);
+  await page.getByText('Already checked in', { exact: true }).waitFor({
+    timeout: 15000,
+  });
+  await pause(page, 3000);
 
   console.log('✓ all sections done');
 } finally {

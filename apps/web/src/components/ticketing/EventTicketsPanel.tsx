@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { StripeConnectBanner } from '@/components/ticketing/StripeConnectBanner';
 import { TicketSetupWizard } from '@/components/ticketing/setup-wizard/TicketSetupWizard';
+import { ToggleSwitch } from '@/components/ticketing/setup-wizard/ToggleSwitch';
 import {
   fromLocalDatetime,
   toLocalDatetime,
@@ -339,16 +340,13 @@ export function EventTicketsPanel({
                 configMutation.mutate();
               }}
             >
-              <div className="flex items-center gap-2 sm:col-span-2">
-                <input
-                  id="ticketing-enabled"
-                  type="checkbox"
-                  checked={ticketingEnabled}
-                  onChange={(e) => setTicketingEnabled(e.target.checked)}
-                  className="size-4"
-                />
-                <Label htmlFor="ticketing-enabled">Enable ticketing</Label>
-              </div>
+              <ToggleSwitch
+                id="ticketing-enabled"
+                label="Enable ticketing"
+                checked={ticketingEnabled}
+                onCheckedChange={setTicketingEnabled}
+                className="sm:col-span-2"
+              />
               {ticketingEnabled ? (
                 <>
                   <div className="space-y-2">
@@ -445,29 +443,25 @@ export function EventTicketsPanel({
                   createAllocMutation.mutate();
                 }}
               >
-                <div className="flex flex-wrap gap-4 sm:col-span-2">
-                  <label className="flex items-center gap-2 text-sm text-ink-300">
-                    <input
-                      type="checkbox"
-                      checked={allocAllOrgs}
-                      onChange={(e) => {
-                        setAllocAllOrgs(e.target.checked);
-                        if (e.target.checked) setAllocPublic(false);
-                      }}
-                    />
-                    All organizations
-                  </label>
-                  <label className="flex items-center gap-2 text-sm text-ink-300">
-                    <input
-                      type="checkbox"
-                      checked={allocPublic}
-                      onChange={(e) => {
-                        setAllocPublic(e.target.checked);
-                        if (e.target.checked) setAllocAllOrgs(false);
-                      }}
-                    />
-                    Public pool
-                  </label>
+                <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
+                  <ToggleSwitch
+                    id="alloc-all-orgs"
+                    label="All organizations"
+                    checked={allocAllOrgs}
+                    onCheckedChange={(checked) => {
+                      setAllocAllOrgs(checked);
+                      if (checked) setAllocPublic(false);
+                    }}
+                  />
+                  <ToggleSwitch
+                    id="alloc-public"
+                    label="Public pool"
+                    checked={allocPublic}
+                    onCheckedChange={(checked) => {
+                      setAllocPublic(checked);
+                      if (checked) setAllocAllOrgs(false);
+                    }}
+                  />
                 </div>
                 {!allocAllOrgs && !allocPublic ? (
                   <div className="space-y-2 sm:col-span-2">
