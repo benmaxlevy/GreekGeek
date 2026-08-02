@@ -207,21 +207,19 @@ export async function checkInTicket(
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    try {
-      const data = (await res.json()) as { code?: string; message?: string };
-      const parsed = TicketCheckInErrorCodeSchema.safeParse(data.code);
-      if (parsed.success) {
-        throw new TicketCheckInError(
-          parsed.data,
-          typeof data.message === 'string' ? data.message : 'Check-in failed',
-        );
-      }
-    } catch (err) {
-      if (err instanceof TicketCheckInError) {
-        throw err;
-      }
+    const data = (await res.json()) as { code?: string; message?: string };
+    const parsed = TicketCheckInErrorCodeSchema.safeParse(data.code);
+    if (parsed.success) {
+      throw new TicketCheckInError(
+        parsed.data,
+        typeof data.message === 'string' ? data.message : 'Check-in failed',
+      );
     }
-    throw new Error(await readError(res, 'Check-in failed'));
+    throw new Error(
+      typeof data.message === 'string'
+        ? data.message
+        : `Check-in failed (${res.status})`,
+    );
   }
   return CheckInTicketResponseSchema.parse(await res.json());
 }
