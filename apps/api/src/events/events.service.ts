@@ -115,7 +115,8 @@ export class EventsService {
     if (
       !keys.has('events.create') &&
       !keys.has('events.manage') &&
-      !keys.has('tickets.manage')
+      !keys.has('tickets.manage') &&
+      !keys.has('tickets.scan')
     ) {
       throw new ForbiddenException('Missing organization permission');
     }
@@ -145,7 +146,8 @@ export class EventsService {
       isHostMember &&
       (keys.has('events.create') ||
         keys.has('events.manage') ||
-        keys.has('tickets.manage'))
+        keys.has('tickets.manage') ||
+        keys.has('tickets.scan'))
     ) {
       return;
     }

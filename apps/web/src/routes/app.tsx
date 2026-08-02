@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { logoutRequest } from '@/lib/api';
 import { meQueryKey, meQueryOptions } from '@/lib/auth';
 import {
+  canAccessEventTicketing,
   canAccessOrgEvents,
   canManageOrgPendingApprovals,
   destinationForUser,
@@ -40,7 +41,9 @@ function AuthenticatedLayout() {
   const navItems = [
     { label: 'Home', to: '/app' },
     { label: 'My tickets', to: '/app/tickets' },
-    ...(canAccessOrgEvents(user) ? [{ label: 'Events', to: '/app/events' }] : []),
+    ...(canAccessOrgEvents(user) || canAccessEventTicketing(user)
+      ? [{ label: 'Events', to: '/app/events' }]
+      : []),
     ...(canManageOrgPendingApprovals(user)
       ? [{ label: 'Pending approvals', to: '/users' }]
       : []),

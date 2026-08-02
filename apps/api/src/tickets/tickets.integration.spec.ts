@@ -529,6 +529,18 @@ const hasDatabase = Boolean(process.env.DATABASE_URL);
     await prisma.event.delete({ where: { id: claimEvent.id } });
   });
 
+  it('host tickets.scan can get and list host event; invited tickets.scan cannot get host event', async () => {
+    const viewed = await events.get(eventId, asUser(hostScannerId));
+    expect(viewed.id).toBe(eventId);
+
+    const listed = await events.list({}, asUser(hostScannerId));
+    expect(listed.some((e) => e.id === eventId)).toBe(true);
+
+    await expect(
+      events.get(eventId, asUser(invitedScannerId)),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
   it('invited lists own allocation; guest lists claimable; tickets.manage can get event', async () => {
     await prisma.ticket.deleteMany({
       where: { allocation: { eventId } },
