@@ -102,14 +102,17 @@ function AdminPermissionsPage() {
   });
 
   const grantedKeys = new Set((grantsQuery.data ?? []).map((g) => g.permissionKey));
-  const catalog = catalogQuery.data ?? [];
+  const catalog = [...(catalogQuery.data ?? [])].sort((a, b) =>
+    a.key.localeCompare(b.key),
+  );
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Permissions</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Seeded catalog is read-only. Grant or revoke on ACTIVE members only.
+          Seeded catalog is read-only (includes payments.manage). Grant or revoke on
+          ACTIVE members only.
         </p>
       </div>
 

@@ -33,6 +33,9 @@ import { Route as UsersIndexRouteImport } from './routes/users.index'
 import { Route as AppEventsIndexRouteImport } from './routes/app.events.index'
 import { Route as AdminEventsEventIdTicketsRouteImport } from './routes/admin.events.$eventId.tickets'
 import { Route as AppEventsEventIdTicketsRouteImport } from './routes/app.events.$eventId.tickets'
+import { Route as AppOrgsOrgIdPaymentsRouteImport } from './routes/app.orgs.$orgId.payments'
+import { Route as AppOrgsOrgIdPaymentsRefreshRouteImport } from './routes/app.orgs.$orgId.payments.refresh'
+import { Route as AppOrgsOrgIdPaymentsReturnRouteImport } from './routes/app.orgs.$orgId.payments.return'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -155,6 +158,23 @@ const AppEventsEventIdTicketsRoute = AppEventsEventIdTicketsRouteImport.update({
   path: '/$eventId/tickets',
   getParentRoute: () => AppEventsRoute,
 } as any)
+const AppOrgsOrgIdPaymentsRoute = AppOrgsOrgIdPaymentsRouteImport.update({
+  id: '/orgs/$orgId/payments',
+  path: '/orgs/$orgId/payments',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOrgsOrgIdPaymentsRefreshRoute =
+  AppOrgsOrgIdPaymentsRefreshRouteImport.update({
+    id: '/refresh',
+    path: '/refresh',
+    getParentRoute: () => AppOrgsOrgIdPaymentsRoute,
+  } as any)
+const AppOrgsOrgIdPaymentsReturnRoute =
+  AppOrgsOrgIdPaymentsReturnRouteImport.update({
+    id: '/return',
+    path: '/return',
+    getParentRoute: () => AppOrgsOrgIdPaymentsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -181,6 +201,9 @@ export interface FileRoutesByFullPath {
   '/app/events/': typeof AppEventsIndexRoute
   '/admin/events/$eventId/tickets': typeof AdminEventsEventIdTicketsRoute
   '/app/events/$eventId/tickets': typeof AppEventsEventIdTicketsRoute
+  '/app/orgs/$orgId/payments': typeof AppOrgsOrgIdPaymentsRouteWithChildren
+  '/app/orgs/$orgId/payments/refresh': typeof AppOrgsOrgIdPaymentsRefreshRoute
+  '/app/orgs/$orgId/payments/return': typeof AppOrgsOrgIdPaymentsReturnRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -203,6 +226,9 @@ export interface FileRoutesByTo {
   '/app/events': typeof AppEventsIndexRoute
   '/admin/events/$eventId/tickets': typeof AdminEventsEventIdTicketsRoute
   '/app/events/$eventId/tickets': typeof AppEventsEventIdTicketsRoute
+  '/app/orgs/$orgId/payments': typeof AppOrgsOrgIdPaymentsRouteWithChildren
+  '/app/orgs/$orgId/payments/refresh': typeof AppOrgsOrgIdPaymentsRefreshRoute
+  '/app/orgs/$orgId/payments/return': typeof AppOrgsOrgIdPaymentsReturnRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -230,6 +256,9 @@ export interface FileRoutesById {
   '/app/events/': typeof AppEventsIndexRoute
   '/admin/events/$eventId/tickets': typeof AdminEventsEventIdTicketsRoute
   '/app/events/$eventId/tickets': typeof AppEventsEventIdTicketsRoute
+  '/app/orgs/$orgId/payments': typeof AppOrgsOrgIdPaymentsRouteWithChildren
+  '/app/orgs/$orgId/payments/refresh': typeof AppOrgsOrgIdPaymentsRefreshRoute
+  '/app/orgs/$orgId/payments/return': typeof AppOrgsOrgIdPaymentsReturnRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -258,6 +287,9 @@ export interface FileRouteTypes {
     | '/app/events/'
     | '/admin/events/$eventId/tickets'
     | '/app/events/$eventId/tickets'
+    | '/app/orgs/$orgId/payments'
+    | '/app/orgs/$orgId/payments/refresh'
+    | '/app/orgs/$orgId/payments/return'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -280,6 +312,9 @@ export interface FileRouteTypes {
     | '/app/events'
     | '/admin/events/$eventId/tickets'
     | '/app/events/$eventId/tickets'
+    | '/app/orgs/$orgId/payments'
+    | '/app/orgs/$orgId/payments/refresh'
+    | '/app/orgs/$orgId/payments/return'
   id:
     | '__root__'
     | '/'
@@ -306,6 +341,9 @@ export interface FileRouteTypes {
     | '/app/events/'
     | '/admin/events/$eventId/tickets'
     | '/app/events/$eventId/tickets'
+    | '/app/orgs/$orgId/payments'
+    | '/app/orgs/$orgId/payments/refresh'
+    | '/app/orgs/$orgId/payments/return'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -489,6 +527,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEventsEventIdTicketsRouteImport
       parentRoute: typeof AppEventsRoute
     }
+    '/app/orgs/$orgId/payments': {
+      id: '/app/orgs/$orgId/payments'
+      path: '/orgs/$orgId/payments'
+      fullPath: '/app/orgs/$orgId/payments'
+      preLoaderRoute: typeof AppOrgsOrgIdPaymentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/orgs/$orgId/payments/refresh': {
+      id: '/app/orgs/$orgId/payments/refresh'
+      path: '/refresh'
+      fullPath: '/app/orgs/$orgId/payments/refresh'
+      preLoaderRoute: typeof AppOrgsOrgIdPaymentsRefreshRouteImport
+      parentRoute: typeof AppOrgsOrgIdPaymentsRoute
+    }
+    '/app/orgs/$orgId/payments/return': {
+      id: '/app/orgs/$orgId/payments/return'
+      path: '/return'
+      fullPath: '/app/orgs/$orgId/payments/return'
+      preLoaderRoute: typeof AppOrgsOrgIdPaymentsReturnRouteImport
+      parentRoute: typeof AppOrgsOrgIdPaymentsRoute
+    }
   }
 }
 
@@ -544,16 +603,31 @@ const AppEventsRouteWithChildren = AppEventsRoute._addFileChildren(
   AppEventsRouteChildren,
 )
 
+interface AppOrgsOrgIdPaymentsRouteChildren {
+  AppOrgsOrgIdPaymentsRefreshRoute: typeof AppOrgsOrgIdPaymentsRefreshRoute
+  AppOrgsOrgIdPaymentsReturnRoute: typeof AppOrgsOrgIdPaymentsReturnRoute
+}
+
+const AppOrgsOrgIdPaymentsRouteChildren: AppOrgsOrgIdPaymentsRouteChildren = {
+  AppOrgsOrgIdPaymentsRefreshRoute: AppOrgsOrgIdPaymentsRefreshRoute,
+  AppOrgsOrgIdPaymentsReturnRoute: AppOrgsOrgIdPaymentsReturnRoute,
+}
+
+const AppOrgsOrgIdPaymentsRouteWithChildren =
+  AppOrgsOrgIdPaymentsRoute._addFileChildren(AppOrgsOrgIdPaymentsRouteChildren)
+
 interface AppRouteChildren {
   AppEventsRoute: typeof AppEventsRouteWithChildren
   AppTicketsRoute: typeof AppTicketsRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppOrgsOrgIdPaymentsRoute: typeof AppOrgsOrgIdPaymentsRouteWithChildren
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppEventsRoute: AppEventsRouteWithChildren,
   AppTicketsRoute: AppTicketsRoute,
   AppIndexRoute: AppIndexRoute,
+  AppOrgsOrgIdPaymentsRoute: AppOrgsOrgIdPaymentsRouteWithChildren,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

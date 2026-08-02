@@ -50,10 +50,14 @@ export {
   OrgStripeFieldsSchema,
   StripeConnectStatusResponseSchema,
   StripeConnectOnboardingLinkResponseSchema,
+  StripeConnectReturnSyncResponseSchema,
+  StripeConnectRefreshLinkResponseSchema,
   type StripeRequirementsDue,
   type OrgStripeFields,
   type StripeConnectStatusResponse,
   type StripeConnectOnboardingLinkResponse,
+  type StripeConnectReturnSyncResponse,
+  type StripeConnectRefreshLinkResponse,
 } from './stripe-connect';
 export {
   MembershipSchema,

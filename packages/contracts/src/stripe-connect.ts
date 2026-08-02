@@ -26,3 +26,17 @@ export const StripeConnectOnboardingLinkResponseSchema = z.object({
 export type StripeConnectOnboardingLinkResponse = z.infer<
   typeof StripeConnectOnboardingLinkResponseSchema
 >;
+
+/** FE bridge: sync return from Stripe, then navigate in-app. */
+export const StripeConnectReturnSyncResponseSchema = z.object({
+  redirectTo: z.string().url(),
+});
+export type StripeConnectReturnSyncResponse = z.infer<
+  typeof StripeConnectReturnSyncResponseSchema
+>;
+
+/** FE bridge: mint refresh link as JSON (no 303). */
+export const StripeConnectRefreshLinkResponseSchema =
+  StripeConnectOnboardingLinkResponseSchema;
+export type StripeConnectRefreshLinkResponse =
+  StripeConnectOnboardingLinkResponse;

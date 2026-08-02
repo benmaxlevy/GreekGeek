@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 export interface AppShellNavItem {
   label: string;
   to: string;
+  params?: Record<string, string>;
 }
 
 export interface AppShellProps {
@@ -34,8 +35,9 @@ export function AppShell({ children, navItems = DEFAULT_NAV, footer }: AppShellP
         <nav className="flex flex-1 flex-col gap-1 px-3 py-2">
           {navItems.map((item) => (
             <Link
-              key={item.to}
+              key={`${item.to}:${JSON.stringify(item.params ?? {})}`}
               to={item.to}
+              params={item.params}
               className="flex min-h-11 items-center rounded-md px-3 text-sm text-ink-300 transition-colors hover:bg-surface-input hover:text-ink-100"
             >
               {item.label}
@@ -83,8 +85,9 @@ export function AppShell({ children, navItems = DEFAULT_NAV, footer }: AppShellP
               <nav className="flex flex-1 flex-col gap-1 px-3 py-2">
                 {navItems.map((item) => (
                   <Link
-                    key={item.to}
+                    key={`${item.to}:${JSON.stringify(item.params ?? {})}`}
                     to={item.to}
+                    params={item.params}
                     className="flex min-h-11 items-center rounded-md px-3 text-sm text-ink-300 hover:bg-surface-input hover:text-ink-100"
                     onClick={() => setMobileOpen(false)}
                   >

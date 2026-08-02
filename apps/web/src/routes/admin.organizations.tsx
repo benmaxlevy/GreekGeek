@@ -14,10 +14,23 @@ import {
   listUniversities,
   updateOrganization,
 } from '@/lib/admin-api';
+import { startConnect } from '@/lib/stripe-connect-api';
+import {
+  deriveConnectUiState,
+  hasOutstandingRequirements,
+} from '@/lib/stripe-connect/types/connect-ui';
 
 export const Route = createFileRoute('/admin/organizations')({
   component: AdminOrganizationsPage,
 });
+
+function stripeStatusLabel(org: Organization): string {
+  const state = deriveConnectUiState(org);
+  if (state === 'not_started') return 'Not started';
+  if (state === 'ready') return 'Ready';
+  if (state === 'restricted') return 'Restricted';
+  return 'Requirements due';
+}
 
 function AdminOrganizationsPage() {
   const queryClient = useQueryClient();
@@ -29,6 +42,7 @@ function AdminOrganizationsPage() {
   const [editName, setEditName] = useState('');
   const [editType, setEditType] = useState<OrganizationType>('FRATERNITY');
   const [error, setError] = useState<string | null>(null);
+  const [connectingOrgId, setConnectingOrgId] = useState<string | null>(null);
 
   const universitiesQuery = useQuery({
     queryKey: ['admin', 'universities'],
@@ -77,6 +91,22 @@ function AdminOrganizationsPage() {
     onError: (err: Error) => setError(err.message),
   });
 
+  const connectMutation = useMutation({
+    mutationFn: (organizationId: string) => startConnect(organizationId),
+    onMutate: (organizationId) => {
+      setConnectingOrgId(organizationId);
+      setError(null);
+    },
+    onSuccess: (data) => {
+      setConnectingOrgId(null);
+      window.location.href = data.url;
+    },
+    onError: (err: Error) => {
+      setConnectingOrgId(null);
+      setError(err.message);
+    },
+  });
+
   const uniName = new Map((universitiesQuery.data ?? []).map((u) => [u.id, u.name]));
   const organizations = listQuery.data ?? [];
 
@@ -85,7 +115,7 @@ function AdminOrganizationsPage() {
       <div>
         <h1 className="text-[28px] font-medium tracking-tight">Organizations</h1>
         <p className="mt-1 text-sm text-ink-500">
-          Chapters bound to a university. Delete fails with conflict when memberships exist.
+          Chapters bound to a university. Stripe flags are read-only from Connect sync.
         </p>
       </div>
 
@@ -224,46 +254,105 @@ function AdminOrganizationsPage() {
             <p className="p-6 text-sm text-ink-500">No organizations yet.</p>
           ) : (
             <ul className="divide-y divide-border-subtle">
-              {organizations.map((org) => (
-                <li
-                  key={org.id}
-                  className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium text-ink-100">{org.name}</p>
-                      <Badge variant="outline">{org.type}</Badge>
+              {organizations.map((org) => {
+                const connectState = deriveConnectUiState(org);
+                return (
+                  <li
+                    key={org.id}
+                    className="flex flex-col gap-3 px-6 py-4 lg:flex-row lg:items-start lg:justify-between"
+                  >
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-medium text-ink-100">{org.name}</p>
+                        <Badge variant="outline">{org.type}</Badge>
+                        <Badge
+                          variant={connectState === 'ready' ? 'default' : 'secondary'}
+                        >
+                          Stripe: {stripeStatusLabel(org)}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-ink-500">
+                        {uniName.get(org.universityId) ?? org.universityId}
+                      </p>
+                      <dl className="grid gap-1 text-xs text-ink-500 sm:grid-cols-2">
+                        <div>
+                          <span className="text-ink-500">Account: </span>
+                          <span className="font-mono text-ink-300">
+                            {org.stripeAccountId ?? '—'}
+                          </span>
+                        </div>
+                        <div>
+                          Charges:{' '}
+                          <span className="text-ink-300">
+                            {org.stripeChargesEnabled ? 'on' : 'off'}
+                          </span>
+                          {' · '}
+                          Payouts:{' '}
+                          <span className="text-ink-300">
+                            {org.stripePayoutsEnabled ? 'on' : 'off'}
+                          </span>
+                          {' · '}
+                          Details:{' '}
+                          <span className="text-ink-300">
+                            {org.stripeDetailsSubmitted ? 'yes' : 'no'}
+                          </span>
+                        </div>
+                        <div>
+                          Requirements:{' '}
+                          <span className="text-ink-300">
+                            {hasOutstandingRequirements(org.stripeRequirementsDue)
+                              ? 'due'
+                              : 'none'}
+                          </span>
+                        </div>
+                        <div>
+                          Updated:{' '}
+                          <span className="text-ink-300">
+                            {org.stripeAccountUpdatedAt
+                              ? new Date(org.stripeAccountUpdatedAt).toLocaleString()
+                              : '—'}
+                          </span>
+                        </div>
+                      </dl>
                     </div>
-                    <p className="text-sm text-ink-500">
-                      {uniName.get(org.universityId) ?? org.universityId}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setEditing(org);
-                        setEditName(org.name);
-                        setEditType(org.type);
-                        setError(null);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="destructive"
-                      disabled={deleteMutation.isPending}
-                      onClick={() => deleteMutation.mutate(org.id)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </li>
-              ))}
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        isLoading={
+                          connectMutation.isPending && connectingOrgId === org.id
+                        }
+                        onClick={() => connectMutation.mutate(org.id)}
+                      >
+                        Generate onboarding link
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditing(org);
+                          setEditName(org.name);
+                          setEditType(org.type);
+                          setError(null);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        disabled={deleteMutation.isPending}
+                        onClick={() => deleteMutation.mutate(org.id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </CardContent>

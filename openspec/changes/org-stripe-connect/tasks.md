@@ -34,11 +34,11 @@
 
 ## 5. FE org settings + banners + admin
 
-- [ ] 5.1 Org payments settings page: not started / requirements due / ready / restricted states; Connect CTA for `payments.manage`; ask-officer copy otherwise
-- [ ] 5.2 Ticketing UI: blocking banner on paid allocation + on_sale when host org not ready; CTA gated on `payments.manage`
-- [ ] 5.3 Admin org detail: read-only Stripe status columns; generate onboarding link action (no flag toggles)
-- [ ] 5.4 Admin permissions UI lists `payments.manage` for grant/revoke
-- [ ] 5.5 Commit: `add stripe connect org settings ticketing banners and admin ui`
+- [x] 5.1 Org payments settings page: not started / requirements due / ready / restricted states; Connect CTA for `payments.manage`; ask-officer copy otherwise
+- [x] 5.2 Ticketing UI: blocking banner on paid allocation + on_sale when host org not ready; CTA gated on `payments.manage`
+- [x] 5.3 Admin org detail: read-only Stripe status columns; generate onboarding link action (no flag toggles)
+- [x] 5.4 Admin permissions UI lists `payments.manage` for grant/revoke
+- [x] 5.5 Commit: `add stripe connect org settings ticketing banners and admin ui`
 
 ## 6. Verification / demos
 

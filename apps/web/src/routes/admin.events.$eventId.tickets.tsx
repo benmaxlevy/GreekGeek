@@ -9,6 +9,7 @@ export const Route = createFileRoute('/admin/events/$eventId/tickets')({
 
 function AdminEventTicketsPage() {
   const { eventId } = Route.useParams();
+  const { user } = Route.useRouteContext();
 
   const eventQuery = useQuery({
     queryKey: ['admin', 'events', eventId],
@@ -43,6 +44,7 @@ function AdminEventTicketsPage() {
         eventId={eventId}
         event={event}
         mode="admin"
+        user={user}
         canManage
         canScan
       />

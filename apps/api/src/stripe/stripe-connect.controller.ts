@@ -14,9 +14,13 @@ import { StripeConnectService } from './stripe-connect.service';
 import {
   OrgStripeParamsSchema,
   StripeConnectOnboardingLinkResponseSchema,
+  StripeConnectRefreshLinkResponseSchema,
+  StripeConnectReturnSyncResponseSchema,
   StripeConnectStatusResponseSchema,
   type OrgStripeParams,
   type StripeConnectOnboardingLinkResponse,
+  type StripeConnectRefreshLinkResponse,
+  type StripeConnectReturnSyncResponse,
   type StripeConnectStatusResponse,
 } from './types/stripe-connect.dto';
 
@@ -66,5 +70,25 @@ export class StripeConnectController {
   ): Promise<void> {
     const url = await this.connect.handleReturn(params.organizationId);
     res.redirect(303, url);
+  }
+
+  /** FE bridge companion: sync + JSON (Bearer), avoids opaque 303 Location. */
+  @Post('return/sync')
+  async returnSync(
+    @Param(new ZodValidationPipe(OrgStripeParamsSchema))
+    params: OrgStripeParams,
+  ): Promise<StripeConnectReturnSyncResponse> {
+    const redirectTo = await this.connect.handleReturn(params.organizationId);
+    return StripeConnectReturnSyncResponseSchema.parse({ redirectTo });
+  }
+
+  /** FE bridge companion: mint link as JSON (Bearer). */
+  @Post('refresh/link')
+  async refreshLink(
+    @Param(new ZodValidationPipe(OrgStripeParamsSchema))
+    params: OrgStripeParams,
+  ): Promise<StripeConnectRefreshLinkResponse> {
+    const url = await this.connect.refreshOnboarding(params.organizationId);
+    return StripeConnectRefreshLinkResponseSchema.parse({ url });
   }
 }

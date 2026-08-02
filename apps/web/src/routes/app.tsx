@@ -38,11 +38,21 @@ function AuthenticatedLayout() {
     await navigate({ to: '/login' });
   }
 
+  const orgId = user.membership?.organizationId;
   const navItems = [
     { label: 'Home', to: '/app' },
     { label: 'My tickets', to: '/app/tickets' },
     ...(canAccessOrgEvents(user) || canAccessEventTicketing(user)
       ? [{ label: 'Events', to: '/app/events' }]
+      : []),
+    ...(orgId
+      ? [
+          {
+            label: 'Payments',
+            to: '/app/orgs/$orgId/payments',
+            params: { orgId },
+          },
+        ]
       : []),
     ...(canManageOrgPendingApprovals(user)
       ? [{ label: 'Pending approvals', to: '/users' }]

@@ -88,6 +88,36 @@ export function canManageTickets(user: PublicUser): boolean {
   );
 }
 
+/** ACTIVE member with payments.manage in their org (or platform ADMIN). */
+export function canManagePayments(user: PublicUser): boolean {
+  if (user.status !== 'ACTIVE') {
+    return false;
+  }
+  if (user.role === 'ADMIN') {
+    return true;
+  }
+  return (
+    user.membership != null && user.permissions.includes('payments.manage')
+  );
+}
+
+/** payments.manage on a specific org (ADMIN bypasses org match). */
+export function canManageOrgPayments(
+  user: PublicUser,
+  organizationId: string,
+): boolean {
+  if (user.status !== 'ACTIVE') {
+    return false;
+  }
+  if (user.role === 'ADMIN') {
+    return true;
+  }
+  return (
+    user.membership?.organizationId === organizationId &&
+    user.permissions.includes('payments.manage')
+  );
+}
+
 /** ACTIVE host-org member with tickets.scan (door staff). Not implied by tickets.manage. */
 export function canScanTickets(user: PublicUser): boolean {
   return (

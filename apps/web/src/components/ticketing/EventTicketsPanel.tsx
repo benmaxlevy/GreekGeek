@@ -12,7 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { StripeConnectBanner } from '@/components/ticketing/StripeConnectBanner';
+import { TicketScanner } from '@/components/ticketing/TicketScanner';
 import { listOrganizations } from '@/lib/admin-api';
+import { canManageOrgPayments } from '@/lib/auth-routing';
 import {
   createAllocation,
   guestList,
@@ -23,7 +26,6 @@ import {
   updateAllocation,
   voidTicket,
 } from '@/lib/ticketing-api';
-import { TicketScanner } from '@/components/ticketing/TicketScanner';
 
 type Tab = 'config' | 'allocations' | 'tickets' | 'guests' | 'scan';
 
@@ -135,10 +137,11 @@ export function EventTicketsPanel({
     enabled: isHost && canManage && tab === 'guests',
   });
 
+  const hostOrgId = event?.organizationId;
   const orgsQuery = useQuery({
     queryKey: ['organizations'],
     queryFn: () => listOrganizations({}),
-    enabled: isHost && canManage && tab === 'allocations',
+    enabled: isHost && canManage,
   });
 
   const allocations = allocationsQuery.data ?? [];
@@ -149,6 +152,30 @@ export function EventTicketsPanel({
   const visibleAllocations = isHost
     ? allocations
     : allocations.filter((a) => a.id === resolvedInvitedAllocId);
+
+  const hostOrg = (orgsQuery.data ?? []).find((o) => o.id === hostOrgId);
+  const chargesEnabled = hostOrg?.stripeChargesEnabled === true;
+  const hasPaidAllocation = allocations.some((a) => (a.priceCents ?? 0) > 0);
+  const enteringPaidPrice =
+    allocPrice.trim() !== '' && Number(allocPrice) > 0;
+  const hostNotChargeReady = hostOrg != null && !chargesEnabled;
+  const showPaidAllocBanner =
+    isHost &&
+    canManage &&
+    Boolean(hostOrgId) &&
+    hostNotChargeReady &&
+    (enteringPaidPrice || hasPaidAllocation);
+  const showOnSaleBanner =
+    isHost &&
+    canManage &&
+    Boolean(hostOrgId) &&
+    hostNotChargeReady &&
+    hasPaidAllocation &&
+    (ticketSaleStatus === 'on_sale' || tab === 'config');
+  const canManageHostPayments =
+    user != null && hostOrgId != null
+      ? canManageOrgPayments(user, hostOrgId)
+      : false;
 
   function invalidateTicketing() {
     return Promise.all([
@@ -319,8 +346,16 @@ export function EventTicketsPanel({
                       className="min-h-11"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 sm:col-span-2">
                     <Label htmlFor="sale-status">Sale status</Label>
+                    {showOnSaleBanner && hostOrgId ? (
+                      <div className="mb-3">
+                        <StripeConnectBanner
+                          organizationId={hostOrgId}
+                          canManagePayments={canManageHostPayments}
+                        />
+                      </div>
+                    ) : null}
                     <select
                       id="sale-status"
                       value={ticketSaleStatus}
@@ -368,6 +403,12 @@ export function EventTicketsPanel({
 
       {tab === 'allocations' && isHost && canManage ? (
         <div className="space-y-6">
+          {showPaidAllocBanner && hostOrgId ? (
+            <StripeConnectBanner
+              organizationId={hostOrgId}
+              canManagePayments={canManageHostPayments}
+            />
+          ) : null}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Create allocation</CardTitle>

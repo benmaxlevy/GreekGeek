@@ -1,8 +1,12 @@
 import { z } from 'zod';
 import {
   StripeConnectOnboardingLinkResponseSchema,
+  StripeConnectRefreshLinkResponseSchema,
+  StripeConnectReturnSyncResponseSchema,
   StripeConnectStatusResponseSchema,
   type StripeConnectOnboardingLinkResponse,
+  type StripeConnectRefreshLinkResponse,
+  type StripeConnectReturnSyncResponse,
   type StripeConnectStatusResponse,
 } from '@rally/contracts';
 
@@ -13,9 +17,13 @@ export type OrgStripeParams = z.infer<typeof OrgStripeParamsSchema>;
 
 export {
   StripeConnectOnboardingLinkResponseSchema,
+  StripeConnectRefreshLinkResponseSchema,
+  StripeConnectReturnSyncResponseSchema,
   StripeConnectStatusResponseSchema,
 };
 export type {
   StripeConnectOnboardingLinkResponse,
+  StripeConnectRefreshLinkResponse,
+  StripeConnectReturnSyncResponse,
   StripeConnectStatusResponse,
 };
