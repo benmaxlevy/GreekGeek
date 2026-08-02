@@ -14,7 +14,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { logoutRequest } from '@/lib/api';
-import { meQueryKey, meQueryOptions, profileSummaryQueryOptions } from '@/lib/auth';
+import {
+  meQueryKey,
+  meQueryOptions,
+  profileSummaryQueryKey,
+  profileSummaryQueryOptions,
+} from '@/lib/auth';
 import { canManageOrgPendingApprovals, destinationForUser, isAdminUser } from '@/lib/auth-routing';
 import { updateDisplayName } from '@/lib/profile-api';
 
@@ -36,23 +41,11 @@ function YouPage() {
   const { data: user } = useSuspenseQuery(meQueryOptions);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const summaryQuery = useQuery(profileSummaryQueryOptions);
+  const summaryQuery = useQuery(profileSummaryQueryOptions(user?.id ?? null));
   const [editingName, setEditingName] = useState(false);
   const [draftName, setDraftName] = useState(user?.name ?? '');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
-
-  if (!user) {
-    return null;
-  }
-  const currentUser = user;
-
-  async function onLogout() {
-    await logoutRequest();
-    queryClient.setQueryData(meQueryKey, null);
-    await queryClient.invalidateQueries({ queryKey: meQueryKey });
-    await navigate({ to: '/login' });
-  }
 
   const nameMutation = useMutation({
     mutationFn: (name: string) => updateDisplayName({ name }),
@@ -69,6 +62,35 @@ function YouPage() {
       setSaveError(error.message);
     },
   });
+
+  if (!user) {
+    return null;
+  }
+  const currentUser = user;
+
+  async function onLogout() {
+    let logoutError: unknown;
+    try {
+      await logoutRequest();
+    } catch (error) {
+      logoutError = error;
+    }
+
+    queryClient.setQueryData(meQueryKey, null);
+    queryClient.removeQueries({ queryKey: profileSummaryQueryKey });
+    try {
+      await queryClient.invalidateQueries({ queryKey: meQueryKey });
+      await navigate({ to: '/login' });
+    } catch (cleanupError) {
+      if (logoutError !== undefined) {
+        throw logoutError;
+      }
+      throw cleanupError;
+    }
+    if (logoutError !== undefined) {
+      throw logoutError;
+    }
+  }
 
   function onEditName() {
     setDraftName(currentUser.name);

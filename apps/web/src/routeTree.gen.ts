@@ -30,6 +30,7 @@ import { Route as AdminWebhookEventsRouteImport } from './routes/admin.webhook-e
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppEventsRouteImport } from './routes/app.events'
 import { Route as AppTicketsRouteImport } from './routes/app.tickets'
+import { Route as AppYouRouteImport } from './routes/app.you'
 import { Route as UsersIndexRouteImport } from './routes/users.index'
 import { Route as AppEventsIndexRouteImport } from './routes/app.events.index'
 import { Route as AdminEventsEventIdTicketsRouteImport } from './routes/admin.events.$eventId.tickets'
@@ -145,6 +146,11 @@ const AppTicketsRoute = AppTicketsRouteImport.update({
   path: '/tickets',
   getParentRoute: () => AppRoute,
 } as any)
+const AppYouRoute = AppYouRouteImport.update({
+  id: '/you',
+  path: '/you',
+  getParentRoute: () => AppRoute,
+} as any)
 const UsersIndexRoute = UsersIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -215,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/admin/webhook-events': typeof AdminWebhookEventsRoute
   '/app/events': typeof AppEventsRouteWithChildren
   '/app/tickets': typeof AppTicketsRoute
+  '/app/you': typeof AppYouRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/users/': typeof UsersIndexRoute
@@ -243,6 +250,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/admin/webhook-events': typeof AdminWebhookEventsRoute
   '/app/tickets': typeof AppTicketsRoute
+  '/app/you': typeof AppYouRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/users': typeof UsersIndexRoute
@@ -276,6 +284,7 @@ export interface FileRoutesById {
   '/admin/webhook-events': typeof AdminWebhookEventsRoute
   '/app/events': typeof AppEventsRouteWithChildren
   '/app/tickets': typeof AppTicketsRoute
+  '/app/you': typeof AppYouRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/users/': typeof UsersIndexRoute
@@ -310,6 +319,7 @@ export interface FileRouteTypes {
     | '/admin/webhook-events'
     | '/app/events'
     | '/app/tickets'
+    | '/app/you'
     | '/admin/'
     | '/app/'
     | '/users/'
@@ -338,6 +348,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/admin/webhook-events'
     | '/app/tickets'
+    | '/app/you'
     | '/admin'
     | '/app'
     | '/users'
@@ -370,6 +381,7 @@ export interface FileRouteTypes {
     | '/admin/webhook-events'
     | '/app/events'
     | '/app/tickets'
+    | '/app/you'
     | '/admin/'
     | '/app/'
     | '/users/'
@@ -543,6 +555,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTicketsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/you': {
+      id: '/app/you'
+      path: '/you'
+      fullPath: '/app/you'
+      preLoaderRoute: typeof AppYouRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/users/': {
       id: '/users/'
       path: '/'
@@ -679,6 +698,7 @@ const AppOrgsOrgIdPaymentsRouteWithChildren =
 interface AppRouteChildren {
   AppEventsRoute: typeof AppEventsRouteWithChildren
   AppTicketsRoute: typeof AppTicketsRoute
+  AppYouRoute: typeof AppYouRoute
   AppIndexRoute: typeof AppIndexRoute
   AppOrgsOrgIdPaymentsRoute: typeof AppOrgsOrgIdPaymentsRouteWithChildren
   AppTicketsIdPayRoute: typeof AppTicketsIdPayRoute
@@ -688,6 +708,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppEventsRoute: AppEventsRouteWithChildren,
   AppTicketsRoute: AppTicketsRoute,
+  AppYouRoute: AppYouRoute,
   AppIndexRoute: AppIndexRoute,
   AppOrgsOrgIdPaymentsRoute: AppOrgsOrgIdPaymentsRouteWithChildren,
   AppTicketsIdPayRoute: AppTicketsIdPayRoute,

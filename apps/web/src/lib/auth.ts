@@ -12,8 +12,10 @@ export const meQueryOptions = queryOptions({
   retry: false,
 });
 
-export const profileSummaryQueryOptions = queryOptions({
-  queryKey: profileSummaryQueryKey,
-  queryFn: fetchProfileSummary,
-  retry: false,
-});
+export const profileSummaryQueryOptions = (userId: string | null) =>
+  queryOptions({
+    queryKey: [...profileSummaryQueryKey, userId] as const,
+    queryFn: fetchProfileSummary,
+    enabled: userId !== null,
+    retry: false,
+  });
