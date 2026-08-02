@@ -124,6 +124,7 @@ export function toTicketDto(
     status: row.status,
     credentialToken: row.credentialToken,
     holderUserId: row.holderUserId,
+    purchaseId: row.purchaseId,
     paidAt: row.paidAt?.toISOString() ?? null,
     voidedAt: row.voidedAt?.toISOString() ?? null,
     checkedIn: row.checkedIn,
@@ -138,6 +139,7 @@ export function toGuestListEntryDto(input: {
   holderUserId: string | null;
   holderName: string | null;
   allocationLabel: string;
+  purchaseId: string | null;
   paidAt: Date;
   checkedIn: boolean;
   checkedInAt: Date | null;
@@ -147,6 +149,7 @@ export function toGuestListEntryDto(input: {
     holderUserId: input.holderUserId,
     holderName: input.holderName,
     allocationLabel: input.allocationLabel,
+    purchaseId: input.purchaseId,
     status: 'paid',
     paidAt: input.paidAt.toISOString(),
     checkedIn: input.checkedIn,
@@ -168,6 +171,7 @@ export function toMyTicketDto(input: {
     allocationLabel: input.allocation.organizationId
       ? (input.allocation.organization?.name ?? 'Organization')
       : 'Public',
+    purchaseId: input.ticket.purchaseId,
     status: input.ticket.status,
     credentialToken: input.ticket.credentialToken,
     paidAt: input.ticket.paidAt?.toISOString() ?? null,

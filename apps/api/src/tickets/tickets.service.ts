@@ -4,10 +4,10 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
-  Logger,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import type {
   AllocationStatus,
   Event,
@@ -15,8 +15,9 @@ import type {
   TicketSaleStatus,
 } from '@prisma/client';
 import type { PublicUser } from '../auth/types/auth.dto';
+import type { Env } from '../config/env.schema';
 import { PrismaService } from '../prisma/prisma.service';
-import { StripeService } from '../stripe/stripe.service';
+import { PurchasesService } from './purchases.service';
 import {
   toCheckInTicketResponseDto,
   toEventTicketingDto,
@@ -46,11 +47,10 @@ type MembershipWithPermissions = {
 
 @Injectable()
 export class TicketsService {
-  private readonly logger = new Logger(TicketsService.name);
-
   constructor(
     private readonly prisma: PrismaService,
-    private readonly stripe: StripeService,
+    private readonly config: ConfigService<Env, true>,
+    private readonly purchases: PurchasesService,
   ) {}
 
   async patchTicketing(
@@ -355,6 +355,7 @@ export class TicketsService {
         allocationLabel: row.allocation.organizationId
           ? (row.allocation.organization?.name ?? 'Organization')
           : 'Public',
+        purchaseId: row.purchaseId,
         paidAt: row.paidAt!,
         checkedIn: row.checkedIn,
         checkedInAt: row.checkedInAt,
@@ -486,25 +487,26 @@ export class TicketsService {
       'void',
     );
 
-    const openPayment = await this.prisma.ticketPayment.findFirst({
-      where: { ticketId, status: 'requires_payment' },
-    });
-    if (openPayment) {
-      try {
-        await this.stripe.cancelPaymentIntent(openPayment.stripePaymentIntentId);
-        await this.prisma.ticketPayment.update({
-          where: { id: openPayment.id },
-          data: { status: 'canceled' },
+    // Unpaid hold on open purchase → cancel whole purchase + DELETE reserved tickets.
+    if (ticket.status === 'unpaid' && ticket.purchaseId) {
+      const purchase = await this.prisma.purchase.findUnique({
+        where: { id: ticket.purchaseId },
+      });
+      if (purchase?.status === 'requires_payment') {
+        const snapshot = toTicketDto({
+          ...ticket,
+          status: 'void',
+          voidedAt: new Date(),
         });
-      } catch (err) {
-        this.logger.warn(
-          `Failed to cancel PaymentIntent ${openPayment.stripePaymentIntentId} on void: ${
-            err instanceof Error ? err.message : String(err)
-          }`,
-        );
+        await this.purchases.releaseReservedPurchase(purchase.id, {
+          cancelStripe: true,
+          status: 'canceled',
+        });
+        return snapshot;
       }
     }
 
+    // Paid (or unpaid without open purchase): soft-void; purchase totals unchanged.
     const updated = await this.prisma.ticket.update({
       where: { id: ticketId },
       data: { status: 'void', voidedAt: new Date() },
@@ -573,17 +575,6 @@ export class TicketsService {
       );
     }
 
-    const existing = await this.prisma.ticket.findFirst({
-      where: {
-        holderUserId: caller.id,
-        status: { not: 'void' },
-        allocation: { eventId },
-      },
-    });
-    if (existing) {
-      throw new ConflictException('You already hold a ticket for this event');
-    }
-
     return this.createTicketInAllocation(allocation.id, caller.id);
   }
 
@@ -608,6 +599,9 @@ export class TicketsService {
     allocationId: string,
     holderUserId: string | null,
   ): Promise<Ticket> {
+    const maxPerUser = this.config.get('MAX_TICKETS_PER_USER_PER_EVENT', {
+      infer: true,
+    });
     const ticket = await this.prisma.$transaction(async (tx) => {
       const locked = await tx.$queryRaw<TicketAllocation[]>`
         SELECT * FROM "TicketAllocation" WHERE id = ${allocationId} FOR UPDATE
@@ -622,6 +616,38 @@ export class TicketsService {
       if (issuedCount >= current.quantity) {
         throw new ConflictException('Allocation is sold out');
       }
+
+      const event = await tx.event.findUnique({
+        where: { id: current.eventId },
+        select: { ticketCapacity: true },
+      });
+      if (event?.ticketCapacity != null) {
+        const eventIssued = await tx.ticket.count({
+          where: {
+            status: { not: 'void' },
+            allocation: { eventId: current.eventId },
+          },
+        });
+        if (eventIssued >= event.ticketCapacity) {
+          throw new ConflictException('Event is at ticket capacity');
+        }
+      }
+
+      if (holderUserId) {
+        const userHeld = await tx.ticket.count({
+          where: {
+            holderUserId,
+            status: { not: 'void' },
+            allocation: { eventId: current.eventId },
+          },
+        });
+        if (userHeld >= maxPerUser) {
+          throw new ConflictException(
+            'Per-user ticket cap reached for this event',
+          );
+        }
+      }
+
       const isFree = (current.priceCents ?? 0) === 0;
       const now = new Date();
       return tx.ticket.create({
@@ -629,6 +655,7 @@ export class TicketsService {
           allocationId,
           credentialToken: randomBytes(32).toString('hex'),
           holderUserId,
+          purchaseId: null,
           ...(isFree
             ? { status: 'paid' as const, paidAt: now }
             : { status: 'unpaid' as const }),

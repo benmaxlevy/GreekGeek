@@ -80,11 +80,7 @@ export class StripeService {
   createPaymentIntent(input: {
     amountCents: number;
     currency: string;
-    metadata: {
-      ticketId: string;
-      eventId: string;
-      organizationId: string;
-    };
+    metadata: Record<string, string>;
     idempotencyKey: string;
   }): Promise<Stripe.PaymentIntent> {
     return this.client.paymentIntents.create(
