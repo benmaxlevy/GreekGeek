@@ -25,6 +25,6 @@ Host ticket setup today splits across Settings and Ticket pools tabs—enable ca
 
 ## Impact
 
-- **Frontend:** `rally/apps/web/src/components/ticketing/EventTicketsPanel.tsx` and new wizard subcomponents under `components/ticketing/` (or `components/ticketing/setup-wizard/`).
+- **Frontend:** `greekgeek/apps/web/src/components/ticketing/EventTicketsPanel.tsx` and new wizard subcomponents under `components/ticketing/` (or `components/ticketing/setup-wizard/`).
 - **APIs used (unchanged):** `patchEventTicketing`, `createAllocation`, `listAllocations`, `listOrganizations` via `ticketing-api.ts` and `admin-api.ts`.
 - **Out of scope:** Backend changes, price edit after create, member purchase UI, scanner/guest redesign, ticketing on event-create form, invited/scan-only modes.

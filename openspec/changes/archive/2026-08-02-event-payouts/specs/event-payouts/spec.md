@@ -1,6 +1,6 @@
 ## Purpose
 
-Event payouts release eligible ticket-sale net proceeds to the host organization through Stripe Connect after the configured hold, while preserving Rally fees and auditable batch history.
+Event payouts release eligible ticket-sale net proceeds to the host organization through Stripe Connect after the configured hold, while preserving GreekGeek fees and auditable batch history.
 
 ## ADDED Requirements
 
@@ -114,11 +114,11 @@ When a succeeded Purchase is disputed, refunded, or voided before release, the s
 
 ### Requirement: Authorized hosts see payout state and reasons
 
-An ACTIVE host-organization member with `payments.manage` MUST be able to view pending net proceeds, computed expected payout date, released history, and per-event gross, Rally fee, net, released, pending, and excluded totals. Invited organizations MUST see sales visibility without a payout line. Excluded purchase counts, amounts, and reasons, blocked reasons, held reasons, failed errors, and post-release exposure flags MUST be visible where applicable. Non-authorized members MUST receive no payout controls or payout data.
+An ACTIVE host-organization member with `payments.manage` MUST be able to view pending net proceeds, computed expected payout date, released history, and per-event gross, GreekGeek fee, net, released, pending, and excluded totals. Invited organizations MUST see sales visibility without a payout line. Excluded purchase counts, amounts, and reasons, blocked reasons, held reasons, failed errors, and post-release exposure flags MUST be visible where applicable. Non-authorized members MUST receive no payout controls or payout data.
 
 #### Scenario: Host sees computed summary
 - **WHEN** a host member with `payments.manage` opens an event payout summary
-- **THEN** the UI shows gross from `amountCents`, Rally fees from `feeCents`, net from `netCents`, pending/released/excluded totals, and expected date computed from current hold configuration
+- **THEN** the UI shows gross from `amountCents`, GreekGeek fees from `feeCents`, net from `netCents`, pending/released/excluded totals, and expected date computed from current hold configuration
 
 #### Scenario: Invited organization sees no payout line
 - **WHEN** an invited-organization member views event sales

@@ -1,30 +1,30 @@
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: rally-postgres
+    container_name: greekgeek-postgres
     restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: rally
-      POSTGRES_PASSWORD: rally
-      POSTGRES_DB: rally
+      POSTGRES_USER: greekgeek
+      POSTGRES_PASSWORD: greekgeek
+      POSTGRES_DB: greekgeek
     volumes:
-      - rally_pg_data:/var/lib/postgresql/data
+      - greekgeek_pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U rally -d rally"]
+      test: ["CMD-SHELL", "pg_isready -U greekgeek -d greekgeek"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   redis:
     image: redis:7-alpine
-    container_name: rally-redis
+    container_name: greekgeek-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - rally_redis_data:/data
+      - greekgeek_redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -32,5 +32,5 @@ services:
       retries: 10
 
 volumes:
-  rally_pg_data:
-  rally_redis_data:
+  greekgeek_pg_data:
+  greekgeek_redis_data:

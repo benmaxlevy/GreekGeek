@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { ArrowRight, Clock, MapPin } from 'lucide-react';
-import type { ClaimableEvent, MyTicket } from '@rally/contracts';
+import type { ClaimableEvent, MyTicket } from '@greekgeek/contracts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -82,7 +82,7 @@ function UpcomingPage() {
               to you yet.
             </h1>
             <p className="max-w-md text-sm text-ink-500">
-              Rally only shows events you can claim or tickets you already hold. When something
+              GreekGeek only shows events you can claim or tickets you already hold. When something
               opens, it lands here.
             </p>
           </>

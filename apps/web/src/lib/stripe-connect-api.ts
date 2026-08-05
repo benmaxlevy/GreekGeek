@@ -7,7 +7,7 @@ import {
   type StripeConnectRefreshLinkResponse,
   type StripeConnectReturnSyncResponse,
   type StripeConnectStatusResponse,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 import { apiFetch, readError } from './api';
 
 export async function getConnectStatus(

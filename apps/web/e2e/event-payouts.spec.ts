@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
-const ADMIN_EMAIL = 'admin@rally.local';
-const ADMIN_PASSWORD = 'RallyAdmin123!';
+const ADMIN_EMAIL = 'admin@greekgeek.local';
+const ADMIN_PASSWORD = 'GreekGeekAdmin123!';
 
 test('admin payout queue shows financial state and requires audited reason', async ({ page }) => {
   const now = new Date().toISOString();

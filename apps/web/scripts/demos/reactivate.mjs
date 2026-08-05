@@ -13,7 +13,7 @@ import {
 } from './demo-helpers.mjs';
 
 const stamp = ts();
-const email = `demo+reactivate-${stamp}@rally.local`;
+const email = `demo+reactivate-${stamp}@greekgeek.local`;
 const name = `Reactivate Demo ${stamp}`;
 const out = `reactivate-${stamp}.webm`;
 

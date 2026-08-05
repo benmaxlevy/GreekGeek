@@ -1,10 +1,10 @@
 ## Purpose
 
-Holder checkout for unpaid tickets via embedded Stripe Payment Element: Rally platform charges, fee math, TicketPayment persistence, and webhook-driven paid transition without transfers or hosted Checkout.
+Holder checkout for unpaid tickets via embedded Stripe Payment Element: GreekGeek platform charges, fee math, TicketPayment persistence, and webhook-driven paid transition without transfers or hosted Checkout.
 
 ## ADDED Requirements
 
-### Requirement: Rally fee is computed server-side with half-up rounding
+### Requirement: GreekGeek fee is computed server-side with half-up rounding
 
 The system MUST read `RALLY_FEE_PERCENT` from environment as a percent number (default **10** when unset). For a ticket price `priceCents` (integer), `feeCents` MUST equal `round_half_up(priceCents * RALLY_FEE_PERCENT / 100)`. `amountCents` MUST equal `priceCents + feeCents`. `netCents` MUST equal `priceCents` (portion reserved for future transfer). Fee and total amounts MUST be computed only on the server from allocation `priceCents`; client-submitted amounts MUST be ignored. USD only.
 
@@ -44,7 +44,7 @@ The system MUST persist `TicketPayment` with: required unique `ticketId` foreign
 
 ### Requirement: Holder-only checkout creates PaymentIntent on platform account
 
-The system MUST expose an authenticated checkout endpoint that creates (or reuses) a Stripe PaymentIntent on the **Rally platform** Stripe account with **no `transfer_data`**. The caller MUST be the ticket's `holderUserId`; all other callers including platform ADMIN MUST receive 403 Forbidden. Preconditions MUST all pass or the system returns a client error (4xx): event `ticketingEnabled` true, `ticketSaleStatus` `on_sale`, ticket `status` `unpaid`, ticket not void, allocation `status` `active`, allocation `priceCents` greater than zero, host organization `stripeChargesEnabled` true. The PaymentIntent amount MUST equal server-computed `amountCents`. Metadata on the PaymentIntent MUST include `ticketId`, `eventId`, and `organizationId` (host org). The endpoint MUST use an idempotency key to prevent duplicate intents on retry. Request and response shapes MUST be validated with shared Zod schemas in `packages/contracts`. The response MUST return `client_secret` and only minimal additional fields needed for the embedded UI (e.g. itemized price, fee, total for display).
+The system MUST expose an authenticated checkout endpoint that creates (or reuses) a Stripe PaymentIntent on the **GreekGeek platform** Stripe account with **no `transfer_data`**. The caller MUST be the ticket's `holderUserId`; all other callers including platform ADMIN MUST receive 403 Forbidden. Preconditions MUST all pass or the system returns a client error (4xx): event `ticketingEnabled` true, `ticketSaleStatus` `on_sale`, ticket `status` `unpaid`, ticket not void, allocation `status` `active`, allocation `priceCents` greater than zero, host organization `stripeChargesEnabled` true. The PaymentIntent amount MUST equal server-computed `amountCents`. Metadata on the PaymentIntent MUST include `ticketId`, `eventId`, and `organizationId` (host org). The endpoint MUST use an idempotency key to prevent duplicate intents on retry. Request and response shapes MUST be validated with shared Zod schemas in `packages/contracts`. The response MUST return `client_secret` and only minimal additional fields needed for the embedded UI (e.g. itemized price, fee, total for display).
 
 #### Scenario: Holder receives client secret
 
@@ -83,7 +83,7 @@ The system MUST expose an authenticated checkout endpoint that creates (or reuse
 
 ### Requirement: Embedded pay UI uses Payment Element on dedicated route
 
-The web app MUST provide `/app/tickets/$id/pay` as a dedicated pay page for the ticket holder. The page MUST embed Stripe Payment Element (not hosted Checkout redirect) initialized with `client_secret` from the checkout API. Payment Element MUST use `automatic_payment_methods`. Apple Pay and Google Pay MUST appear only when Stripe offers them for the registered domain — no custom wallet plumbing in application code. Domain registration for wallet methods is a Stripe Dashboard operations task, not application code. The UI MUST show itemized pricing (e.g. `$10.00 + $1.00 Rally fee = $11.00`). The UI MUST handle states: loading, error, processing, success; MUST prevent double-submit while processing. On client-side payment confirmation success, the UI MUST refetch the ticket; QR MUST appear per existing ticketing rules when status becomes `paid`. Client-side confirmation MUST NOT directly set ticket status to paid. The web app MUST require `VITE_STRIPE_PUBLISHABLE_KEY` documented in `.env.example`.
+The web app MUST provide `/app/tickets/$id/pay` as a dedicated pay page for the ticket holder. The page MUST embed Stripe Payment Element (not hosted Checkout redirect) initialized with `client_secret` from the checkout API. Payment Element MUST use `automatic_payment_methods`. Apple Pay and Google Pay MUST appear only when Stripe offers them for the registered domain — no custom wallet plumbing in application code. Domain registration for wallet methods is a Stripe Dashboard operations task, not application code. The UI MUST show itemized pricing (e.g. `$10.00 + $1.00 GreekGeek fee = $11.00`). The UI MUST handle states: loading, error, processing, success; MUST prevent double-submit while processing. On client-side payment confirmation success, the UI MUST refetch the ticket; QR MUST appear per existing ticketing rules when status becomes `paid`. Client-side confirmation MUST NOT directly set ticket status to paid. The web app MUST require `VITE_STRIPE_PUBLISHABLE_KEY` documented in `.env.example`.
 
 #### Scenario: Holder opens pay page
 

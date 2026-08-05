@@ -1,6 +1,6 @@
 ## Why
 
-Rally's existing web UI does not consistently express the rally-mockup-handoff design system across its routes and shared components. Aligning the frontend now creates one coherent visual language for member and executive portals while preserving existing routes, interactions, and feature behavior.
+GreekGeek's existing web UI does not consistently express the greekgeek-mockup-handoff design system across its routes and shared components. Aligning the frontend now creates one coherent visual language for member and executive portals while preserving existing routes, interactions, and feature behavior.
 
 ## What Changes
 
@@ -22,7 +22,7 @@ Rally's existing web UI does not consistently express the rally-mockup-handoff d
 
 ## Impact
 
-- Affects the Rally web app's global styles, shell/layout components, shared UI primitives, and route-level presentation classes.
+- Affects the GreekGeek web app's global styles, shell/layout components, shared UI primitives, and route-level presentation classes.
 - No API endpoints, request/response contracts, Prisma schema, Stripe integration, or backend dependencies change.
 - Existing URLs, navigation, data flows, and feature interactions remain available.
 - Visual verification must cover representative member, executive, auth/onboarding, ticketing, money, chapter, scanner, admin, agency, and production routes at desktop and responsive widths.

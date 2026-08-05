@@ -9,7 +9,7 @@ export interface BrandLockupProps {
   style?: CSSProperties;
 }
 
-/** The only approved Rally lockup: fixed seal plus tracked RALLY wordtext. */
+/** The only approved GreekGeek lockup: fixed seal plus tracked RALLY wordtext. */
 export function BrandLockup({
   markSize = 40,
   textSize = 15,
@@ -24,7 +24,7 @@ export function BrandLockup({
     >
       <Wordmark size={markSize} />
       <span
-        className="rally-brand-caps"
+        className="greekgeek-brand-caps"
         style={{
           fontSize: textSize,
           fontFamily: "'Playfair Display', Georgia, serif",
@@ -34,7 +34,7 @@ export function BrandLockup({
           color: "#ffffff",
         }}
       >
-        Rally
+        GreekGeek
       </span>
     </span>
   );

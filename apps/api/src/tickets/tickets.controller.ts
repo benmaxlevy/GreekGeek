@@ -2,7 +2,7 @@ import { Controller, Get, Param, Post, Body } from '@nestjs/common';
 import {
   ClaimableEventListSchema,
   type ClaimableEventList,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { PublicUser } from '../auth/types/auth.dto';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';

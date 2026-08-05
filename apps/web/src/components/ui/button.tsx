@@ -30,7 +30,7 @@ const buttonVariants = cva(
         link: 'text-ink-100 underline-offset-4 hover:underline disabled:no-underline',
       },
       size: {
-        // 44px minimum tap target for chapter-facing UI (rally-design hard rule).
+        // 44px minimum tap target for chapter-facing UI (greekgeek-design hard rule).
         default: 'h-11 px-[18px] py-2',
         sm: 'h-[34px] rounded-md px-3 text-[13px]',
         lg: 'h-[52px] rounded-full px-7 text-[15px]',

@@ -1,6 +1,6 @@
 ## Context
 
-`EventTicketsPanel` (`apps/web/src/components/ticketing/EventTicketsPanel.tsx`) is the host ticketing surface: tabs Settings (`config`), Ticket pools (`allocations`), Tickets, Guests, Scanner. Initial setup splits enable/capacity/sale status (Settings) from one-at-a-time pool creation (Ticket pools). APIs are stable: `patchEventTicketing` and `createAllocation` in `ticketing-api.ts`; org list via `listOrganizations`. Contracts: `PatchEventTicketing`, `CreateTicketAllocation` in `@rally/contracts/ticketing`. See proposal.md for motivation.
+`EventTicketsPanel` (`apps/web/src/components/ticketing/EventTicketsPanel.tsx`) is the host ticketing surface: tabs Settings (`config`), Ticket pools (`allocations`), Tickets, Guests, Scanner. Initial setup splits enable/capacity/sale status (Settings) from one-at-a-time pool creation (Ticket pools). APIs are stable: `patchEventTicketing` and `createAllocation` in `ticketing-api.ts`; org list via `listOrganizations`. Contracts: `PatchEventTicketing`, `CreateTicketAllocation` in `@greekgeek/contracts/ticketing`. See proposal.md for motivation.
 
 ## Goals / Non-Goals
 

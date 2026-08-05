@@ -11,7 +11,7 @@ import {
 } from './demo-helpers.mjs';
 
 const stamp = ts();
-const hostEmail = `demo+ticket-host-${stamp}@rally.local`;
+const hostEmail = `demo+ticket-host-${stamp}@greekgeek.local`;
 const hostName = `Ticket Host ${stamp}`;
 const orgBName = `Org B Demo ${stamp}`;
 const eventName = `Ticketing Formal ${stamp}`;

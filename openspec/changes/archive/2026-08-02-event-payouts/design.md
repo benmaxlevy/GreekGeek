@@ -1,6 +1,6 @@
 ## Context
 
-Existing ticket checkout charges the Rally platform and persists succeeded Purchase rows with `subtotalCents`, `feeCents`, `amountCents`, `netCents`, event identity, and Stripe charge/payment identifiers. Existing Connect state is organization-scoped and webhook-sourced. See proposal.md and the event-payouts delta specs for the behavior contract.
+Existing ticket checkout charges the GreekGeek platform and persists succeeded Purchase rows with `subtotalCents`, `feeCents`, `amountCents`, `netCents`, event identity, and Stripe charge/payment identifiers. Existing Connect state is organization-scoped and webhook-sourced. See proposal.md and the event-payouts delta specs for the behavior contract.
 
 The change crosses Prisma data, event APIs, Stripe Connect transfers, the existing webhook inbox, BullMQ worker scheduling, host permissions, and admin/member UI. `PAYOUT_HOLD_DAYS` is runtime configuration, not payout-row state.
 

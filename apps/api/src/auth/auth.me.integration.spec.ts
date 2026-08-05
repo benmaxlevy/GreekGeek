@@ -1,6 +1,6 @@
 import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
-import { PublicUserSchema } from '@rally/contracts';
+import { PublicUserSchema } from '@greekgeek/contracts';
 import { MembershipsService } from '../memberships/memberships.service';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { PermissionsService } from '../permissions/permissions.service';

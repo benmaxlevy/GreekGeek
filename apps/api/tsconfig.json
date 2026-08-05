@@ -1,5 +1,5 @@
 {
-  "extends": "@rally/tsconfig/nestjs.json",
+  "extends": "@greekgeek/tsconfig/nestjs.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",

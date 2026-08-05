@@ -1,6 +1,6 @@
 ## Why
 
-The existing `/app/you` route exposes only a minimal session identity view, links, and logout, so users cannot manage their display name or see their membership capabilities and ticket context in one place. Rally already has authenticated identity, permission, and owned-ticket data; this change gives that data a stable profile contract and focused public-facing app surface without changing session security or adding verification scope.
+The existing `/app/you` route exposes only a minimal session identity view, links, and logout, so users cannot manage their display name or see their membership capabilities and ticket context in one place. GreekGeek already has authenticated identity, permission, and owned-ticket data; this change gives that data a stable profile contract and focused public-facing app surface without changing session security or adding verification scope.
 
 ## What Changes
 

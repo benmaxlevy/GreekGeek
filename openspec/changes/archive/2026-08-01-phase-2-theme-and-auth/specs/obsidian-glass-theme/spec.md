@@ -1,6 +1,6 @@
 ## Purpose
 
-Provides the Rally web app with the obsidian-glass visual system — tokens, fonts, primitives, shell, and brand — so authenticated product screens share one maintainable look without per-route color palettes.
+Provides the GreekGeek web app with the obsidian-glass visual system — tokens, fonts, primitives, shell, and brand — so authenticated product screens share one maintainable look without per-route color palettes.
 
 ## ADDED Requirements
 

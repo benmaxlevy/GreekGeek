@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { AllocationStatus, Event, TicketAllocation, TicketSaleStatus } from '@prisma/client';
-import type { ClaimableEvent } from '@rally/contracts';
+import type { ClaimableEvent } from '@greekgeek/contracts';
 import type { PublicUser } from '../auth/types/auth.dto';
 import type { Env } from '../config/env.schema';
 import { toEventDto } from '../events/types/events.dto';

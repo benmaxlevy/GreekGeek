@@ -13,7 +13,7 @@ import {
 } from './demo-helpers.mjs';
 
 const stamp = ts();
-const email = `demo+deny-${stamp}@rally.local`;
+const email = `demo+deny-${stamp}@greekgeek.local`;
 const name = `Deny Demo ${stamp}`;
 const out = `admin-deny-${stamp}.webm`;
 

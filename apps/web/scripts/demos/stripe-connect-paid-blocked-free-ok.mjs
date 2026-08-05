@@ -13,7 +13,7 @@ import {
 import { resetOrgStripeConnect } from './stripe-demo-fixtures.mjs';
 
 const stamp = ts();
-const officerEmail = `demo+stripe-paid-block-${stamp}@rally.local`;
+const officerEmail = `demo+stripe-paid-block-${stamp}@greekgeek.local`;
 const officerName = `Stripe Paid Block ${stamp}`;
 const eventName = `Stripe Gate Event ${stamp}`;
 const out = `stripe-connect-paid-blocked-free-ok-${stamp}.webm`;

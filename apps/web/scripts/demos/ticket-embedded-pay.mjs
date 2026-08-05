@@ -17,8 +17,8 @@ import {
 import { setOrgStripeReady } from './stripe-demo-fixtures.mjs';
 
 const stamp = ts();
-const hostEmail = `demo+embed-pay-host-${stamp}@rally.local`;
-const buyerEmail = `demo+embed-pay-buyer-${stamp}@rally.local`;
+const hostEmail = `demo+embed-pay-host-${stamp}@greekgeek.local`;
+const buyerEmail = `demo+embed-pay-buyer-${stamp}@greekgeek.local`;
 const hostName = `Embed Pay Host ${stamp}`;
 const buyerName = `Embed Pay Buyer ${stamp}`;
 const eventName = `Embedded Pay Formal ${stamp}`;
@@ -157,7 +157,7 @@ try {
   await page.getByRole('heading', { name: 'Pay for ticket' }).waitFor();
   await pause(page, 2000);
 
-  await page.getByText('$10.00 + $1.00 Rally fee = $11.00').waitFor({
+  await page.getByText('$10.00 + $1.00 GreekGeek fee = $11.00').waitFor({
     timeout: 30000,
   });
   await pause(page, 2000);

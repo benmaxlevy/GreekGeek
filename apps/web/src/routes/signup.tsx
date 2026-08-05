@@ -75,14 +75,14 @@ function SignupPage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-[var(--content-max)] flex-col px-6 py-8 sm:px-10 sm:py-12">
       <header>
-        <Link to="/" aria-label="Rally home">
+        <Link to="/" aria-label="GreekGeek home">
           <BrandLockup />
         </Link>
       </header>
       <main className="flex flex-1 items-center justify-center py-16">
         <Card className="w-full max-w-2xl">
           <CardHeader className="p-8 pb-5 sm:p-10 sm:pb-6">
-            <p className="rl-eyebrow">Join Rally</p>
+            <p className="rl-eyebrow">Join GreekGeek</p>
             <CardTitle className="display-md mt-3 font-display font-medium tracking-[-0.03em]">
               Create account
             </CardTitle>

@@ -51,7 +51,7 @@ function BlockedPage() {
             <div className="space-y-3 rounded-[var(--radius-md)] border border-error/30 bg-error-surface/70 px-4 py-4">
               <Badge variant="destructive">Inactive</Badge>
               <p className="text-sm leading-6 text-ink-300">
-                Hi {user.name}. Your account is inactive and cannot access Rally.
+                Hi {user.name}. Your account is inactive and cannot access GreekGeek.
               </p>
             </div>
             <p className="text-sm leading-6 text-ink-500">

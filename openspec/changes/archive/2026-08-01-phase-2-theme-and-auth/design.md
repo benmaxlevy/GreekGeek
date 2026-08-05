@@ -1,8 +1,8 @@
 ## Context
 
-See proposal.md for motivation. Phase 1 (separate change) establishes the pnpm/Turborepo monorepo under `rally/`: `apps/api` (NestJS + Prisma + Postgres), `apps/web` (Vite + React 19 + TanStack Router/Query + Tailwind v4), and `packages/contracts` for shared Zod schemas. This design assumes that scaffold exists before implementation starts.
+See proposal.md for motivation. Phase 1 (separate change) establishes the pnpm/Turborepo monorepo under `greekgeek/`: `apps/api` (NestJS + Prisma + Postgres), `apps/web` (Vite + React 19 + TanStack Router/Query + Tailwind v4), and `packages/contracts` for shared Zod schemas. This design assumes that scaffold exists before implementation starts.
 
-Theme source of truth is `oldRally/src/styles.css` plus self-hosted fonts under `oldRally/src/assets/fonts`. Auth replaces the old app's auth approach with NestJS Passport; no third-party IdP.
+Theme source of truth is `oldGreekGeek/src/styles.css` plus self-hosted fonts under `oldGreekGeek/src/assets/fonts`. Auth replaces the old app's auth approach with NestJS Passport; no third-party IdP.
 
 Workspace conventions that shape the design: Zod validates HTTP request/response boundaries; named types and schemas live in feature `types/` / `dto/` files (shared auth shapes also in `packages/contracts`); helpers only when multi-line logic is reused.
 
@@ -27,23 +27,23 @@ Workspace conventions that shape the design: Zod validates HTTP request/response
 
 ### 1. Theme as CSS variables + Tailwind v4 utilities (not JS palettes)
 
-**Choice:** Copy fonts and port `@font-face`, `@theme inline`, `:root` obsidian-glass tokens, and body ambient gradient (`rally-theme` class) into `apps/web`. Express `btn-chrome` and `surface-glass-panel` as Tailwind v4 `@utility` blocks wired into shadcn Button/Card variants.
+**Choice:** Copy fonts and port `@font-face`, `@theme inline`, `:root` obsidian-glass tokens, and body ambient gradient (`greekgeek-theme` class) into `apps/web`. Express `btn-chrome` and `surface-glass-panel` as Tailwind v4 `@utility` blocks wired into shadcn Button/Card variants.
 
 **Why:** Old app's per-route `const C` palettes were unmaintainable. CSS variables keep one source of truth and match existing shadcn `cssVariables: true` setup.
 
-**Alternatives considered:** CSS-in-JS theme object — rejected (duplicates tokens, fights Tailwind v4). Full copy of oldRally component tree — rejected (out of scope; landing page and route-local styles explicitly excluded).
+**Alternatives considered:** CSS-in-JS theme object — rejected (duplicates tokens, fights Tailwind v4). Full copy of oldGreekGeek component tree — rejected (out of scope; landing page and route-local styles explicitly excluded).
 
 ### 2. Lean shadcn new-york primitive set
 
 **Choice:** Init shadcn with new-york style, `baseColor: slate`, lucide icons. Install only: button, card, input, label, form, separator, badge, avatar, dropdown-menu, sonner, skeleton.
 
-**Why:** Matches oldRally `components.json` and covers auth + shell needs without shipping unused primitives.
+**Why:** Matches oldGreekGeek `components.json` and covers auth + shell needs without shipping unused primitives.
 
 **Alternatives considered:** Custom components without shadcn — rejected (slower, worse a11y baseline). Broader primitive install — rejected (unnecessary for Phase 2).
 
 ### 3. AppShell layout constants from tokens
 
-**Choice:** Sidebar 232px, content max 1160px, main padding `40px 48px`, mobile drawer `<768px`, 44px min tap targets. Brand via Wordmark/BrandLockup derived from oldRally favicon + BrandLockup.
+**Choice:** Sidebar 232px, content max 1160px, main padding `40px 48px`, mobile drawer `<768px`, 44px min tap targets. Brand via Wordmark/BrandLockup derived from oldGreekGeek favicon + BrandLockup.
 
 **Why:** Preserves proven product chrome without inventing a new layout system.
 
@@ -60,13 +60,13 @@ Workspace conventions that shape the design: Zod validates HTTP request/response
 
 **Why:** Nest-native, no third-party auth vendor, revocable sessions, XSS-resistant refresh storage.
 
-**Alternatives considered:** Session cookies only (no JWT) — workable but less aligned with locked plan and SPA Bearer usage. Refresh token in localStorage — rejected (XSS risk). Multiple global role systems like oldRally — rejected (single enum now; Membership later).
+**Alternatives considered:** Session cookies only (no JWT) — workable but less aligned with locked plan and SPA Bearer usage. Refresh token in localStorage — rejected (XSS risk). Multiple global role systems like oldGreekGeek — rejected (single enum now; Membership later).
 
 ### 5. Frontend auth client and guards
 
 **Choice:** Glass `/login` and `/signup` (centered glass card, 44px inputs, chrome submit). Shared fetch wrapper: attach Bearer access token; on 401, single refresh attempt then one replay. TanStack Query `['me']` for auth state; TanStack Router `beforeLoad` on authenticated route group redirects to `/login`. Dev Prisma seed creates admin user.
 
-**Why:** Matches locked UX from oldRally auth page treatment while fitting TanStack Router/Query.
+**Why:** Matches locked UX from oldGreekGeek auth page treatment while fitting TanStack Router/Query.
 
 ### 6. Testing strategy (e2e-first, conditional unit/integration)
 
@@ -86,7 +86,7 @@ Workspace conventions that shape the design: Zod validates HTTP request/response
 - [Docker unavailable in some WSL setups] → E2e and migrations need Docker Desktop WSL integration; document prerequisite in tasks/README rather than inventing a non-Postgres path
 - [Refresh rotation races (parallel 401s)] → Client allows a single in-flight refresh; API rejects reused refresh tokens — cover with focused API integration test if e2e flaky
 - [Cookie + Vite proxy SameSite/path quirks] → Scope refresh cookie path to `/api/auth` (or `/api`) and verify through Playwright against the proxied origin
-- [Theme drift from oldRally] → Port tokens/fonts from source files listed above; do not reimagine palette values
+- [Theme drift from oldGreekGeek] → Port tokens/fonts from source files listed above; do not reimagine palette values
 
 ## Migration Plan
 

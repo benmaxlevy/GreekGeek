@@ -1,5 +1,5 @@
 {
-  "name": "rally",
+  "name": "greekgeek",
   "private": true,
   "packageManager": "pnpm@11.18.0",
   "engines": {
@@ -7,18 +7,18 @@
   },
   "scripts": {
     "dev": "turbo run dev",
-    "dev:all": "concurrently --kill-others-on-fail \"pnpm run dev\" \"pnpm --filter @rally/api run dev:worker\"",
-    "dev:workers": "pnpm --filter @rally/api run dev:worker",
+    "dev:all": "concurrently --kill-others-on-fail \"pnpm run dev\" \"pnpm --filter @greekgeek/api run dev:worker\"",
+    "dev:workers": "pnpm --filter @greekgeek/api run dev:worker",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
-    "db:generate": "pnpm --filter @rally/api exec prisma generate",
-    "db:migrate": "pnpm --filter @rally/api exec prisma migrate dev",
-    "db:seed": "pnpm --filter @rally/api run prisma:seed",
-    "db:studio": "pnpm --filter @rally/api exec prisma studio",
-    "test:api": "pnpm --filter @rally/api test",
-    "test:e2e": "pnpm --filter @rally/web test:e2e"
+    "db:generate": "pnpm --filter @greekgeek/api exec prisma generate",
+    "db:migrate": "pnpm --filter @greekgeek/api exec prisma migrate dev",
+    "db:seed": "pnpm --filter @greekgeek/api run prisma:seed",
+    "db:studio": "pnpm --filter @greekgeek/api exec prisma studio",
+    "test:api": "pnpm --filter @greekgeek/api test",
+    "test:e2e": "pnpm --filter @greekgeek/web test:e2e"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",

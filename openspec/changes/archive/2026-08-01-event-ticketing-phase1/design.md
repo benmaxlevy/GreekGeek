@@ -141,7 +141,7 @@ COMMIT;
 - `POST /api/events/:eventId/public-claim` — ACTIVE self-claim
 - `GET /api/tickets/mine` — caller's held tickets
 
-All bodies/query parsed with Zod from `@rally/contracts`.
+All bodies/query parsed with Zod from `@greekgeek/contracts`.
 
 ### 7. Sale status transitions
 

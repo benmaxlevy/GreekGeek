@@ -2,13 +2,13 @@
 
 ## Purpose
 
-Provides the Rally web app with the obsidian-glass visual system — tokens, fonts, primitives, shell, and brand — so authenticated product screens share one maintainable look without per-route color palettes.
+Provides the GreekGeek web app with the obsidian-glass visual system — tokens, fonts, primitives, shell, and brand — so authenticated product screens share one maintainable look without per-route color palettes.
 
 ## Requirements
 
 ### Requirement: Obsidian-glass tokens and fonts are the sole theme source
 
-The web application MUST apply the rally-mockup-handoff design tokens as CSS custom properties and MUST load the configured display and UI fonts used by the mockup. UI color, typography, spacing, radii, borders, shadows, motion, and responsive values MUST reference those tokens or theme mappings derived from them. The application MUST NOT introduce per-route inline color palette objects as the source of truth for visual styling.
+The web application MUST apply the greekgeek-mockup-handoff design tokens as CSS custom properties and MUST load the configured display and UI fonts used by the mockup. UI color, typography, spacing, radii, borders, shadows, motion, and responsive values MUST reference those tokens or theme mappings derived from them. The application MUST NOT introduce per-route inline color palette objects as the source of truth for visual styling.
 
 #### Scenario: Token-backed surfaces render on every themed page
 

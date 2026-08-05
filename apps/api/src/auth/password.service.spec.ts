@@ -4,7 +4,7 @@ describe('PasswordService', () => {
   const passwords = new PasswordService();
 
   it('hashes and verifies a known password with argon2', async () => {
-    const password = 'RallyTestPass123!';
+    const password = 'GreekGeekTestPass123!';
     const hash = await passwords.hash(password);
 
     expect(hash).not.toEqual(password);

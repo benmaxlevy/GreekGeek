@@ -1,5 +1,5 @@
 {
-  "extends": "@rally/tsconfig/base.json",
+  "extends": "@greekgeek/tsconfig/base.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",

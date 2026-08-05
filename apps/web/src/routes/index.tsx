@@ -28,14 +28,14 @@ function HomePage() {
             Make room for what brings people together.
           </h1>
           <p className="mt-6 max-w-md text-base leading-7 text-ink-500">
-            Rally gives your next gathering a place to begin.
+            GreekGeek gives your next gathering a place to begin.
           </p>
         </section>
         <Card className="w-full max-w-md justify-self-end">
           <CardHeader className="p-8 pb-4 sm:p-10 sm:pb-5">
-            <p className="rl-eyebrow">Your Rally starts here</p>
+            <p className="rl-eyebrow">Your GreekGeek starts here</p>
             <CardTitle className="display-sm mt-3 font-display font-medium tracking-[-0.02em]">
-              Welcome to Rally
+              Welcome to GreekGeek
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 p-8 pt-2 sm:p-10 sm:pt-2">

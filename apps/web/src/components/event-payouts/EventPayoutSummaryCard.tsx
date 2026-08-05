@@ -1,4 +1,4 @@
-import type { EventPayoutSummary as EventPayoutSummaryData } from '@rally/contracts';
+import type { EventPayoutSummary as EventPayoutSummaryData } from '@greekgeek/contracts';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCents, formatDateTime, formatPayoutReason } from './formatters';
@@ -40,7 +40,7 @@ export function EventPayoutSummaryCard({
             </dd>
           </div>
           <div className="rounded-[var(--radius-md)] border border-border-subtle bg-white/[0.025] p-4">
-            <dt className="text-ink-500">Rally fee</dt>
+            <dt className="text-ink-500">GreekGeek fee</dt>
             <dd className="num mt-1 text-lg font-medium text-ink-100">
               {formatCents(summary.feeCents)}
             </dd>

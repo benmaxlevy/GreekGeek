@@ -7,7 +7,7 @@ import {
   type AdminUserList,
   type ListUsersQuery,
   type PatchUserStatus,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export {
   AdminUserListSchema,

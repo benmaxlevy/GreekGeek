@@ -1,6 +1,6 @@
 ## Context
 
-Rally API today: NestJS + Prisma + Postgres, health checks database only, no Redis or background workers. Ticketing uses stub mark-paid — Stripe integration is next. Webhooks need fast HTTP ack, durable storage, and async processing with retries. See proposal.md for locked scope.
+GreekGeek API today: NestJS + Prisma + Postgres, health checks database only, no Redis or background workers. Ticketing uses stub mark-paid — Stripe integration is next. Webhooks need fast HTTP ack, durable storage, and async processing with retries. See proposal.md for locked scope.
 
 ## Goals / Non-Goals
 
@@ -28,12 +28,12 @@ Rally API today: NestJS + Prisma + Postgres, health checks database only, no Red
 ```yaml
 redis:
   image: redis:7-alpine
-  container_name: rally-redis
+  container_name: greekgeek-redis
   restart: unless-stopped
   ports:
     - "6379:6379"
   volumes:
-    - rally_redis_data:/data
+    - greekgeek_redis_data:/data
   healthcheck:
     test: ["CMD", "redis-cli", "ping"]
     interval: 5s
@@ -81,7 +81,7 @@ Default job options:
 ### 4. Worker entrypoint
 
 - `apps/api/src/worker.main.ts` — NestJS context bootstrapping processors only (no HTTP)
-- Root / `@rally/api` script: `"start:worker": "node dist/worker.main.js"` (dev: `nest start --entryFile worker.main --watch` or tsx equivalent)
+- Root / `@greekgeek/api` script: `"start:worker": "node dist/worker.main.js"` (dev: `nest start --entryFile worker.main --watch` or tsx equivalent)
 - Same `AppModule` subtree or dedicated `WorkerModule` importing queue processors
 - Rationale: separate process scales independently; shares Prisma + services
 

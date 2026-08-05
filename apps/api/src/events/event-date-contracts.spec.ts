@@ -1,4 +1,4 @@
-import { CreateEventSchema, EventSchema, UpdateEventSchema } from '@rally/contracts';
+import { CreateEventSchema, EventSchema, UpdateEventSchema } from '@greekgeek/contracts';
 
 describe('event date contracts', () => {
   const base = {

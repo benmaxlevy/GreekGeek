@@ -6,7 +6,7 @@ export interface WordmarkProps {
   style?: CSSProperties;
 }
 
-/** Rally's fixed monochrome seal. School colors never tint this mark. */
+/** GreekGeek's fixed monochrome seal. School colors never tint this mark. */
 export function Wordmark({ size = 40, color = "#e8e5dc", style }: WordmarkProps) {
   return (
     <span

@@ -1,6 +1,6 @@
 ## Why
 
-Phase 2 delivers authentication and the obsidian-glass shell, but Rally still lacks the organizational model that defines who belongs to which fraternity or sorority chapter and what they can do. Phase 3 introduces universities, organizations, one-to-one memberships, a direct-grant permission catalog, admin-gated user approval, and the admin dashboard to operate all of it — so the platform can onboard real chapters with controlled access before building event features.
+Phase 2 delivers authentication and the obsidian-glass shell, but GreekGeek still lacks the organizational model that defines who belongs to which fraternity or sorority chapter and what they can do. Phase 3 introduces universities, organizations, one-to-one memberships, a direct-grant permission catalog, admin-gated user approval, and the admin dashboard to operate all of it — so the platform can onboard real chapters with controlled access before building event features.
 
 ## What Changes
 

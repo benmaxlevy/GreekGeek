@@ -1,6 +1,6 @@
 ## Why
 
-Ticketing supports paid allocations (`priceCents > 0`) but has no payment processor — hosts cannot legally collect card revenue. Host organizations need Stripe Connect Express onboarding so Rally can gate paid ticket sales until Stripe confirms charges are enabled, without building Checkout or payout UI in this phase.
+Ticketing supports paid allocations (`priceCents > 0`) but has no payment processor — hosts cannot legally collect card revenue. Host organizations need Stripe Connect Express onboarding so GreekGeek can gate paid ticket sales until Stripe confirms charges are enabled, without building Checkout or payout UI in this phase.
 
 ## What Changes
 

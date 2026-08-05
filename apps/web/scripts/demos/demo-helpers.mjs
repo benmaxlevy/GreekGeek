@@ -7,10 +7,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const BASE_URL = process.env.DEMO_BASE_URL ?? 'http://localhost:5173';
 export const API_URL = process.env.DEMO_API_URL ?? 'http://localhost:3001';
-export const OUT_DIR = path.resolve('/root/rally/rally/demo-videos');
-export const ADMIN_EMAIL = 'admin@rally.local';
-export const ADMIN_PASSWORD = 'RallyAdmin123!';
-export const DEMO_PASSWORD = 'RallyDemo123!';
+export const OUT_DIR = path.resolve('/root/greekgeek/greekgeek/demo-videos');
+export const ADMIN_EMAIL = 'admin@greekgeek.local';
+export const ADMIN_PASSWORD = 'GreekGeekAdmin123!';
+export const DEMO_PASSWORD = 'GreekGeekDemo123!';
 export const UNI_NAME = 'Demo State University';
 export const ORG_LABEL = 'Alpha Demo Fraternity (FRATERNITY)';
 

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Provides Redis-backed BullMQ job infrastructure for Rally: shared connection, typed queues, a dedicated worker process, and health visibility for Redis connectivity.
+Provides Redis-backed BullMQ job infrastructure for GreekGeek: shared connection, typed queues, a dedicated worker process, and health visibility for Redis connectivity.
 
 ## Requirements
 

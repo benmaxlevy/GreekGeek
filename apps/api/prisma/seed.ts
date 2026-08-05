@@ -3,9 +3,9 @@ import * as argon2 from 'argon2';
 
 const prisma = new PrismaClient();
 
-const ADMIN_EMAIL = 'admin@rally.local';
-const ADMIN_PASSWORD = 'RallyAdmin123!';
-const ADMIN_NAME = 'Rally Admin';
+const ADMIN_EMAIL = 'admin@greekgeek.local';
+const ADMIN_PASSWORD = 'GreekGeekAdmin123!';
+const ADMIN_NAME = 'GreekGeek Admin';
 
 const PERMISSIONS = [
   {

@@ -10,7 +10,7 @@ import {
 } from './demo-helpers.mjs';
 
 const stamp = ts();
-const email = `demo+events-${stamp}@rally.local`;
+const email = `demo+events-${stamp}@greekgeek.local`;
 const name = `Events Member ${stamp}`;
 const eventName = `Member Party ${stamp}`;
 const eventNameUpdated = `${eventName} Updated`;

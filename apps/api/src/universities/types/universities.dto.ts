@@ -7,7 +7,7 @@ import {
   type University,
   type UniversityList,
   type UpdateUniversity,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export {
   CreateUniversitySchema,

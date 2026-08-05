@@ -35,7 +35,7 @@ import {
   type TicketAllocationList,
   type TicketList,
   type UpdateTicketAllocation,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 import { apiFetch, readError } from './api';
 import { TicketCheckInError } from './ticketing/types/check-in';
 import { PurchaseCheckoutError } from './ticketing/types/purchase';

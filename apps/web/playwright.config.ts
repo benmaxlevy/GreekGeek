@@ -22,7 +22,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'pnpm --filter @rally/api exec nest start',
+      command: 'pnpm --filter @greekgeek/api exec nest start',
       cwd: '../..',
       url: `http://127.0.0.1:${apiPort}/api/health`,
       reuseExistingServer: !process.env.CI,

@@ -3,18 +3,18 @@ import {
   PurchaseCheckoutResponseSchema,
   PurchaseStatusSchema,
   computePurchaseAmounts,
-  computeRallyFee,
+  computeGreekGeekFee,
   type PurchaseCheckoutRequest,
   type PurchaseCheckoutResponse,
   type PurchaseStatus,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export {
   PurchaseCheckoutRequestSchema,
   PurchaseCheckoutResponseSchema,
   PurchaseStatusSchema,
   computePurchaseAmounts,
-  computeRallyFee,
+  computeGreekGeekFee,
 };
 
 export type {

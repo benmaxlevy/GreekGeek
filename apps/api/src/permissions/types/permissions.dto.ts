@@ -9,7 +9,7 @@ import {
   type MemberPermissionList,
   type Permission,
   type PermissionList,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export {
   GrantPermissionSchema,

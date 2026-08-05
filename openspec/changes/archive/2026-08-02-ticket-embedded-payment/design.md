@@ -7,7 +7,7 @@ Archived `redis-bullmq-webhook-inbox` provides Stripe signature verification, `W
 **Goals:**
 
 - `TicketPayment` model (one row per ticket) tracking PI lifecycle
-- Server-side Rally fee via `RALLY_FEE_PERCENT` with half-up rounding
+- Server-side GreekGeek fee via `RALLY_FEE_PERCENT` with half-up rounding
 - Holder-only checkout API creating/reusing PaymentIntent on **platform** account (no `transfer_data`)
 - Embedded Payment Element at `/app/tickets/$id/pay`
 - Webhook worker flips ticket `paid`; client confirmation never does
@@ -58,7 +58,7 @@ enum TicketPaymentStatus {
 
 ```typescript
 // packages/contracts or apps/api fee module
-export function computeRallyFee(priceCents: number, feePercent: number): {
+export function computeGreekGeekFee(priceCents: number, feePercent: number): {
   feeCents: number;
   amountCents: number;
   netCents: number;

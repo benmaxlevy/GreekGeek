@@ -1,4 +1,4 @@
-# Rally
+# GreekGeek
 
 pnpm + Turborepo monorepo: NestJS API (`apps/api`) and Vite React web app (`apps/web`).
 
@@ -33,7 +33,7 @@ pnpm db:migrate
 pnpm db:seed
 ```
 
-Seeded admin: `admin@rally.local` / `RallyAdmin123!`
+Seeded admin: `admin@greekgeek.local` / `GreekGeekAdmin123!`
 
 ### Dev servers
 
@@ -74,8 +74,8 @@ packages/tsconfig   Shared TypeScript bases
 pnpm test:api
 
 # Playwright e2e (needs Docker Postgres + Chromium deps)
-pnpm --filter @rally/web exec playwright install chromium
-# first time on Linux: pnpm --filter @rally/web exec playwright install-deps chromium
+pnpm --filter @greekgeek/web exec playwright install chromium
+# first time on Linux: pnpm --filter @greekgeek/web exec playwright install-deps chromium
 pnpm test:e2e
 ```
 

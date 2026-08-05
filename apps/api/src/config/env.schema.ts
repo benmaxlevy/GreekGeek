@@ -12,7 +12,7 @@ export const envSchema = z.object({
   /** Pin Stripe Accounts v2 preview (e.g. 2026-07-29.preview). Bump with care. */
   STRIPE_API_VERSION: z.string().min(1),
   APP_URL: z.string().url(),
-  /** Rally platform fee as percent of ticket price (default 10). */
+  /** GreekGeek platform fee as percent of ticket price (default 10). */
   RALLY_FEE_PERCENT: z.coerce.number().nonnegative().default(10),
   /** Max non-void tickets one user may hold per event (default 2). */
   MAX_TICKETS_PER_USER_PER_EVENT: z.coerce.number().int().positive().default(2),

@@ -1,4 +1,4 @@
-import type { OrgStripeFields } from '@rally/contracts';
+import type { OrgStripeFields } from '@greekgeek/contracts';
 
 export type StripeConnectUiState =
   | 'not_started'

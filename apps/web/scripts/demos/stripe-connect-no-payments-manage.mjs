@@ -14,7 +14,7 @@ import {
 import { resetOrgStripeConnect } from './stripe-demo-fixtures.mjs';
 
 const stamp = ts();
-const officerEmail = `demo+stripe-no-pay-${stamp}@rally.local`;
+const officerEmail = `demo+stripe-no-pay-${stamp}@greekgeek.local`;
 const officerName = `Stripe No Pay Perm ${stamp}`;
 const eventName = `Stripe Ask Officer ${stamp}`;
 const out = `stripe-connect-no-payments-manage-${stamp}.webm`;

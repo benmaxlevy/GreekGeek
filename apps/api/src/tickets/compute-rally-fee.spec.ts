@@ -1,8 +1,8 @@
-import { computePurchaseAmounts, computeRallyFee } from '@rally/contracts';
+import { computePurchaseAmounts, computeGreekGeekFee } from '@greekgeek/contracts';
 
-describe('computePurchaseAmounts / computeRallyFee', () => {
+describe('computePurchaseAmounts / computeGreekGeekFee', () => {
   it('computes ten percent on whole dollar (qty 1)', () => {
-    expect(computeRallyFee(1000, 10)).toEqual({
+    expect(computeGreekGeekFee(1000, 10)).toEqual({
       feeCents: 100,
       amountCents: 1100,
       netCents: 1000,
@@ -10,7 +10,7 @@ describe('computePurchaseAmounts / computeRallyFee', () => {
   });
 
   it('half-up at .5 boundary (1005 * 10% = 100.5 → 101)', () => {
-    expect(computeRallyFee(1005, 10)).toEqual({
+    expect(computeGreekGeekFee(1005, 10)).toEqual({
       feeCents: 101,
       amountCents: 1106,
       netCents: 1005,
@@ -18,7 +18,7 @@ describe('computePurchaseAmounts / computeRallyFee', () => {
   });
 
   it('half-up below .5 boundary (1004 * 10% = 100.4 → 100)', () => {
-    expect(computeRallyFee(1004, 10)).toEqual({
+    expect(computeGreekGeekFee(1004, 10)).toEqual({
       feeCents: 100,
       amountCents: 1104,
       netCents: 1004,
@@ -42,7 +42,7 @@ describe('computePurchaseAmounts / computeRallyFee', () => {
       netCents: 2010,
     });
     const perTicketSum =
-      computeRallyFee(1005, 10).feeCents + computeRallyFee(1005, 10).feeCents;
+      computeGreekGeekFee(1005, 10).feeCents + computeGreekGeekFee(1005, 10).feeCents;
     expect(perTicketSum).toBe(202);
     expect(computePurchaseAmounts(2, 1005, 10).feeCents).not.toBe(perTicketSum);
   });

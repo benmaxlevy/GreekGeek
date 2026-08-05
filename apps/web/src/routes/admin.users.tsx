@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { AdminUser, Organization, University, UserStatus } from '@rally/contracts';
+import type { AdminUser, Organization, University, UserStatus } from '@greekgeek/contracts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

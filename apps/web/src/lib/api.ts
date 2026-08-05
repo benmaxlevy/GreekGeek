@@ -13,7 +13,7 @@ import {
   type SignupRequest,
   type SignupResponse,
   type UniversityList,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 import { getAccessToken, setAccessToken } from './auth-token';
 
 let refreshInFlight: Promise<string | null> | null = null;

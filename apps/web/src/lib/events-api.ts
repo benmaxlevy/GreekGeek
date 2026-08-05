@@ -7,7 +7,7 @@ import {
   type Event,
   type EventList,
   type UpdateEvent,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 import { apiFetch, readError } from './api';
 
 type ListEventsParams = {

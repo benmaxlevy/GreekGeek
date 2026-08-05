@@ -1,6 +1,6 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { HealthResponse } from '@rally/contracts';
+import type { HealthResponse } from '@greekgeek/contracts';
 import Redis from 'ioredis';
 import type { Env } from '../config/env.schema';
 import { PrismaService } from '../prisma/prisma.service';

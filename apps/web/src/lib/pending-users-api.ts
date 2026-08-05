@@ -4,7 +4,7 @@ import {
   PatchPendingApplicantStatusSchema,
   type PendingApplicant,
   type PendingApplicantList,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 import { apiFetch, readError } from './api';
 
 export async function listPendingApplicants(
