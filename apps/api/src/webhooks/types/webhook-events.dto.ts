@@ -7,7 +7,7 @@ import {
   type WebhookEventList,
   type ListWebhookEventsQuery,
   type RequeueWebhookEventResponse,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export {
   WebhookEventListSchema,

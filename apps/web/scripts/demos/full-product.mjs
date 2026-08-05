@@ -37,66 +37,66 @@ import {
 const stamp = ts();
 const out = `full-product-${stamp}.webm`;
 
-const pendingEmail = `demo+full-pend-${stamp}@rally.local`;
+const pendingEmail = `demo+full-pend-${stamp}@greekgeek.local`;
 const pendingName = `Full Pending ${stamp}`;
-const approveEmail = `demo+full-appr-${stamp}@rally.local`;
+const approveEmail = `demo+full-appr-${stamp}@greekgeek.local`;
 const approveName = `Full Approve ${stamp}`;
-const denyEmail = `demo+full-deny-${stamp}@rally.local`;
+const denyEmail = `demo+full-deny-${stamp}@greekgeek.local`;
 const denyName = `Full Deny ${stamp}`;
-const reactivateEmail = `demo+full-reac-${stamp}@rally.local`;
+const reactivateEmail = `demo+full-reac-${stamp}@greekgeek.local`;
 const reactivateName = `Full Reactivate ${stamp}`;
-const permsEmail = `demo+full-perm-${stamp}@rally.local`;
+const permsEmail = `demo+full-perm-${stamp}@greekgeek.local`;
 const permsName = `Full Perms ${stamp}`;
 const uniName = `Full Demo Uni ${stamp}`;
 const orgName = `Full Beta Org ${stamp}`;
-const orgMemberEmail = `demo+full-orgm-${stamp}@rally.local`;
+const orgMemberEmail = `demo+full-orgm-${stamp}@greekgeek.local`;
 const adminEventName = `Full Admin Formal ${stamp}`;
 const adminEventUpdated = `${adminEventName} Updated`;
-const officerEmail = `demo+full-off-${stamp}@rally.local`;
+const officerEmail = `demo+full-off-${stamp}@greekgeek.local`;
 const officerName = `Full Officer ${stamp}`;
-const offApplEmail = `demo+full-offa-${stamp}@rally.local`;
+const offApplEmail = `demo+full-offa-${stamp}@greekgeek.local`;
 const offApplName = `Full Off Applicant ${stamp}`;
-const offDenyEmail = `demo+full-offd-${stamp}@rally.local`;
+const offDenyEmail = `demo+full-offd-${stamp}@greekgeek.local`;
 const offDenyName = `Full Off Denied ${stamp}`;
-const offDenyOfficerEmail = `demo+full-offdo-${stamp}@rally.local`;
+const offDenyOfficerEmail = `demo+full-offdo-${stamp}@greekgeek.local`;
 const offDenyOfficerName = `Full Off Denier ${stamp}`;
-const noPermEmail = `demo+full-nop-${stamp}@rally.local`;
+const noPermEmail = `demo+full-nop-${stamp}@greekgeek.local`;
 const noPermName = `Full No Perm ${stamp}`;
-const eventsEmail = `demo+full-evt-${stamp}@rally.local`;
+const eventsEmail = `demo+full-evt-${stamp}@greekgeek.local`;
 const eventsName = `Full Events Member ${stamp}`;
 const memberEventName = `Full Member Party ${stamp}`;
 const memberEventUpdated = `${memberEventName} Updated`;
-const noEvtEmail = `demo+full-noevt-${stamp}@rally.local`;
+const noEvtEmail = `demo+full-noevt-${stamp}@greekgeek.local`;
 const noEvtName = `Full No Events ${stamp}`;
 
 // Section 14 — optional org signup
-const optOrglessEmail = `demo+full-optless-${stamp}@rally.local`;
+const optOrglessEmail = `demo+full-optless-${stamp}@greekgeek.local`;
 const optOrglessName = `Full Orgless ${stamp}`;
-const optPendingEmail = `demo+full-optpend-${stamp}@rally.local`;
+const optPendingEmail = `demo+full-optpend-${stamp}@greekgeek.local`;
 const optPendingName = `Full Opt Pending ${stamp}`;
 
 // Section 15 — ticketing host
-const ticketHostEmail = `demo+full-thost-${stamp}@rally.local`;
+const ticketHostEmail = `demo+full-thost-${stamp}@greekgeek.local`;
 const ticketHostName = `Full Ticket Host ${stamp}`;
 const ticketOrgBName = `Full Org B ${stamp}`;
 const ticketEventName = `Full Ticketing Formal ${stamp}`;
 
 // Section 16 — guest claim
-const ticketFixtureHostEmail = `demo+full-tfix-${stamp}@rally.local`;
-const ticketGuestEmail = `demo+full-tguest-${stamp}@rally.local`;
+const ticketFixtureHostEmail = `demo+full-tfix-${stamp}@greekgeek.local`;
+const ticketGuestEmail = `demo+full-tguest-${stamp}@greekgeek.local`;
 const ticketGuestName = `Full Ticket Guest ${stamp}`;
 const publicEventName = `Full Public Gala ${stamp}`;
 
 // Section 17 — org member buy
-const orgBuyHostEmail = `demo+full-obuy-h-${stamp}@rally.local`;
-const orgBuyBuyerEmail = `demo+full-obuy-m-${stamp}@rally.local`;
+const orgBuyHostEmail = `demo+full-obuy-h-${stamp}@greekgeek.local`;
+const orgBuyBuyerEmail = `demo+full-obuy-m-${stamp}@greekgeek.local`;
 const orgBuyHostName = `Full Org Buy Host ${stamp}`;
 const orgBuyBuyerName = `Full Org Buyer ${stamp}`;
 const orgBuyEventName = `Full Org Gala ${stamp}`;
 
 // Section 18 — QR check-in
-const qrHostManagerEmail = `demo+full-qr-mgr-${stamp}@rally.local`;
-const qrHostScannerEmail = `demo+full-qr-scan-${stamp}@rally.local`;
+const qrHostManagerEmail = `demo+full-qr-mgr-${stamp}@greekgeek.local`;
+const qrHostScannerEmail = `demo+full-qr-scan-${stamp}@greekgeek.local`;
 const qrHostManagerName = `Full QR Manager ${stamp}`;
 const qrHostScannerName = `Full QR Scanner ${stamp}`;
 const qrEventName = `Full QR Formal ${stamp}`;

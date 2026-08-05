@@ -1,7 +1,7 @@
 import { ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
-import { ProfileSummarySchema, UpdateDisplayNameRequestSchema } from '@rally/contracts';
+import { ProfileSummarySchema, UpdateDisplayNameRequestSchema } from '@greekgeek/contracts';
 import { AuthService } from './auth.service';
 import { PasswordService } from './password.service';
 

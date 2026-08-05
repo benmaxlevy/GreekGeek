@@ -7,7 +7,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import type { PublicUser } from '@rally/contracts';
+import type { PublicUser } from '@greekgeek/contracts';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 import { RequireOrgPermission } from '../permissions/decorators/require-org-permission.decorator';

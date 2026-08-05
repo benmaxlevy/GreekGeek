@@ -14,8 +14,8 @@ import {
 } from './demo-helpers.mjs';
 
 const stamp = ts();
-const hostEmail = `demo+org-buy-host-${stamp}@rally.local`;
-const buyerEmail = `demo+org-buy-member-${stamp}@rally.local`;
+const hostEmail = `demo+org-buy-host-${stamp}@greekgeek.local`;
+const buyerEmail = `demo+org-buy-member-${stamp}@greekgeek.local`;
 const hostName = `Org Buy Host ${stamp}`;
 const buyerName = `Org Buyer ${stamp}`;
 const eventName = `Org Allocation Gala ${stamp}`;

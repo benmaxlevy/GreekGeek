@@ -15,7 +15,7 @@ import {
   type EventPayoutQueue,
   type EventPayoutSummary,
   type PayoutReason,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export {
   EventPayoutActionResponseSchema,

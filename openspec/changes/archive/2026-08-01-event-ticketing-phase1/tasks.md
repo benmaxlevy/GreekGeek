@@ -8,7 +8,7 @@
 
 ## 2. Contracts
 
-- [x] 2.1 Add `@rally/contracts` Zod schemas: event ticketing config patch, allocation create/update, ticket issue, list filters, guest list, mark-paid, void, public-claim, mine response
+- [x] 2.1 Add `@greekgeek/contracts` Zod schemas: event ticketing config patch, allocation create/update, ticket issue, list filters, guest list, mark-paid, void, public-claim, mine response
 - [x] 2.2 Commit: `add ticketing zod contracts`
 
 ## 3. API — config + allocations (vertical slice 1)

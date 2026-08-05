@@ -8,7 +8,7 @@
  */
 import { createHash, randomBytes } from 'node:crypto';
 import { PrismaClient } from '@prisma/client';
-import { computePurchaseAmounts } from '@rally/contracts';
+import { computePurchaseAmounts } from '@greekgeek/contracts';
 import argon2 from 'argon2';
 
 const prisma = new PrismaClient();
@@ -45,7 +45,7 @@ async function grantPermissions(membershipId: string, keys: string[]) {
 }
 
 async function createActiveUser(name: string, email: string, organizationId: string) {
-  const passwordHash = await argon2.hash('RallyDemo123!');
+  const passwordHash = await argon2.hash('GreekGeekDemo123!');
   const user = await prisma.user.create({
     data: { name, email, passwordHash, status: 'ACTIVE' },
   });
@@ -148,7 +148,7 @@ async function initFixture() {
     },
   });
 
-  const hostHost = await createActiveUser(`Payout Host ${stamp}`, `demo+payout-host-${stamp}@rally.local`, hostOrg.id);
+  const hostHost = await createActiveUser(`Payout Host ${stamp}`, `demo+payout-host-${stamp}@greekgeek.local`, hostOrg.id);
   await grantPermissions(hostHost.membership.id, [
     'events.create',
     'events.manage',
@@ -156,10 +156,10 @@ async function initFixture() {
     'payments.manage',
   ]);
 
-  const hostBuyer = await createActiveUser(`Payout Host Buyer ${stamp}`, `demo+payout-host-buyer-${stamp}@rally.local`, hostOrg.id);
-  const invitedBuyer = await createActiveUser(`Payout Invited Buyer ${stamp}`, `demo+payout-invited-${stamp}@rally.local`, invitedOrg.id);
-  const publicBuyer = await createActiveUser(`Payout Public Buyer ${stamp}`, `demo+payout-public-${stamp}@rally.local`, hostOrg.id);
-  const disputedBuyer = await createActiveUser(`Payout Disputed Buyer ${stamp}`, `demo+payout-disputed-${stamp}@rally.local`, hostOrg.id);
+  const hostBuyer = await createActiveUser(`Payout Host Buyer ${stamp}`, `demo+payout-host-buyer-${stamp}@greekgeek.local`, hostOrg.id);
+  const invitedBuyer = await createActiveUser(`Payout Invited Buyer ${stamp}`, `demo+payout-invited-${stamp}@greekgeek.local`, invitedOrg.id);
+  const publicBuyer = await createActiveUser(`Payout Public Buyer ${stamp}`, `demo+payout-public-${stamp}@greekgeek.local`, hostOrg.id);
+  const disputedBuyer = await createActiveUser(`Payout Disputed Buyer ${stamp}`, `demo+payout-disputed-${stamp}@greekgeek.local`, hostOrg.id);
 
   const event = await prisma.event.create({
     data: {
@@ -257,7 +257,7 @@ async function lateSale(eventId: string) {
   const stamp = Date.now().toString();
   const lateBuyer = await createActiveUser(
     `Payout Late Buyer ${stamp}`,
-    `demo+payout-late-${stamp}@rally.local`,
+    `demo+payout-late-${stamp}@greekgeek.local`,
     event.organizationId,
   );
   const purchase = await createSucceededPurchase({

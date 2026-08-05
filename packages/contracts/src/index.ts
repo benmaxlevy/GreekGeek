@@ -220,7 +220,7 @@ export {
   PurchasePayoutFieldsSchema,
   TicketPaymentStatusSchema,
   computePurchaseAmounts,
-  computeRallyFee,
+  computeGreekGeekFee,
   PurchaseCheckoutRequestSchema,
   PurchaseCheckoutResponseSchema,
   TicketCheckoutParamsSchema,

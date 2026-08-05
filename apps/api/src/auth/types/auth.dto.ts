@@ -21,7 +21,7 @@ import {
   type SignupRequest,
   type SignupResponse,
   type UpdateDisplayNameRequest,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export {
   AccessTokenResponseSchema,

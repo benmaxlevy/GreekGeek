@@ -8,7 +8,7 @@ import {
 } from '@tanstack/react-query';
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { ArrowRight, Check, Clock, MapPin, Pencil, X } from 'lucide-react';
-import type { ProfileSummary } from '@rally/contracts';
+import type { ProfileSummary } from '@greekgeek/contracts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -125,7 +125,7 @@ function YouPage() {
         <p className="rl-eyebrow">Account</p>
         <h1 className="display-lg font-display leading-[1.02]">You</h1>
         <p className="max-w-2xl text-sm text-ink-500">
-          Your Rally identity, membership context, permissions, and ticket activity.
+          Your GreekGeek identity, membership context, permissions, and ticket activity.
         </p>
       </header>
 
@@ -288,7 +288,7 @@ function YouPage() {
               className="block px-5 py-4 text-sm text-ink-100 transition-colors hover:bg-white/[0.03]"
             >
               Admin
-              <span className="mt-0.5 block text-xs text-ink-500">Rally HQ console</span>
+              <span className="mt-0.5 block text-xs text-ink-500">GreekGeek HQ console</span>
             </Link>
           ) : null}
           <div className="px-5 py-4">
@@ -349,7 +349,7 @@ function SummaryCard({ query }: { query: UseQueryResult<ProfileSummary, Error> }
     <Card>
       <CardHeader className="border-b border-border-subtle pb-5">
         <p className="rl-eyebrow">Ticket activity</p>
-        <CardTitle className="display-sm font-display mt-2">Your rally calendar</CardTitle>
+        <CardTitle className="display-sm font-display mt-2">Your greekgeek calendar</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5 pt-5">
         <div className="grid grid-cols-2 gap-3">

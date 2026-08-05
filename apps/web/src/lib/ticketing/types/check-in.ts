@@ -1,4 +1,4 @@
-import type { TicketCheckInErrorCode } from '@rally/contracts';
+import type { TicketCheckInErrorCode } from '@greekgeek/contracts';
 
 export type ScannerResultState =
   | 'idle'

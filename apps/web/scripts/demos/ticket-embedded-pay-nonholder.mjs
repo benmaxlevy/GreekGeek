@@ -15,9 +15,9 @@ import {
 import { setOrgStripeReady } from './stripe-demo-fixtures.mjs';
 
 const stamp = ts();
-const holderEmail = `demo+embed-pay-holder-${stamp}@rally.local`;
-const intruderEmail = `demo+embed-pay-intruder-${stamp}@rally.local`;
-const hostEmail = `demo+embed-pay-host-nh-${stamp}@rally.local`;
+const holderEmail = `demo+embed-pay-holder-${stamp}@greekgeek.local`;
+const intruderEmail = `demo+embed-pay-intruder-${stamp}@greekgeek.local`;
+const hostEmail = `demo+embed-pay-host-nh-${stamp}@greekgeek.local`;
 const holderName = `Embed Pay Holder ${stamp}`;
 const intruderName = `Embed Pay Intruder ${stamp}`;
 const hostName = `Embed Pay Host NH ${stamp}`;

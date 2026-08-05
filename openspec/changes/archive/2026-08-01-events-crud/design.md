@@ -27,7 +27,7 @@ Phase 3 shipped universities, organizations, 1:1 memberships, permission catalog
 
 ### 2. Location as free text
 - Optional `String?` on Event — not FK
-- Alt: locations table like oldRally — deferred
+- Alt: locations table like oldGreekGeek — deferred
 
 ### 3. Type as free string
 - No enum / registry this phase
@@ -46,7 +46,7 @@ Phase 3 shipped universities, organizations, 1:1 memberships, permission catalog
 - List: service filters by role/perms
 
 ### 6. FE
-- Glass forms mirroring oldRally field set (name, type, headcount, optional location) — not oldRally visual system
+- Glass forms mirroring oldGreekGeek field set (name, type, headcount, optional location) — not oldGreekGeek visual system
 - Gate `/app/events` via `/me.permissions`
 - Admin page mirrors `admin.organizations` list+form pattern
 

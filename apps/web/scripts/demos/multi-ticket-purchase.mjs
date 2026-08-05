@@ -20,10 +20,10 @@ import {
 import { setOrgStripeReady } from './stripe-demo-fixtures.mjs';
 
 const stamp = ts();
-const hostEmail = `demo+multi-tix-host-${stamp}@rally.local`;
-const buyerAEmail = `demo+multi-tix-buyer-a-${stamp}@rally.local`;
-const buyerBEmail = `demo+multi-tix-buyer-b-${stamp}@rally.local`;
-const buyerCEmail = `demo+multi-tix-buyer-c-${stamp}@rally.local`;
+const hostEmail = `demo+multi-tix-host-${stamp}@greekgeek.local`;
+const buyerAEmail = `demo+multi-tix-buyer-a-${stamp}@greekgeek.local`;
+const buyerBEmail = `demo+multi-tix-buyer-b-${stamp}@greekgeek.local`;
+const buyerCEmail = `demo+multi-tix-buyer-c-${stamp}@greekgeek.local`;
 const hostName = `Multi Tix Host ${stamp}`;
 const buyerAName = `Multi Tix Buyer A ${stamp}`;
 const buyerBName = `Multi Tix Buyer B ${stamp}`;
@@ -144,7 +144,7 @@ async function findOpenPurchaseId(buyerToken) {
 
 function expirePurchaseAndSweep(purchaseId) {
   const script = path.resolve(
-    '/root/rally/rally/apps/api/scripts/demo-ttl-sweep-once.mjs',
+    '/root/greekgeek/greekgeek/apps/api/scripts/demo-ttl-sweep-once.mjs',
   );
   execSync(`node ${script} ${purchaseId}`, {
     stdio: 'inherit',

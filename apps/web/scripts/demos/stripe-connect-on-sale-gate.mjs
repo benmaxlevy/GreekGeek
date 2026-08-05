@@ -18,7 +18,7 @@ import {
 } from './stripe-demo-fixtures.mjs';
 
 const stamp = ts();
-const officerEmail = `demo+stripe-onsale-${stamp}@rally.local`;
+const officerEmail = `demo+stripe-onsale-${stamp}@greekgeek.local`;
 const officerName = `Stripe On Sale ${stamp}`;
 const eventName = `Stripe On Sale Gate ${stamp}`;
 const out = `stripe-connect-on-sale-gate-${stamp}.webm`;

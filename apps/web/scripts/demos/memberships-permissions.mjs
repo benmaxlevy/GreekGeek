@@ -14,7 +14,7 @@ import {
 } from './demo-helpers.mjs';
 
 const stamp = ts();
-const email = `demo+perms-${stamp}@rally.local`;
+const email = `demo+perms-${stamp}@greekgeek.local`;
 const name = `Perms Demo ${stamp}`;
 const out = `memberships-permissions-${stamp}.webm`;
 

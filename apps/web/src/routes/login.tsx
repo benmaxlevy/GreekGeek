@@ -17,7 +17,7 @@ type LoginLocationState = {
 
 const SIGNUP_MESSAGES: Record<NonNullable<LoginLocationState['signupMessage']>, string> = {
   ready: 'Account created. You can sign in now.',
-  pending: 'Account created. Your account awaits admin approval before you can use Rally.',
+  pending: 'Account created. Your account awaits admin approval before you can use GreekGeek.',
 };
 
 export const Route = createFileRoute('/login')({
@@ -64,7 +64,7 @@ function LoginPage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-[var(--content-max)] flex-col px-6 py-8 sm:px-10 sm:py-12">
       <header>
-        <Link to="/" aria-label="Rally home">
+        <Link to="/" aria-label="GreekGeek home">
           <BrandLockup />
         </Link>
       </header>
@@ -75,7 +75,7 @@ function LoginPage() {
             <CardTitle className="display-md mt-3 font-display font-medium tracking-[-0.03em]">
               Log in
             </CardTitle>
-            <p className="mt-3 text-sm leading-6 text-ink-500">Sign in to continue to Rally.</p>
+            <p className="mt-3 text-sm leading-6 text-ink-500">Sign in to continue to GreekGeek.</p>
           </CardHeader>
           <CardContent className="p-8 pt-0 sm:p-10 sm:pt-0">
             {successMessage ? (

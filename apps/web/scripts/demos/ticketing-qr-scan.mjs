@@ -20,10 +20,10 @@ import {
 } from './demo-helpers.mjs';
 
 const stamp = ts();
-const hostManagerEmail = `demo+qr-host-mgr-${stamp}@rally.local`;
-const hostScannerEmail = `demo+qr-host-scan-${stamp}@rally.local`;
-const manageOnlyEmail = `demo+qr-manage-only-${stamp}@rally.local`;
-const invitedScannerEmail = `demo+qr-invited-scan-${stamp}@rally.local`;
+const hostManagerEmail = `demo+qr-host-mgr-${stamp}@greekgeek.local`;
+const hostScannerEmail = `demo+qr-host-scan-${stamp}@greekgeek.local`;
+const manageOnlyEmail = `demo+qr-manage-only-${stamp}@greekgeek.local`;
+const invitedScannerEmail = `demo+qr-invited-scan-${stamp}@greekgeek.local`;
 const hostManagerName = `QR Host Manager ${stamp}`;
 const hostScannerName = `QR Host Scanner ${stamp}`;
 const manageOnlyName = `QR Manage Only ${stamp}`;

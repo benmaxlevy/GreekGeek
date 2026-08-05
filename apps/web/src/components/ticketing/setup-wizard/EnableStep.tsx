@@ -1,4 +1,4 @@
-import type { Event } from '@rally/contracts';
+import type { Event } from '@greekgeek/contracts';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { WizardState } from './types';

@@ -1,6 +1,6 @@
 ## Why
 
-Rally currently collects ticket payments but has no controlled path to transfer eligible event proceeds to the host organization. Event dates, payout holds, Stripe transfer readiness, disputes, and repeatable release operations must be defined together now so Rally can release net proceeds exactly once while retaining its fee.
+GreekGeek currently collects ticket payments but has no controlled path to transfer eligible event proceeds to the host organization. Event dates, payout holds, Stripe transfer readiness, disputes, and repeatable release operations must be defined together now so GreekGeek can release net proceeds exactly once while retaining its fee.
 
 ## What Changes
 

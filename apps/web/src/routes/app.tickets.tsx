@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ClaimableEvent, MyTicket } from '@rally/contracts';
+import type { ClaimableEvent, MyTicket } from '@greekgeek/contracts';
 import { TicketQrCode } from '@/components/ticketing/TicketQrCode';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

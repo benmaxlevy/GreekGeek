@@ -1,5 +1,5 @@
 {
-  "name": "@rally/api",
+  "name": "@greekgeek/api",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -29,7 +29,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.5",
     "@prisma/client": "^6.13.0",
-    "@rally/contracts": "workspace:*",
+    "@greekgeek/contracts": "workspace:*",
     "argon2": "^0.45.1",
     "bullmq": "^6.0.3",
     "cookie-parser": "^1.4.7",
@@ -46,7 +46,7 @@
     "@nestjs/cli": "^11.0.8",
     "@nestjs/schematics": "^11.0.5",
     "@nestjs/testing": "^11.1.28",
-    "@rally/tsconfig": "workspace:*",
+    "@greekgeek/tsconfig": "workspace:*",
     "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",

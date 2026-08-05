@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Represents academic institutions that host fraternity and sorority chapters, providing the top-level geographic anchor for organizations in Rally.
+Represents academic institutions that host fraternity and sorority chapters, providing the top-level geographic anchor for organizations in GreekGeek.
 
 ## Requirements
 

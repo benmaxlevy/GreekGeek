@@ -10,7 +10,7 @@ import {
 } from './demo-helpers.mjs';
 
 const stamp = ts();
-const email = `demo+noevt-${stamp}@rally.local`;
+const email = `demo+noevt-${stamp}@greekgeek.local`;
 const name = `No Events Member ${stamp}`;
 const out = `member-events-forbidden-${stamp}.webm`;
 

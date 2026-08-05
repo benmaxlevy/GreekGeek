@@ -37,7 +37,7 @@ import {
   type UniversityList,
   type UpdateOrganization,
   type UpdateUniversity,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 import { apiFetch, readError } from './api';
 
 function toQuery(params: Record<string, string | undefined>): string {

@@ -8,7 +8,7 @@ import {
   type StripeConnectRefreshLinkResponse,
   type StripeConnectReturnSyncResponse,
   type StripeConnectStatusResponse,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export const OrgStripeParamsSchema = z.object({
   organizationId: z.string().min(1),

@@ -5,7 +5,7 @@ import {
   type ListWebhookEventsQuery,
   type RequeueWebhookEventResponse,
   type WebhookEventList,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 import { apiFetch, readError } from './api';
 
 function toQuery(params: Record<string, string | undefined>): string {

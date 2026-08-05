@@ -12,7 +12,7 @@ import {
 import { resetOrgStripeConnect } from './stripe-demo-fixtures.mjs';
 
 const stamp = ts();
-const officerEmail = `demo+embed-pay-unready-${stamp}@rally.local`;
+const officerEmail = `demo+embed-pay-unready-${stamp}@greekgeek.local`;
 const officerName = `Embed Pay Unready ${stamp}`;
 const eventName = `Embed Pay Unready Event ${stamp}`;
 const out = `ticket-embedded-pay-unready-${stamp}.webm`;

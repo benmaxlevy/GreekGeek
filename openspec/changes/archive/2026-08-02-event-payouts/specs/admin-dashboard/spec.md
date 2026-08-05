@@ -26,7 +26,7 @@ The admin dashboard MUST provide an event payout operations view for ACTIVE plat
 
 ### Requirement: Admin sees event payout financial summary
 
-The admin dashboard MUST show per-event gross (`amountCents` sum), Rally fees (`feeCents` sum), net (`netCents` sum), released, pending, and excluded totals. It MUST show excluded purchase count, amount, and reason, host Connect readiness, payout batch sequence/status, transfer identity when present, and post-release dispute exposure. Historical released EventPayout amounts MUST remain displayed unchanged.
+The admin dashboard MUST show per-event gross (`amountCents` sum), GreekGeek fees (`feeCents` sum), net (`netCents` sum), released, pending, and excluded totals. It MUST show excluded purchase count, amount, and reason, host Connect readiness, payout batch sequence/status, transfer identity when present, and post-release dispute exposure. Historical released EventPayout amounts MUST remain displayed unchanged.
 
 #### Scenario: Admin reviews partial exclusion
 - **WHEN** an event has one excluded purchase and other clean purchases

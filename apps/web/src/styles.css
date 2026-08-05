@@ -2,7 +2,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Rally brand fonts — self-hosted from oldRally. */
+/* GreekGeek brand fonts — self-hosted from oldGreekGeek. */
 @font-face {
   font-family: 'Instrument Sans';
   src: url('./assets/fonts/InstrumentSans-normal.woff2') format('woff2');
@@ -300,7 +300,7 @@
   }
 }
 
-.rally-brand-caps {
+.greekgeek-brand-caps {
   font-family: var(--font-display);
   font-weight: 500;
   text-transform: uppercase;
@@ -309,8 +309,8 @@
   white-space: nowrap;
 }
 
-/* Ambient page gradient — tasks use rally-theme; alias oldRally rally-unified-theme. */
-body.rally-theme {
+/* Ambient page gradient — tasks use greekgeek-theme; alias oldGreekGeek greekgeek-unified-theme. */
+body.greekgeek-theme {
   min-height: 100vh;
   margin: 0;
   color: var(--ink-100);
@@ -321,8 +321,8 @@ body.rally-theme {
   background-attachment: fixed;
 }
 
-body.rally-theme::before,
-body.rally-theme::after {
+body.greekgeek-theme::before,
+body.greekgeek-theme::after {
   position: fixed;
   z-index: 0;
   inset: 0;
@@ -330,15 +330,15 @@ body.rally-theme::after {
   content: '';
 }
 
-body.rally-theme::before {
+body.greekgeek-theme::before {
   background: radial-gradient(60% 42% at 50% 0%, rgba(255, 255, 255, 0.025), transparent 74%);
 }
 
-body.rally-theme::after {
+body.greekgeek-theme::after {
   display: none;
 }
 
-body.rally-theme :where(#root, main) {
+body.greekgeek-theme :where(#root, main) {
   position: relative;
   z-index: 1;
 }

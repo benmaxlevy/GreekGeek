@@ -5,7 +5,7 @@ import {
   type ProfileSummary,
   type PublicUser,
   type UpdateDisplayNameRequest,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 import { apiFetch, readError } from './api';
 
 export async function updateDisplayName(body: UpdateDisplayNameRequest): Promise<PublicUser> {

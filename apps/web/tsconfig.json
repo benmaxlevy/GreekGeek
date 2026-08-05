@@ -1,5 +1,5 @@
 {
-  "extends": "@rally/tsconfig/react.json",
+  "extends": "@greekgeek/tsconfig/react.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

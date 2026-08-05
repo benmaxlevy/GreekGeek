@@ -33,7 +33,7 @@
 ## 6. Frontend
 
 - [x] 6.1 Quantity selector on buy flow bounded by remaining allocation and per-user headroom; call purchase checkout API
-- [x] 6.2 Itemized summary (e.g. `2 × $10.00 = $20.00`, Rally fee, Total); keep embedded Payment Element; prevent double-submit
+- [x] 6.2 Itemized summary (e.g. `2 × $10.00 = $20.00`, GreekGeek fee, Total); keep embedded Payment Element; prevent double-submit
 - [x] 6.3 Success shows all N tickets with QR codes; paidAt/QR behavior unchanged for legacy single tickets
 - [x] 6.4 Officer guest list groups tickets by purchase/buyer
 

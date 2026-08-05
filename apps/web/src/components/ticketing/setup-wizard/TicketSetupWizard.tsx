@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Event, Organization } from '@rally/contracts';
+import type { Event, Organization } from '@greekgeek/contracts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createAllocation, patchEventTicketing } from '@/lib/ticketing-api';

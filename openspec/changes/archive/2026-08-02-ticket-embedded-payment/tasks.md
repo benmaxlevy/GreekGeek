@@ -2,7 +2,7 @@
 
 - [x] 1.1 Add Prisma `TicketPayment` model and `TicketPaymentStatus` enum per design; generate and apply migration
 - [x] 1.2 Add `RALLY_FEE_PERCENT` to API Zod env schema (default 10); document in `.env.example`
-- [x] 1.3 Implement `computeRallyFee(priceCents, feePercent)` with half-up rounding; unit tests for whole-dollar, `.5` boundary above, `.5` boundary below
+- [x] 1.3 Implement `computeGreekGeekFee(priceCents, feePercent)` with half-up rounding; unit tests for whole-dollar, `.5` boundary above, `.5` boundary below
 - [x] 1.4 Add `packages/contracts/src/ticket-payments.ts`: checkout request/response Zod schemas (clientSecret, priceCents, feeCents, amountCents, currency)
 - [x] 1.5 Document `VITE_STRIPE_PUBLISHABLE_KEY` in `apps/web/.env.example`
 - [x] 1.6 Commit: `add ticket payment schema fee helper and contracts`

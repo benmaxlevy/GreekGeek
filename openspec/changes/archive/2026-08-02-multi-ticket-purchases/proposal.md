@@ -41,7 +41,7 @@ Holders can buy only one ticket per checkout because `TicketPayment` is 1:1 with
 ### UI
 
 - Quantity selector on buy flow, bounded by remaining allocation and per-user cap
-- Itemized summary (e.g. `2 × $10.00 = $20.00`, Rally fee `$2.00`, Total `$22.00`); embedded Payment Element unchanged
+- Itemized summary (e.g. `2 × $10.00 = $20.00`, GreekGeek fee `$2.00`, Total `$22.00`); embedded Payment Element unchanged
 - Success shows all N tickets with QR codes; officer guest list groups tickets by purchase/buyer
 
 ### Non-goals

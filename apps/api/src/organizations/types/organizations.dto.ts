@@ -10,7 +10,7 @@ import {
   type Organization,
   type OrganizationList,
   type UpdateOrganization,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export {
   CreateOrganizationSchema,

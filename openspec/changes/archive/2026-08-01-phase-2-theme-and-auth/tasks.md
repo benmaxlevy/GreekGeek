@@ -5,16 +5,16 @@
 
 ## 2. Theme tokens and fonts
 
-- [x] 2.1 Copy self-hosted woff2 fonts from `oldRally/src/assets/fonts` into `apps/web/src/assets/fonts`
-- [x] 2.2 Port `@font-face`, `@theme inline`, and `:root` obsidian-glass tokens from `oldRally/src/styles.css` into `apps/web` styles
-- [x] 2.3 Apply `rally-theme` (or equivalent) body class with ambient page gradient; expose layout tokens (`--sidebar-width: 232px`, `--content-max: 1160px`, `--nav-height`)
+- [x] 2.1 Copy self-hosted woff2 fonts from `oldGreekGeek/src/assets/fonts` into `apps/web/src/assets/fonts`
+- [x] 2.2 Port `@font-face`, `@theme inline`, and `:root` obsidian-glass tokens from `oldGreekGeek/src/styles.css` into `apps/web` styles
+- [x] 2.3 Apply `greekgeek-theme` (or equivalent) body class with ambient page gradient; expose layout tokens (`--sidebar-width: 232px`, `--content-max: 1160px`, `--nav-height`)
 - [x] 2.4 Verify no per-route `const C` palette pattern is introduced — CSS variables only
 
 ## 3. UI primitives and shell
 
 - [x] 3.1 Init shadcn (new-york, `cssVariables: true`, `baseColor: slate`, lucide) and add primitives: button, card, input, label, form, separator, badge, avatar, dropdown-menu, sonner, skeleton
 - [x] 3.2 Port `btn-chrome` and `surface-glass-panel` as Tailwind v4 `@utility` blocks and wire as Button/Card variants
-- [x] 3.3 Build Wordmark and BrandLockup from oldRally favicon / BrandLockup references
+- [x] 3.3 Build Wordmark and BrandLockup from oldGreekGeek favicon / BrandLockup references
 - [x] 3.4 Build AppShell: 232px sticky sidebar, 1160px content max, `40px 48px` main padding, mobile drawer `<768px`, 44px min tap targets
 
 ## 4. Auth data model and contracts

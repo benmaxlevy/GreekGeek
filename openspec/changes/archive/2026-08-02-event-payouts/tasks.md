@@ -56,7 +56,7 @@
 
 ## 8. Host and admin UI
 
-- [x] 8.1 Add host event payout summary showing gross amountCents, Rally fee feeCents, net netCents, released, pending, excluded totals, computed expected date, and released history.
+- [x] 8.1 Add host event payout summary showing gross amountCents, GreekGeek fee feeCents, net netCents, released, pending, excluded totals, computed expected date, and released history.
 - [x] 8.2 Add excluded purchase count, amount, and disputed/refunded/voided reason display plus post-release exposure flag.
 - [x] 8.3 Add ADMIN payout queue for eligible now, pending, held, blocked, failed, and post-release dispute states with visible reasons.
 - [x] 8.4 Add ADMIN release, hold, clear hold, and retry actions requiring reason and showing audit result.
@@ -65,7 +65,7 @@
 
 ## 9. End-to-end verification and demo
 
-- [x] 9.1 Run end-to-end flow: host, invited, and public sales; event ends; hold or ADMIN early release; one host transfer of net only; Rally fee retained.
+- [x] 9.1 Run end-to-end flow: host, invited, and public sales; event ends; hold or ADMIN early release; one host transfer of net only; GreekGeek fee retained.
 - [x] 9.2 Demonstrate one disputed purchase excluded while remaining purchases release, including multi-ticket whole-purchase behavior.
 - [x] 9.3 Demonstrate late sale producing a second batchSeq and transfer eligibility.
 - [x] 9.4 Demonstrate post-release dispute flagged for later clawback with historical amount unchanged and no automatic reverse transfer.

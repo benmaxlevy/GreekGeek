@@ -1,6 +1,6 @@
 ## Why
 
-Rally needs durable async job processing before payment webhooks land. Stripe (and future providers) must accept HTTP quickly, persist events idempotently, and process them in a separate worker with retries — without blocking API requests or losing events on crash.
+GreekGeek needs durable async job processing before payment webhooks land. Stripe (and future providers) must accept HTTP quickly, persist events idempotently, and process them in a separate worker with retries — without blocking API requests or losing events on crash.
 
 ## What Changes
 
@@ -13,7 +13,7 @@ Rally needs durable async job processing before payment webhooks land. Stripe (a
 - Default job opts: retries with exponential backoff, `removeOnComplete` bounded, `removeOnFail` retained for inspection
 - Worker runs as own process/entrypoint (`start:worker`), same codebase
 - Graceful shutdown drains in-flight jobs
-- Health endpoint reports Redis reachable (`redis: 'up'|'down'`; overall status degraded if Redis or database down); extend `@rally/contracts` `HealthResponseSchema`
+- Health endpoint reports Redis reachable (`redis: 'up'|'down'`; overall status degraded if Redis or database down); extend `@greekgeek/contracts` `HealthResponseSchema`
 - Job failures logged with job id + payload keys (no PII dumps)
 - Temporary ADMIN prove enqueue used for smoke only — removed after confirmed
 
@@ -54,5 +54,5 @@ Rally needs durable async job processing before payment webhooks land. Stripe (a
 - **apps/api**: env schema (`REDIS_URL`, `STRIPE_WEBHOOK_SECRET`), queue module, worker bootstrap, health service, webhook module, Prisma `WebhookEvent`, integration tests
 - **packages/contracts**: extended `HealthResponseSchema`, webhook event + admin list/re-enqueue Zod schemas
 - **apps/web**: `/admin/webhook-events` route, admin nav link, API client helpers
-- **package.json** (`@rally/api`): `start:worker` script; new deps `bullmq`, `@nestjs/bullmq`
+- **package.json** (`@greekgeek/api`): `start:worker` script; new deps `bullmq`, `@nestjs/bullmq`
 - **Non-goals**: payment business logic, non-Stripe handlers, public webhook UI

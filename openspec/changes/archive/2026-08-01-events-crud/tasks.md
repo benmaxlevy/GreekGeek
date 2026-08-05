@@ -6,7 +6,7 @@
 
 ## 2. Contracts + API
 
-- [x] 2.1 Add `@rally/contracts` Event Zod schemas (create/update/list query/response)
+- [x] 2.1 Add `@greekgeek/contracts` Event Zod schemas (create/update/list query/response)
 - [x] 2.2 Nest events module: create (`events.create`), list/get (create|manage|ADMIN), update/delete (`events.manage`), ADMIN bypass
 - [x] 2.3 Wire module into AppModule; parse responses with Zod
 - [x] 2.4 Commit: `add events api and contracts`

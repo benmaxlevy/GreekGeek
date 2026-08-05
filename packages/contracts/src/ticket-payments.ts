@@ -42,7 +42,7 @@ export function computePurchaseAmounts(
 }
 
 /** Half-up fee on a single price (quantity 1). Prefer computePurchaseAmounts for multi-qty. */
-export function computeRallyFee(
+export function computeGreekGeekFee(
   priceCents: number,
   feePercent: number,
 ): {

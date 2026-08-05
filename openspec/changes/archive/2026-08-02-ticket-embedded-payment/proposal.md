@@ -1,6 +1,6 @@
 ## Why
 
-Connect readiness gates paid allocations, but holders still cannot pay — only stub mark-paid exists. Host orgs need real card collection via embedded Stripe Payment Element on Rally's platform account so unpaid tickets become paid through webhooks, without hosted Checkout or transfers this slice.
+Connect readiness gates paid allocations, but holders still cannot pay — only stub mark-paid exists. Host orgs need real card collection via embedded Stripe Payment Element on GreekGeek's platform account so unpaid tickets become paid through webhooks, without hosted Checkout or transfers this slice.
 
 ## What Changes
 
@@ -8,7 +8,7 @@ Connect readiness gates paid allocations, but holders still cannot pay — only 
 
 - `RALLY_FEE_PERCENT` env (percent number, default **10**)
 - `feeCents = round_half_up(priceCents * pct / 100)`; unit tested including `.5` boundaries
-- Buyer pays fee on top; UI itemized (e.g. `$10.00 + $1.00 Rally fee = $11.00` at 10%)
+- Buyer pays fee on top; UI itemized (e.g. `$10.00 + $1.00 GreekGeek fee = $11.00` at 10%)
 - Amounts computed **server-side** from allocation `priceCents` + fee; client amounts ignored
 
 ### TicketPayment model (one row per ticket)
@@ -27,7 +27,7 @@ Connect readiness gates paid allocations, but holders still cannot pay — only 
 - Preconditions: ticketing enabled, `on_sale`, ticket unpaid and not void, allocation active, `priceCents > 0`, host org `stripeChargesEnabled`
 - Returns **`client_secret`** plus minimal FE fields; metadata on PI: `ticketId`, `eventId`, `organizationId`
 - Reuses open PI for same ticket; idempotency key prevents duplicate intents
-- Charges on **Rally platform** Stripe account; **no `transfer_data`**
+- Charges on **GreekGeek platform** Stripe account; **no `transfer_data`**
 
 ### Embedded payment UI
 
@@ -59,7 +59,7 @@ No transfers, payouts, refunds, dispute UI, saved payment methods, payment pools
 
 ### New Capabilities
 
-- `ticket-payments`: TicketPayment persistence, Rally fee math, holder-only PaymentIntent checkout API, embedded pay UI, webhook-driven paid transition, free-ticket auto-pay
+- `ticket-payments`: TicketPayment persistence, GreekGeek fee math, holder-only PaymentIntent checkout API, embedded pay UI, webhook-driven paid transition, free-ticket auto-pay
 
 ### Modified Capabilities
 

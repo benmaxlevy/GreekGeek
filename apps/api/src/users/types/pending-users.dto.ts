@@ -11,7 +11,7 @@ import {
   type OrgPendingUsersParams,
   type OrgPendingUserParams,
   type PatchPendingApplicantStatus,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export {
   PendingApplicantListSchema,

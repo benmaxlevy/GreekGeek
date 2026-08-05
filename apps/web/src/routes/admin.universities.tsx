@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { University } from '@rally/contracts';
+import type { University } from '@greekgeek/contracts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

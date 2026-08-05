@@ -11,7 +11,7 @@ import {
   type ListEventsQuery,
   type PayoutReason,
   type UpdateEvent,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export {
   CreateEventSchema,

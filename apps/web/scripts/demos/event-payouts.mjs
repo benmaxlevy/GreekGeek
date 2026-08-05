@@ -24,7 +24,7 @@ import {
 
 const stamp = ts();
 const out = `event-payouts-${stamp}.webm`;
-const API_DIR = '/root/rally/rally/apps/api';
+const API_DIR = '/root/greekgeek/greekgeek/apps/api';
 const NODE_BIN = '/root/.nvm/versions/node/v22.21.1/bin';
 
 function runApiScript(cmd) {
@@ -94,7 +94,7 @@ try {
 
   await page.getByText('Payout summary').waitFor({ timeout: 15000 });
   await page.getByText('Gross sales').waitFor();
-  await page.getByText('Rally fee').waitFor();
+  await page.getByText('GreekGeek fee').waitFor();
   await page.getByText('Net proceeds').waitFor();
   await page.getByText('Excluded purchases').waitFor();
   await pause(page, 2500);
@@ -215,7 +215,7 @@ try {
 
 console.log(
   JSON.stringify({
-    video: path.join('/root/rally/rally/demo-videos', out),
+    video: path.join('/root/greekgeek/greekgeek/demo-videos', out),
     accounts: {
       admin: ADMIN_EMAIL,
       host: hostEmail,

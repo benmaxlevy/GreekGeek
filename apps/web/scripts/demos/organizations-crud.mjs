@@ -16,7 +16,7 @@ import {
 
 const stamp = ts();
 const orgName = `Beta Demo Org ${stamp}`;
-const memberEmail = `demo+orgcrud-${stamp}@rally.local`;
+const memberEmail = `demo+orgcrud-${stamp}@greekgeek.local`;
 const out = `organizations-crud-${stamp}.webm`;
 
 const { browser, context, page } = await launchDemo();

@@ -15,7 +15,7 @@ import {
   type PatchEventTicketing,
   type Ticket,
   type TicketAllocation,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 import type {
   AllocationStatus,
   Event,
@@ -45,7 +45,7 @@ export {
   CheckInTicketResponseSchema,
   TicketCheckInErrorCodeSchema,
   TicketSaleGateErrorCodeSchema,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export type {
   EventTicketing,
@@ -67,7 +67,7 @@ export type {
   CheckInTicketResponse,
   TicketCheckInErrorCode,
   TicketSaleGateErrorCode,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export function toEventTicketingDto(
   event: Pick<

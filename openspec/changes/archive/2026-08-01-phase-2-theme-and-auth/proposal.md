@@ -1,10 +1,10 @@
 ## Why
 
-Phase 1 scaffolds the monorepo (NestJS API + Vite web + contracts) but leaves the product without a design system or authentication. Phase 2 ports the proven obsidian-glass theme from oldRally and adds first-party Passport JWT auth so developers can sign in, protect routes, and build authenticated features on a consistent visual foundation.
+Phase 1 scaffolds the monorepo (NestJS API + Vite web + contracts) but leaves the product without a design system or authentication. Phase 2 ports the proven obsidian-glass theme from oldGreekGeek and adds first-party Passport JWT auth so developers can sign in, protect routes, and build authenticated features on a consistent visual foundation.
 
 ## What Changes
 
-- Port obsidian-glass design tokens, self-hosted Playfair Display + Instrument Sans fonts, and ambient body gradient from oldRally into `apps/web`
+- Port obsidian-glass design tokens, self-hosted Playfair Display + Instrument Sans fonts, and ambient body gradient from oldGreekGeek into `apps/web`
 - Initialize shadcn/ui (new-york, CSS variables) with a lean primitive set; wire `btn-chrome` and `surface-glass-panel` as Button/Card variants
 - Add AppShell (232px sidebar, 1160px content max, mobile drawer, 44px tap targets) plus Wordmark/BrandLockup
 - Extend Prisma `User` with `passwordHash`, `role` (`USER` | `ADMIN`), and a revocable `RefreshToken` model; add a dev admin seed

@@ -1,7 +1,7 @@
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
-const ADMIN_EMAIL = 'admin@rally.local';
-const ADMIN_PASSWORD = 'RallyAdmin123!';
+const ADMIN_EMAIL = 'admin@greekgeek.local';
+const ADMIN_PASSWORD = 'GreekGeekAdmin123!';
 
 function uniqueEmail(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10_000)}@example.com`;
@@ -9,7 +9,7 @@ function uniqueEmail(prefix: string) {
 
 async function signupPending(page: Page, email: string, password: string, name: string) {
   await page.goto('/signup');
-  await expect(page.locator('body')).toHaveClass(/rally-theme/);
+  await expect(page.locator('body')).toHaveClass(/greekgeek-theme/);
   await page.getByLabel('Name').fill(name);
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);

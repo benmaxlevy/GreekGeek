@@ -12,8 +12,8 @@ import {
 } from './demo-helpers.mjs';
 
 const stamp = ts();
-const officerEmail = `demo+off-appr-${stamp}@rally.local`;
-const applicantEmail = `demo+off-appl-${stamp}@rally.local`;
+const officerEmail = `demo+off-appr-${stamp}@greekgeek.local`;
+const applicantEmail = `demo+off-appl-${stamp}@greekgeek.local`;
 const officerName = `Officer Approver ${stamp}`;
 const applicantName = `Officer Applicant ${stamp}`;
 const out = `officer-approve-${stamp}.webm`;

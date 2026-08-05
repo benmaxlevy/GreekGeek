@@ -15,9 +15,9 @@ import {
 } from './demo-helpers.mjs';
 
 const stamp = ts();
-const orglessEmail = `demo+orgless-${stamp}@rally.local`;
+const orglessEmail = `demo+orgless-${stamp}@greekgeek.local`;
 const orglessName = `Orgless Demo ${stamp}`;
-const pendingEmail = `demo+pending-${stamp}@rally.local`;
+const pendingEmail = `demo+pending-${stamp}@greekgeek.local`;
 const pendingName = `Pending Demo ${stamp}`;
 const out = `optional-org-signup-${stamp}.webm`;
 

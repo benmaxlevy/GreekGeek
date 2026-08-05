@@ -1,6 +1,6 @@
 ## Purpose
 
-Provides Redis-backed BullMQ job infrastructure for Rally: shared connection, typed queues, a dedicated worker process, health visibility, and an ADMIN prove-job path to validate enqueue-to-process flow end-to-end.
+Provides Redis-backed BullMQ job infrastructure for GreekGeek: shared connection, typed queues, a dedicated worker process, health visibility, and an ADMIN prove-job path to validate enqueue-to-process flow end-to-end.
 
 ## ADDED Requirements
 

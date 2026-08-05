@@ -56,7 +56,7 @@ importers:
       '@prisma/client':
         specifier: ^6.13.0
         version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
-      '@rally/contracts':
+      '@greekgeek/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
       argon2:
@@ -102,7 +102,7 @@ importers:
       '@nestjs/testing':
         specifier: ^11.1.28
         version: 11.1.28(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@10.2.2))(@nestjs/core@11.1.28)(@nestjs/platform-express@11.1.28)
-      '@rally/tsconfig':
+      '@greekgeek/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
       '@types/cookie-parser':
@@ -162,7 +162,7 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.3.3
         version: 1.3.3(@types/react@19.2.18)(react@19.2.8)
-      '@rally/contracts':
+      '@greekgeek/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
       '@stripe/react-stripe-js':
@@ -211,7 +211,7 @@ importers:
       '@playwright/test':
         specifier: ^1.62.1
         version: 1.62.1
-      '@rally/tsconfig':
+      '@greekgeek/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
       '@tailwindcss/vite':
@@ -248,7 +248,7 @@ importers:
         specifier: ^4.0.14
         version: 4.4.3
     devDependencies:
-      '@rally/tsconfig':
+      '@greekgeek/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
       tsup:

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createFileRoute, getRouteApi } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { PendingApplicant } from '@rally/contracts';
+import type { PendingApplicant } from '@greekgeek/contracts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';

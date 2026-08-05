@@ -11,7 +11,7 @@ import {
 } from './demo-helpers.mjs';
 
 const stamp = ts();
-const email = `demo+pending-${stamp}@rally.local`;
+const email = `demo+pending-${stamp}@greekgeek.local`;
 const name = `Pending Demo ${stamp}`;
 const out = `register-pending-${stamp}.webm`;
 

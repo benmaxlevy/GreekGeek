@@ -7,7 +7,7 @@ import type {
   Ticket,
   TicketAllocation,
   TicketSaleStatus,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

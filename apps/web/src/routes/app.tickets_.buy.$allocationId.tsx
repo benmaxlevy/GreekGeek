@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Elements } from '@stripe/react-stripe-js';
-import { computePurchaseAmounts } from '@rally/contracts';
+import { computePurchaseAmounts } from '@greekgeek/contracts';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router';
 import { TicketPayForm } from '@/components/ticketing/TicketPayForm';
@@ -414,7 +414,7 @@ function ItemizedSummary({
         {quantity} × {formatUsd(unitPriceCents)} = {formatUsd(subtotalCents)}
       </p>
       <p className="num text-ink-300">
-        Rally fee {formatUsd(feeCents)}
+        GreekGeek fee {formatUsd(feeCents)}
         {preview ? ' (estimate)' : ''}
       </p>
       <p className="num font-medium text-ink-100">Total {formatUsd(amountCents)}</p>

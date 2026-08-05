@@ -18,7 +18,7 @@ import {
 } from './stripe-connect-helpers.mjs';
 
 const stamp = ts();
-const officerEmail = `demo+stripe-onboard-${stamp}@rally.local`;
+const officerEmail = `demo+stripe-onboard-${stamp}@greekgeek.local`;
 const officerName = `Stripe Onboard ${stamp}`;
 const eventName = `Stripe Ready Event ${stamp}`;
 const out = `stripe-connect-onboarding-ready-${stamp}.webm`;

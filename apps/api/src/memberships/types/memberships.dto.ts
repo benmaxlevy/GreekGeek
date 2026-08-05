@@ -5,7 +5,7 @@ import {
   type AssignMembership,
   type Membership,
   type MembershipList,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 
 export {
   AssignMembershipSchema,

@@ -1,4 +1,4 @@
-import type { PublicUser } from '@rally/contracts';
+import type { PublicUser } from '@greekgeek/contracts';
 
 const MANAGE_PERMISSIONS_KEY = 'members.manage_permissions';
 const EVENTS_CREATE_KEY = 'events.create';

@@ -8,7 +8,7 @@ import {
   type EventPayoutQueue,
   type EventPayoutSummary,
   type PayoutReason,
-} from '@rally/contracts';
+} from '@greekgeek/contracts';
 import { apiFetch, readError } from './api';
 
 export async function getEventPayoutSummary(eventId: string): Promise<EventPayoutSummary> {

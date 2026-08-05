@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { HealthResponseSchema, type HealthResponse } from '@rally/contracts';
+import { HealthResponseSchema, type HealthResponse } from '@greekgeek/contracts';
 import { Public } from '../auth/decorators/public.decorator';
 import { HealthService } from './health.service';
 
